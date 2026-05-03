@@ -1,7 +1,48 @@
-<div class="p-6">
-  <h1 class="text-2xl font-bold mb-4"><%= @project.name %></h1>
-  <p><strong>URL :</strong> <%= @project.production_url %></p>
-  <p><strong>Repo :</strong> <%= @project.repo_url %></p>
-  <p><strong>Statut :</strong> <%= @project.status %></p>
-  <p><strong>Maintenance :</strong> <%= @project.maintenance_mode? ? 'Activée' : 'Désactivée' %></p>
+<div class="p-6 max-w-4xl">
+  <h1 class="text-3xl font-bold mb-6"><%= @project.name %></h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="space-y-2">
+      <p><strong>Statut :</strong> <span class="<%= @project.online? ? 'text-green-600' : @project.offline? ? 'text-red-600' : 'text-gray-500' %>"><%= @project.status %></span></p>
+      <p><strong>URL :</strong> <a href="<%= @project.production_url %>" target="_blank" class="text-blue-600"><%= @project.production_url %></a></p>
+      <p><strong>Repo :</strong> <a href="<%= @project.repo_url %>" target="_blank" class="text-blue-600"><%= @project.repo_url %></a></p>
+      <p><strong>Branche :</strong> <%= @project.branch %></p>
+      <p><strong>Commit déployé :</strong> <code><%= @project.last_commit_deployed || 'Aucun' %></code></p>
+      <p><strong>Commits de retard :</strong> <%= @project.commits_behind %></p>
+    </div>
+    <div class="space-y-2">
+      <p><strong>Maintenance :</strong> <%= @project.maintenance_mode? ? 'Activée' : 'Désactivée' %></p>
+      <p><strong>Chemin VPS :</strong> <code><%= @project.vps_path %></code></p>
+      <div class="flex gap-2 mt-4">
+        <%= button_to "Déployer", deploy_project_path(@project), method: :post, class: "px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600" %>
+        <%= button_to @project.maintenance_mode? ? "Désactiver la maintenance" : "Activer la maintenance",
+              toggle_maintenance_project_path(@project), method: :patch,
+              class: "px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600" %>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="text-xl font-semibold mb-4">Historique des déploiements</h2>
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="px-4 py-2 text-left">Commit</th>
+          <th class="px-4 py-2 text-left">Statut</th>
+          <th class="px-4 py-2 text-left">Durée</th>
+          <th class="px-4 py-2 text-left">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @project.deployments.order(created_at: :desc).limit(20).each do |deploy| %>
+          <tr class="border-t">
+            <td class="px-4 py-2"><code class="text-xs bg-gray-100 p-1 rounded"><%= deploy.commit_sha.first(7) %></code></td>
+            <td class="px-4 py-2"><span class="<%= deploy.success? ? 'text-green-600' : deploy.failed? ? 'text-red-600' : 'text-yellow-600' %>"><%= deploy.status %></span></td>
+            <td class="px-4 py-2"><%= deploy.duration ? "#{deploy.duration}s" : '-' %></td>
+            <td class="px-4 py-2"><%= l(deploy.created_at, format: :short) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>

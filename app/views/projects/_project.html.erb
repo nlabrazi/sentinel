@@ -1,36 +1,64 @@
 <%= turbo_frame_tag dom_id(project) do %>
-  <div class="border rounded-lg p-4 flex flex-col gap-2">
-    <div class="flex justify-between items-start">
-      <div>
-        <h2 class="text-lg font-semibold"><%= link_to project.name, project_path(project) %></h2>
-        <p class="text-sm text-gray-600"><%= project.production_url %></p>
-        <p class="text-sm mt-1">
-          Statut :
-          <span class="<%= project.online? ? 'text-green-600' : project.offline? ? 'text-red-600' : 'text-gray-500' %>">
-            <%= project.status %>
-          </span>
-          <% if project.maintenance_mode? %>
-            <span class="ml-2 text-yellow-600 font-medium">(Maintenance)</span>
-          <% end %>
-        </p>
-        <p class="text-xs text-gray-500 mt-1">
-          Déploiement : <%= project.last_commit_deployed || 'Aucun' %>
-          <% if project.commits_behind.to_i > 0 %>
-            · <%= pluralize(project.commits_behind, 'commit') %> en retard
-          <% end %>
-        </p>
+  <div class="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow">
+    <div class="flex justify-between items-start mb-3">
+      <div class="flex items-center gap-3">
+        <span class="relative flex h-3 w-3">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 <%= project.online? ? 'bg-green-400' : project.offline? ? 'bg-red-400' : 'bg-gray-400' %>"></span>
+          <span class="relative inline-flex rounded-full h-3 w-3 <%= project.online? ? 'bg-green-500' : project.offline? ? 'bg-red-500' : 'bg-gray-500' %>"></span>
+        </span>
+        <h2 class="text-lg font-semibold">
+          <%= link_to project.name, project_path(project), class: "hover:underline" %>
+        </h2>
+        <% if project.maintenance_mode? %>
+          <span class="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded-full">Maintenance</span>
+        <% end %>
       </div>
       <div class="flex gap-2">
-        <%= button_to "Deploy",
-              deploy_project_path(project),
-              method: :post,
-              class: "px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600" %>
-
-        <%= button_to project.maintenance_mode? ? "Désactiver maintenance" : "Activer maintenance",
-              toggle_maintenance_project_path(project),
-              method: :patch,
-              class: "px-3 py-1 bg-yellow-500 text-white text-sm rounded hover:bg-yellow-600" %>
+        <%= button_to deploy_project_path(project), method: :post,
+              class: "px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600",
+              form: { data: { turbo_confirm: "Déployer #{project.name} ?" } } do %>
+          Déployer
+        <% end %>
+        <%= button_to toggle_maintenance_project_path(project), method: :patch,
+              class: "px-3 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600" do %>
+          <%= project.maintenance_mode? ? "Desact. maintenance" : "Act. maintenance" %>
+        <% end %>
       </div>
     </div>
+
+    <div class="grid grid-cols-2 gap-2 text-sm">
+      <div>
+        <span class="text-gray-500">URL :</span>
+        <a href="<%= project.production_url %>" target="_blank" class="ml-1 text-blue-600 hover:underline"><%= project.production_url %></a>
+      </div>
+      <div>
+        <span class="text-gray-500">Branche :</span>
+        <span class="ml-1"><%= project.branch %></span>
+      </div>
+      <div>
+        <span class="text-gray-500">Commit déployé :</span>
+        <code class="ml-1 text-xs bg-gray-100 px-1 rounded"><%= project.last_commit_deployed&.first(7) || 'N/A' %></code>
+      </div>
+      <div>
+        <span class="text-gray-500">En retard :</span>
+        <span class="ml-1 font-medium <%= project.commits_behind.to_i > 0 ? 'text-orange-600' : 'text-green-600' %>">
+          <%= project.commits_behind.to_i > 0 ? "#{project.commits_behind} commits" : "À jour" %>
+        </span>
+      </div>
+    </div>
+
+    <!-- Dernier déploiement -->
+    <% last_deploy = project.deployments.order(created_at: :desc).first %>
+    <% if last_deploy %>
+      <div class="mt-3 text-xs text-gray-500 border-t pt-2">
+        Dernier déploiement : <%= time_ago_in_words(last_deploy.created_at) %> —
+        <span class="<%= last_deploy.status == 'success' ? 'text-green-600' : 'text-red-600' %>">
+          <%= last_deploy.status %>
+        </span>
+        <% if last_deploy.duration %>
+          · <%= last_deploy.duration %>s
+        <% end %>
+      </div>
+    <% end %>
   </div>
 <% end %>

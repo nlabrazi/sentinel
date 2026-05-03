@@ -1,23 +1,65 @@
 version: '3.8'
+
 services:
   web:
     build: .
-    command: bash -c "rm -f tmp/pids/server.pid && rails s"
+    command: bash -c "rm -f tmp/pids/server.pid && bin/rails server"
     ports:
       - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/sentinel_production
+      RAILS_ENV: production
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:?err}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:?err}
+      VPS_HOST: ${VPS_HOST:?err}
+      VPS_USER: ${VPS_USER:-control-panel}
+      SSH_KEY_PATH: /root/.ssh/id_rsa
     volumes:
       - .:/app
-    environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/sentinel_development
+      - ssh_key:/root/.ssh:ro   # clé privée SSH
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      solidqueue:
+        condition: service_started
+
+  solidqueue:
+    build: .
+    command: bin/solid_queue start
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/sentinel_production
+      RAILS_ENV: production
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:?err}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:?err}
+      VPS_HOST: ${VPS_HOST:?err}
+      VPS_USER: ${VPS_USER:-control-panel}
+      SSH_KEY_PATH: /root/.ssh/id_rsa
+    volumes:
+      - .:/app
+      - ssh_key:/root/.ssh:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
   db:
     image: postgres:16
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: sentinel_development
+      POSTGRES_DB: sentinel_production
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
   pgdata:
+  ssh_key:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./config/ssh_key   # dossier contenant la clé privée id_rsa

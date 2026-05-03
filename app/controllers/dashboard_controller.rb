@@ -1,5 +1,5 @@
 class DashboardController < ApplicationController
   def index
-    @projects = Project.order(:name)
+    @projects = Project.includes(:deployments).order(:name)
   end
 end
