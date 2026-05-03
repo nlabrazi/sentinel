@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :project do
-    name { Faker::App.name } # Nous ajouterons la gem faker plus tard, sinon utiliser une chaîne fixe
+    sequence(:name) { |n| "Project #{n}" }
     slug { name.parameterize }
     repo_url { "https://github.com/user/#{slug}.git" }
     branch { "master" }
