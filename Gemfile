@@ -66,7 +66,7 @@ group :development, :test do
   # ---------------- AJOUTS POUR LE PROJET SENTINEL ----------------
   gem "rspec-rails", "~> 7.0"                    # Compatible Rails 8
   gem "factory_bot_rails", "~> 6.4"
-  gem "shoulda-matchers", "~> 6.2"
+  gem "shoulda-matchers", "~> 7.0"
   gem "webmock", "~> 3.24"                       # Pour stubber les appels HTTP/SSH en test
   gem "simplecov", "~> 0.22", require: false     # Couverture de test (optionnel)
 end
