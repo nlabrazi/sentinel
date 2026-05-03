@@ -1,10 +1,11 @@
-// config/tailwind.config.js
 module.exports = {
   content: [
-    './public/*.html',
+    './app/views/**/*.html.erb',
+    './app/views/**/*.erb',
     './app/helpers/**/*.rb',
     './app/javascript/**/*.js',
-    './app/views/**/*.{erb,haml,html,slim}'
+    './app/assets/stylesheets/**/*.css',
+    './public/*.html'
   ],
   theme: {
     extend: {},

@@ -1,10 +1,6 @@
 class ProjectsController < ApplicationController
   before_action :set_project, only: [:show, :deploy, :toggle_maintenance]
 
-  def index
-    @projects = Project.order(:name)
-  end
-
   def show
   end
 

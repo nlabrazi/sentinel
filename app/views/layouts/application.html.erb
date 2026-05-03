@@ -6,6 +6,7 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
   </head>
   <body class="bg-gray-50 font-sans">
     <div class="flex h-screen">
@@ -18,11 +19,15 @@
         <nav class="flex-1 px-4 py-4 space-y-1">
           <%= link_to root_path, class: "flex items-center px-3 py-2 rounded-md text-sm font-medium #{current_page?(root_path) ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700'}" do %>
             <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-            Dashboard
-          <% end %>
-          <%= link_to projects_path, class: "flex items-center px-3 py-2 rounded-md text-sm font-medium #{current_page?('/projects') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700'}" do %>
-            <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
             Projets
+          <% end %>
+          <%= link_to deploys_path, class: "flex items-center px-3 py-2 rounded-md text-sm font-medium #{current_page?(deploys_path) ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700'}" do %>
+            <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" /></svg>
+            Déploiements
+          <% end %>
+          <%= link_to settings_path, class: "flex items-center px-3 py-2 rounded-md text-sm font-medium #{current_page?(settings_path) ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700'}" do %>
+            <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg>
+            Réglages
           <% end %>
         </nav>
         <div class="px-4 py-4 border-t border-gray-800">
@@ -32,10 +37,8 @@
 
       <!-- Main content -->
       <main class="flex-1 flex flex-col overflow-hidden">
-        <!-- Top bar -->
         <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-3 flex items-center justify-between">
           <div class="flex items-center gap-4 w-full">
-            <!-- Search -->
             <div class="relative flex-1 max-w-lg">
               <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               <input type="text" placeholder="Rechercher un projet..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
@@ -43,8 +46,6 @@
             <div class="text-sm text-gray-500"><%= Project.count %> projets</div>
           </div>
         </header>
-
-        <!-- Page content -->
         <div class="flex-1 overflow-y-auto p-6">
           <%= yield %>
         </div>
