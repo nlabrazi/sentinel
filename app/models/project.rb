@@ -6,7 +6,7 @@ class Project < ApplicationRecord
   validates :slug, uniqueness: true
   validates :status, inclusion: { in: %w[online offline unknown] }
 
-  enum :status, { online: 0, offline: 1, unknown: 2 }, default: :unknown, prefix: true
+  enum :status, { online: 0, offline: 1, unknown: 2 }, default: :unknown
 
   # Extrait le nom du dépôt GitHub depuis l'URL
   def github_repo

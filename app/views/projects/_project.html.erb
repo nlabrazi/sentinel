@@ -1,0 +1,36 @@
+<%= turbo_frame_tag dom_id(project) do %>
+  <div class="border rounded-lg p-4 flex flex-col gap-2">
+    <div class="flex justify-between items-start">
+      <div>
+        <h2 class="text-lg font-semibold"><%= link_to project.name, project_path(project) %></h2>
+        <p class="text-sm text-gray-600"><%= project.production_url %></p>
+        <p class="text-sm mt-1">
+          Statut :
+          <span class="<%= project.online? ? 'text-green-600' : project.offline? ? 'text-red-600' : 'text-gray-500' %>">
+            <%= project.status %>
+          </span>
+          <% if project.maintenance_mode? %>
+            <span class="ml-2 text-yellow-600 font-medium">(Maintenance)</span>
+          <% end %>
+        </p>
+        <p class="text-xs text-gray-500 mt-1">
+          Déploiement : <%= project.last_commit_deployed || 'Aucun' %>
+          <% if project.commits_behind.to_i > 0 %>
+            · <%= pluralize(project.commits_behind, 'commit') %> en retard
+          <% end %>
+        </p>
+      </div>
+      <div class="flex gap-2">
+        <%= button_to "Deploy",
+              deploy_project_path(project),
+              method: :post,
+              class: "px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600" %>
+
+        <%= button_to project.maintenance_mode? ? "Désactiver maintenance" : "Activer maintenance",
+              toggle_maintenance_project_path(project),
+              method: :patch,
+              class: "px-3 py-1 bg-yellow-500 text-white text-sm rounded hover:bg-yellow-600" %>
+      </div>
+    </div>
+  </div>
+<% end %>
