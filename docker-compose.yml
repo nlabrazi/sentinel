@@ -3,35 +3,31 @@ version: '3.8'
 services:
   web:
     build: .
-    command: bash -c "rm -f tmp/pids/server.pid && bin/rails server"
+    command: bash -c "rm -f tmp/pids/server.pid && bin/rails server -b 0.0.0.0"
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/sentinel_production
-      RAILS_ENV: production
-      SECRET_KEY_BASE: ${SECRET_KEY_BASE:?err}
-      GITHUB_TOKEN: ${GITHUB_TOKEN:?err}
-      VPS_HOST: ${VPS_HOST:?err}
+      RAILS_ENV: development
+      DATABASE_URL: postgres://postgres:postgres@db:5432/sentinel_development
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-fake}
+      VPS_HOST: ${VPS_HOST:-vps.local}
       VPS_USER: ${VPS_USER:-control-panel}
       SSH_KEY_PATH: /root/.ssh/id_rsa
     volumes:
-      - .:/app
-      - ssh_key:/root/.ssh:ro   # clé privée SSH
+      - .:/app                             # code monté en direct → hot reload
+      - ssh_key:/root/.ssh:ro              # clé SSH
     depends_on:
       db:
         condition: service_healthy
-      solidqueue:
-        condition: service_started
 
   solidqueue:
     build: .
-    command: bin/solid_queue start
+    command: bin/rails solid_queue:start   # commande corrigée
     environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/sentinel_production
-      RAILS_ENV: production
-      SECRET_KEY_BASE: ${SECRET_KEY_BASE:?err}
-      GITHUB_TOKEN: ${GITHUB_TOKEN:?err}
-      VPS_HOST: ${VPS_HOST:?err}
+      RAILS_ENV: development
+      DATABASE_URL: postgres://postgres:postgres@db:5432/sentinel_development
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-fake}
+      VPS_HOST: ${VPS_HOST:-vps.local}
       VPS_USER: ${VPS_USER:-control-panel}
       SSH_KEY_PATH: /root/.ssh/id_rsa
     volumes:
@@ -41,12 +37,21 @@ services:
       db:
         condition: service_healthy
 
+  tailwind:
+    build: .
+    command: bin/rails tailwindcss:watch
+    environment:
+      RAILS_ENV: development
+    volumes:
+      - .:/app
+    tty: true
+
   db:
     image: postgres:16
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: sentinel_production
+      POSTGRES_DB: sentinel_development
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -62,4 +67,4 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ./config/ssh_key   # dossier contenant la clé privée id_rsa
+      device: ./config/ssh_key
