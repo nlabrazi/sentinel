@@ -1,31 +1,106 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Sentinel" %></title>
+    <title>Sentinel</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Sentinel">
-    <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-
-    <%= yield :head %>
-
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
+  <body class="bg-gray-50 font-sans text-gray-900 dark:bg-gray-950 dark:text-gray-100">
+    <div class="min-h-screen lg:flex" data-controller="mobile-nav">
+      <button type="button"
+              class="fixed inset-0 z-30 hidden bg-gray-950/60 lg:hidden"
+              data-mobile-nav-target="overlay"
+              data-action="mobile-nav#close"
+              aria-label="Fermer le menu"></button>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
-      <%= yield %>
-    </main>
+      <aside class="fixed inset-y-0 left-0 z-40 hidden w-72 max-w-[85vw] flex-col bg-gray-900 text-white shadow-xl lg:static lg:z-auto lg:flex lg:w-64 lg:max-w-none lg:shadow-none"
+             data-mobile-nav-target="panel">
+        <div class="flex items-center justify-between border-b border-gray-800 px-5 py-4">
+          <div>
+            <h1 class="text-xl font-bold tracking-tight">Sentinel</h1>
+            <p class="mt-1 text-xs text-gray-400">Control Panel</p>
+          </div>
+          <button type="button"
+                  class="inline-flex h-10 w-10 items-center justify-center rounded-md text-gray-300 hover:bg-gray-800 hover:text-white lg:hidden"
+                  data-action="mobile-nav#close"
+                  aria-label="Fermer le menu">
+            <%= fa_icon(:xmark, class_name: "h-5 w-5") %>
+          </button>
+        </div>
+        <nav class="flex-1 px-4 py-4 space-y-1">
+          <%= link_to root_path, data: { action: "mobile-nav#close" }, class: "flex items-center px-3 py-2 rounded-md text-sm font-medium #{current_page?(root_path) ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700'}" do %>
+            <%= fa_icon(:house, class_name: "mr-2 h-4 w-4") %>
+            Projets
+          <% end %>
+          <%= link_to deploys_path, data: { action: "mobile-nav#close" }, class: "flex items-center px-3 py-2 rounded-md text-sm font-medium #{current_page?(deploys_path) ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700'}" do %>
+            <%= fa_icon(:rocket, class_name: "mr-2 h-4 w-4") %>
+            Déploiements
+          <% end %>
+          <%= link_to settings_path, data: { action: "mobile-nav#close" }, class: "flex items-center px-3 py-2 rounded-md text-sm font-medium #{current_page?(settings_path) ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700'}" do %>
+            <%= fa_icon(:gear, class_name: "mr-2 h-4 w-4") %>
+            Réglages
+          <% end %>
+        </nav>
+        <div class="px-4 py-3 border-t border-gray-800">
+          <button id="dark-mode-toggle"
+                  data-controller="dark-mode"
+                  data-action="click->dark-mode#toggle"
+                  class="flex items-center w-full px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-md">
+            <svg data-dark-mode-target="icon" class="mr-2 h-4 w-4" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true">
+              <path d="<%= ApplicationHelper::FONT_AWESOME_PATHS.fetch(:moon).last %>" />
+            </svg>
+            <span data-dark-mode-target="text">Mode sombre</span>
+          </button>
+        </div>
+        <% if user_signed_in? %>
+          <div class="px-4 py-3 border-t border-gray-800">
+            <p class="mb-2 truncate px-3 text-xs text-gray-500 dark:text-gray-400"><%= current_user.email %></p>
+            <%= button_to destroy_user_session_path, method: :delete, class: "flex w-full items-center rounded-md px-3 py-2 text-sm text-gray-300 hover:bg-gray-700" do %>
+              <%= fa_icon(:right_from_bracket, class_name: "mr-2 h-4 w-4") %>
+              Déconnexion
+            <% end %>
+          </div>
+        <% end %>
+        <div class="px-4 py-2 border-t border-gray-800">
+          <p class="text-xs text-gray-500 dark:text-gray-400"><%= Rails.env.capitalize %></p>
+        </div>
+      </aside>
+
+      <main class="flex min-h-screen min-w-0 flex-1 flex-col">
+        <header class="sticky top-0 z-20 border-b border-gray-200 bg-white px-4 py-3 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:px-6 lg:static">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center justify-between gap-3">
+              <button type="button"
+                      class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800 lg:hidden"
+                      data-action="mobile-nav#open"
+                      aria-label="Ouvrir le menu">
+                <%= fa_icon(:bars, class_name: "h-5 w-5") %>
+              </button>
+              <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 lg:hidden">Sentinel</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 sm:hidden"><%= Project.count %> projets</div>
+            </div>
+            <div class="flex min-w-0 flex-1 items-center gap-4">
+              <div class="relative min-w-0 flex-1 sm:max-w-lg">
+                <%= fa_icon(:magnifying_glass, class_name: "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400") %>
+                <input type="text" placeholder="Rechercher un projet..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-950 dark:text-gray-100 dark:border-gray-700 dark:placeholder:text-gray-500">
+              </div>
+              <div class="hidden text-sm text-gray-500 dark:text-gray-400 sm:block"><%= Project.count %> projets</div>
+            </div>
+          </div>
+        </header>
+        <div class="flex-1 p-4 sm:p-6">
+          <% if notice.present? %>
+            <p class="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-900/60 dark:bg-green-900/30 dark:text-green-200"><%= notice %></p>
+          <% end %>
+          <% if alert.present? %>
+            <p class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/60 dark:bg-red-900/30 dark:text-red-200"><%= alert %></p>
+          <% end %>
+          <%= yield %>
+        </div>
+      </main>
+    </div>
   </body>
 </html>

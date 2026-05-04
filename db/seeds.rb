@@ -1,9 +1,33 @@
-# This file should ensure the existence of records required to run the application in every environment (production,
-# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Example:
-#
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
+projects = [
+  { name: "Argan d'ici",        slug: "argandici",          repo_url: "https://github.com/nlabrazi/argandici.git",          branch: "master", production_url: "https://argandici.com",               vps_path: "/srv/projects/argandici" },
+  { name: "Games Lab",          slug: "games-lab",          repo_url: "https://github.com/nlabrazi/games-lab.git",          branch: "master", production_url: "https://games-lab.nabster.dev",       vps_path: "/srv/projects/games-lab" },
+  { name: "Lazarus Exchange",   slug: "lazarus-exchange",   repo_url: "https://github.com/nlabrazi/lazarus-exchange.git",   branch: "main",   production_url: "https://lazarus-exchange.nabster.dev",  vps_path: "/srv/projects/lazarus-exchange" },
+  { name: "L’escale Gourmande", slug: "lescale-gourmande",  repo_url: "https://github.com/nlabrazi/lescale-gourmande.git",  branch: "master", production_url: "https://lescale-gourmande.nabster.dev", vps_path: "/srv/projects/lescale-gourmande" },
+  { name: "Media Tools",        slug: "media-tools",        repo_url: "https://github.com/nlabrazi/media-tools.git",        branch: "main",   production_url: "https://media-tools.nabster.dev",       vps_path: "/srv/projects/media-tools" },
+  { name: "Portfolio",          slug: "portfolio",          repo_url: "https://github.com/nlabrazi/portfolio-3d.git",      branch: "master", production_url: "https://nabster.dev",                   vps_path: "/srv/projects/portfolio" },
+  { name: "Sawt AI",            slug: "sawt-ai",            repo_url: "https://github.com/nlabrazi/sawt-ai.git",            branch: "main",   production_url: "https://sawt-ai.nabster.dev",           vps_path: "/srv/projects/sawt-ai" },
+  { name: "SJVTDM",            slug: "sjvtdm",             repo_url: "https://github.com/nlabrazi/sjvtdm.git",             branch: "master", production_url: "https://sjvtdm.nabster.dev",            vps_path: "/srv/projects/sjvtdm" },
+]
+
+projects.each do |attrs|
+  project = Project.find_or_initialize_by(slug: attrs[:slug])
+  was_new = project.new_record?
+  project.update!(attrs)
+  puts was_new ? "✅ Créé : #{project.name} (#{project.slug})" : "🔄 Mis à jour : #{project.name} (#{project.slug})"
+end
+
+puts "\n🌱 Seed terminée : #{Project.count} projet(s) en base."
+
+admin_email = ENV["ADMIN_EMAIL"]
+admin_password = ENV["ADMIN_PASSWORD"]
+
+if admin_email.present? && admin_password.present?
+  admin = User.find_or_initialize_by(email: admin_email)
+  admin.password = admin_password
+  admin.password_confirmation = admin_password
+  admin.save!
+
+  puts "👤 Admin prêt : #{admin.email}"
+else
+  puts "ℹ️  Admin non créé. Utilisez ADMIN_EMAIL=... ADMIN_PASSWORD=... bin/rails db:seed"
+end

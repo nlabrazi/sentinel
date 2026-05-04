@@ -1,14 +1,14 @@
 FactoryBot.define do
   factory :project do
-    name { "MyString" }
-    slug { "MyString" }
-    repo_url { "MyString" }
-    branch { "MyString" }
-    production_url { "MyString" }
-    vps_path { "MyString" }
-    status { 1 }
-    last_commit_deployed { "MyString" }
-    commits_behind { 1 }
+    sequence(:name) { |n| "Project #{n}" }
+    slug { name.parameterize }
+    repo_url { "https://github.com/user/#{slug}.git" }
+    branch { "master" }
+    production_url { "https://#{slug}.example.com" }
+    vps_path { "/srv/projects/#{slug}" }
+    status { :unknown }
     maintenance_mode { false }
+    last_commit_deployed { nil }
+    commits_behind { 0 }
   end
 end

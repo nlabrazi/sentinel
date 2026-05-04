@@ -1,16 +1,51 @@
 version: '3.8'
+
 services:
   web:
     build: .
-    command: bash -c "rm -f tmp/pids/server.pid && rails s"
+    command: bash -c "rm -f tmp/pids/server.pid && bin/rails server -b 0.0.0.0"
     ports:
       - "3000:3000"
+    environment:
+      RAILS_ENV: development
+      DATABASE_URL: postgres://postgres:postgres@db:5432/sentinel_development
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-fake}
+      VPS_HOST: ${VPS_HOST:-vps.local}
+      VPS_USER: ${VPS_USER:-control-panel}
+      SSH_KEY_PATH: /root/.ssh/id_rsa
+    volumes:
+      - .:/app                             # code monté en direct → hot reload
+      - ssh_key:/root/.ssh:ro              # clé SSH
+    depends_on:
+      db:
+        condition: service_healthy
+
+  solidqueue:
+    build: .
+    command: bin/rails solid_queue:start   # commande corrigée
+    environment:
+      RAILS_ENV: development
+      DATABASE_URL: postgres://postgres:postgres@db:5432/sentinel_development
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-fake}
+      VPS_HOST: ${VPS_HOST:-vps.local}
+      VPS_USER: ${VPS_USER:-control-panel}
+      SSH_KEY_PATH: /root/.ssh/id_rsa
     volumes:
       - .:/app
-    environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/sentinel_development
+      - ssh_key:/root/.ssh:ro
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+
+  tailwind:
+    build: .
+    command: bin/rails tailwindcss:watch
+    environment:
+      RAILS_ENV: development
+    volumes:
+      - .:/app
+    tty: true
+
   db:
     image: postgres:16
     environment:
@@ -19,5 +54,17 @@ services:
       POSTGRES_DB: sentinel_development
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
   pgdata:
+  ssh_key:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./config/ssh_key

@@ -1,0 +1,80 @@
+<div class="max-w-4xl">
+  <h1 class="mb-6 break-words text-2xl font-bold sm:text-3xl"><%= @project.name %></h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="min-w-0 space-y-2">
+      <p><strong>Statut :</strong> <span class="<%= @project.online? ? 'text-green-600 dark:text-green-400' : @project.offline? ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400' %>"><%= @project.status %></span></p>
+      <p class="break-all"><strong>URL :</strong> <a href="<%= @project.production_url %>" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400"><%= @project.production_url %></a></p>
+      <p class="break-all"><strong>Repo :</strong> <a href="<%= @project.repo_url %>" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400"><%= @project.repo_url %></a></p>
+      <p><strong>Branche :</strong> <%= @project.branch %></p>
+      <p class="break-all"><strong>Commit déployé :</strong> <code class="rounded bg-gray-100 px-1 dark:bg-gray-800 dark:text-gray-200"><%= @project.last_commit_deployed || 'Aucun' %></code></p>
+      <p><strong>Commits de retard :</strong> <%= @project.commits_behind %></p>
+    </div>
+    <div class="min-w-0 space-y-2">
+      <p><strong>Maintenance :</strong> <%= @project.maintenance_mode? ? 'Activée' : 'Désactivée' %></p>
+      <p class="break-all"><strong>Chemin VPS :</strong> <code class="rounded bg-gray-100 px-1 dark:bg-gray-800 dark:text-gray-200"><%= @project.vps_path %></code></p>
+      <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <%= button_to deploy_project_path(@project), method: :post, class: "inline-flex w-full items-center justify-center gap-2 rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600 sm:w-auto" do %>
+          <%= fa_icon(:play, class_name: "h-4 w-4") %>
+          Déployer
+        <% end %>
+        <%= button_to toggle_maintenance_project_path(@project), method: :patch,
+              class: "inline-flex w-full items-center justify-center gap-2 rounded bg-yellow-500 px-4 py-2 text-white hover:bg-yellow-600 sm:w-auto" do %>
+          <%= fa_icon(:wrench, class_name: "h-4 w-4") %>
+          <%= @project.maintenance_mode? ? "Désactiver la maintenance" : "Activer la maintenance" %>
+        <% end %>
+        <%= button_to refresh_screenshot_project_path(@project), method: :post, class: "inline-flex w-full items-center justify-center gap-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 sm:w-auto" do %>
+          <%= fa_icon(:rotate, class_name: "h-4 w-4") %>
+          Rafraîchir l'aperçu
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="text-xl font-semibold mb-4">Historique des déploiements</h2>
+  <div class="bg-white rounded-lg shadow overflow-hidden dark:bg-gray-900">
+    <div class="hidden overflow-x-auto md:block">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-100 dark:bg-gray-800">
+        <tr>
+          <th class="px-4 py-2 text-left">Commit</th>
+          <th class="px-4 py-2 text-left">Statut</th>
+          <th class="px-4 py-2 text-left">Durée</th>
+          <th class="px-4 py-2 text-left">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @project.deployments.order(created_at: :desc).limit(20).each do |deploy| %>
+          <tr class="border-t border-gray-200 dark:border-gray-800">
+            <td class="px-4 py-2"><code class="text-xs bg-gray-100 p-1 rounded dark:bg-gray-800 dark:text-gray-200"><%= deploy.commit_sha.first(7) %></code></td>
+            <td class="px-4 py-2"><span class="<%= deploy.success? ? 'text-green-600 dark:text-green-400' : deploy.failed? ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400' %>"><%= deploy.status %></span></td>
+            <td class="px-4 py-2"><%= deploy.duration ? "#{deploy.duration}s" : '-' %></td>
+            <td class="px-4 py-2"><%= l(deploy.created_at, format: :short) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="divide-y divide-gray-200 dark:divide-gray-800 md:hidden">
+      <% @project.deployments.order(created_at: :desc).limit(20).each do |deploy| %>
+        <article class="space-y-3 px-4 py-4 text-sm">
+          <div class="flex items-start justify-between gap-3">
+            <code class="rounded bg-gray-100 p-1 text-xs dark:bg-gray-800 dark:text-gray-200"><%= deploy.commit_sha.first(7) %></code>
+            <span class="font-medium <%= deploy.success? ? 'text-green-600 dark:text-green-400' : deploy.failed? ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400' %>"><%= deploy.status %></span>
+          </div>
+          <dl class="grid grid-cols-2 gap-3">
+            <div>
+              <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Durée</dt>
+              <dd class="mt-1"><%= deploy.duration ? "#{deploy.duration}s" : '-' %></dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Date</dt>
+              <dd class="mt-1"><%= l(deploy.created_at, format: :short) %></dd>
+            </div>
+          </dl>
+        </article>
+      <% end %>
+    </div>
+  </div>
+</div>
