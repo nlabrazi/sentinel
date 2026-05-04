@@ -29,6 +29,8 @@
 
 # Ignore key files for decrypting credentials and more.
 /config/*.key
+/config/ssh_key/*
+!/config/ssh_key/.gitkeep
 
 
 /app/assets/builds/*

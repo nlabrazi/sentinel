@@ -40,6 +40,7 @@ gem "thruster", require: false
 
 # GitHub API
 gem "octokit", "~> 9.0"          # dernière majeure stable (vérif : vérifiez rubygems)
+gem "faraday-retry", "~> 2.3"
 
 # Connexion SSH au VPS
 gem "net-ssh", "~> 7.3"

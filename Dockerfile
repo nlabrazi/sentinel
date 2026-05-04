@@ -17,6 +17,7 @@ WORKDIR /app
 
 COPY Gemfile Gemfile.lock ./
 RUN bundle install
+RUN chmod -R a+rwX /bundle
 
 COPY . .
 

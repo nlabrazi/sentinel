@@ -16,7 +16,7 @@
               data-action="mobile-nav#close"
               aria-label="Fermer le menu"></button>
 
-      <aside class="fixed inset-y-0 left-0 z-40 hidden w-72 max-w-[85vw] flex-col bg-gray-900 text-white shadow-xl lg:static lg:z-auto lg:flex lg:w-64 lg:max-w-none lg:shadow-none"
+      <aside class="fixed inset-y-0 left-0 z-40 hidden w-72 max-w-[85vw] flex-col bg-gray-900 text-white shadow-xl lg:sticky lg:top-0 lg:z-auto lg:flex lg:h-screen lg:w-64 lg:max-w-none lg:shrink-0 lg:shadow-none"
              data-mobile-nav-target="panel">
         <div class="flex items-center justify-between border-b border-gray-800 px-5 py-4">
           <div>
@@ -30,7 +30,7 @@
             <%= fa_icon(:xmark, class_name: "h-5 w-5") %>
           </button>
         </div>
-        <nav class="flex-1 px-4 py-4 space-y-1">
+        <nav class="min-h-0 flex-1 space-y-1 overflow-y-auto px-4 py-4">
           <%= link_to root_path, data: { action: "mobile-nav#close" }, class: "flex items-center px-3 py-2 rounded-md text-sm font-medium #{current_page?(root_path) ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700'}" do %>
             <%= fa_icon(:house, class_name: "mr-2 h-4 w-4") %>
             Projets
