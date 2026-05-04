@@ -3,16 +3,16 @@
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
     <div class="space-y-2">
-      <p><strong>Statut :</strong> <span class="<%= @project.online? ? 'text-green-600' : @project.offline? ? 'text-red-600' : 'text-gray-500' %>"><%= @project.status %></span></p>
-      <p><strong>URL :</strong> <a href="<%= @project.production_url %>" target="_blank" class="text-blue-600"><%= @project.production_url %></a></p>
-      <p><strong>Repo :</strong> <a href="<%= @project.repo_url %>" target="_blank" class="text-blue-600"><%= @project.repo_url %></a></p>
+      <p><strong>Statut :</strong> <span class="<%= @project.online? ? 'text-green-600 dark:text-green-400' : @project.offline? ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400' %>"><%= @project.status %></span></p>
+      <p><strong>URL :</strong> <a href="<%= @project.production_url %>" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400"><%= @project.production_url %></a></p>
+      <p><strong>Repo :</strong> <a href="<%= @project.repo_url %>" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400"><%= @project.repo_url %></a></p>
       <p><strong>Branche :</strong> <%= @project.branch %></p>
-      <p><strong>Commit déployé :</strong> <code><%= @project.last_commit_deployed || 'Aucun' %></code></p>
+      <p><strong>Commit déployé :</strong> <code class="rounded bg-gray-100 px-1 dark:bg-gray-800 dark:text-gray-200"><%= @project.last_commit_deployed || 'Aucun' %></code></p>
       <p><strong>Commits de retard :</strong> <%= @project.commits_behind %></p>
     </div>
     <div class="space-y-2">
       <p><strong>Maintenance :</strong> <%= @project.maintenance_mode? ? 'Activée' : 'Désactivée' %></p>
-      <p><strong>Chemin VPS :</strong> <code><%= @project.vps_path %></code></p>
+      <p><strong>Chemin VPS :</strong> <code class="rounded bg-gray-100 px-1 dark:bg-gray-800 dark:text-gray-200"><%= @project.vps_path %></code></p>
       <div class="flex gap-2 mt-4">
         <%= button_to "Déployer", deploy_project_path(@project), method: :post, class: "px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600" %>
         <%= button_to @project.maintenance_mode? ? "Désactiver la maintenance" : "Activer la maintenance",
@@ -24,9 +24,9 @@
   </div>
 
   <h2 class="text-xl font-semibold mb-4">Historique des déploiements</h2>
-  <div class="bg-white rounded-lg shadow overflow-hidden">
+  <div class="bg-white rounded-lg shadow overflow-hidden dark:bg-gray-900">
     <table class="min-w-full text-sm">
-      <thead class="bg-gray-100">
+      <thead class="bg-gray-100 dark:bg-gray-800">
         <tr>
           <th class="px-4 py-2 text-left">Commit</th>
           <th class="px-4 py-2 text-left">Statut</th>
@@ -36,9 +36,9 @@
       </thead>
       <tbody>
         <% @project.deployments.order(created_at: :desc).limit(20).each do |deploy| %>
-          <tr class="border-t">
-            <td class="px-4 py-2"><code class="text-xs bg-gray-100 p-1 rounded"><%= deploy.commit_sha.first(7) %></code></td>
-            <td class="px-4 py-2"><span class="<%= deploy.success? ? 'text-green-600' : deploy.failed? ? 'text-red-600' : 'text-yellow-600' %>"><%= deploy.status %></span></td>
+          <tr class="border-t border-gray-200 dark:border-gray-800">
+            <td class="px-4 py-2"><code class="text-xs bg-gray-100 p-1 rounded dark:bg-gray-800 dark:text-gray-200"><%= deploy.commit_sha.first(7) %></code></td>
+            <td class="px-4 py-2"><span class="<%= deploy.success? ? 'text-green-600 dark:text-green-400' : deploy.failed? ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400' %>"><%= deploy.status %></span></td>
             <td class="px-4 py-2"><%= deploy.duration ? "#{deploy.duration}s" : '-' %></td>
             <td class="px-4 py-2"><%= l(deploy.created_at, format: :short) %></td>
           </tr>
