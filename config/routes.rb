@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  devise_for :users, only: [:sessions]
   get "pages/deploys"
   get "pages/settings"
   root "dashboard#index"

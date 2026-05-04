@@ -17,3 +17,17 @@ projects.each do |attrs|
 end
 
 puts "\n🌱 Seed terminée : #{Project.count} projet(s) en base."
+
+admin_email = ENV["ADMIN_EMAIL"]
+admin_password = ENV["ADMIN_PASSWORD"]
+
+if admin_email.present? && admin_password.present?
+  admin = User.find_or_initialize_by(email: admin_email)
+  admin.password = admin_password
+  admin.password_confirmation = admin_password
+  admin.save!
+
+  puts "👤 Admin prêt : #{admin.email}"
+else
+  puts "ℹ️  Admin non créé. Utilisez ADMIN_EMAIL=... ADMIN_PASSWORD=... bin/rails db:seed"
+end

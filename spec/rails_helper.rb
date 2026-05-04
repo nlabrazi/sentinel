@@ -18,6 +18,7 @@ end
 RSpec.configure do |config|
   # Factory Bot syntactic sugar
   config.include FactoryBot::Syntax::Methods
+  config.include Devise::Test::IntegrationHelpers, type: :request
 
   # Remove this line if you're not using ActiveRecord
   config.fixture_paths = [Rails.root.join('spec/fixtures')]
