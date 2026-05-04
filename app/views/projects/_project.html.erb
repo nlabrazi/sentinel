@@ -1,35 +1,37 @@
 <%= turbo_frame_tag dom_id(project) do %>
   <div class="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow dark:bg-gray-900 dark:border-gray-800">
-    <div class="flex justify-between items-start mb-3">
-      <div class="flex items-center gap-3">
+    <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div class="flex min-w-0 items-center gap-3">
         <span class="relative flex h-3 w-3">
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 <%= project.online? ? 'bg-green-400' : project.offline? ? 'bg-red-400' : 'bg-gray-400' %>"></span>
           <span class="relative inline-flex rounded-full h-3 w-3 <%= project.online? ? 'bg-green-500' : project.offline? ? 'bg-red-500' : 'bg-gray-500' %>"></span>
         </span>
-        <h2 class="text-lg font-semibold">
+        <h2 class="min-w-0 break-words text-lg font-semibold">
           <%= link_to project.name, project_path(project), class: "hover:underline" %>
         </h2>
         <% if project.maintenance_mode? %>
           <span class="px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded-full dark:bg-yellow-900/30 dark:text-yellow-300">Maintenance</span>
         <% end %>
       </div>
-      <div class="flex gap-2">
+      <div class="flex flex-col gap-2 sm:flex-row">
         <%= button_to deploy_project_path(project), method: :post,
-              class: "px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600",
+              class: "inline-flex w-full items-center justify-center gap-1.5 rounded bg-green-500 px-3 py-1 text-sm text-white hover:bg-green-600 sm:w-auto",
               form: { data: { turbo_confirm: "Déployer #{project.name} ?" } } do %>
+          <%= fa_icon(:play, class_name: "h-3 w-3") %>
           Déployer
         <% end %>
         <%= button_to toggle_maintenance_project_path(project), method: :patch,
-              class: "px-3 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600" do %>
+              class: "inline-flex w-full items-center justify-center gap-1.5 rounded bg-yellow-500 px-3 py-1 text-sm text-white hover:bg-yellow-600 sm:w-auto" do %>
+          <%= fa_icon(:wrench, class_name: "h-3 w-3") %>
           <%= project.maintenance_mode? ? "Desact. maintenance" : "Act. maintenance" %>
         <% end %>
       </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-2 text-sm">
+    <div class="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
       <div>
         <span class="text-gray-500 dark:text-gray-400">URL :</span>
-        <a href="<%= project.production_url %>" target="_blank" class="ml-1 text-blue-600 hover:underline dark:text-blue-400"><%= project.production_url %></a>
+        <a href="<%= project.production_url %>" target="_blank" class="ml-1 break-all text-blue-600 hover:underline dark:text-blue-400"><%= project.production_url %></a>
       </div>
       <div>
         <span class="text-gray-500 dark:text-gray-400">Branche :</span>

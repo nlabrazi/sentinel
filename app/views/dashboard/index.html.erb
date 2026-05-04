@@ -4,6 +4,7 @@
     <span class="text-xs text-gray-500 dark:text-gray-400">Mis à jour il y a quelques secondes</span>
   </div>
 
+  <div class="hidden overflow-x-auto md:block">
   <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
     <thead class="bg-gray-50 dark:bg-gray-800">
       <tr>
@@ -63,13 +64,86 @@
             <% end %>
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-            <%= button_to "Deploy", deploy_project_path(project), method: :post, class: "inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500", form: { data: { turbo_confirm: "Déployer #{project.name} ?" } } %>
-            <%= button_to project.maintenance_mode? ? "Désactiver" : "Maintenance",
-                  toggle_maintenance_project_path(project), method: :patch,
-                  class: "ml-2 inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800" %>
+            <%= button_to deploy_project_path(project), method: :post, class: "inline-flex items-center gap-1.5 px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500", form: { data: { turbo_confirm: "Déployer #{project.name} ?" } } do %>
+              <%= fa_icon(:play, class_name: "h-3 w-3") %>
+              Deploy
+            <% end %>
+            <%= button_to toggle_maintenance_project_path(project), method: :patch,
+                  class: "ml-2 inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800" do %>
+              <%= fa_icon(:wrench, class_name: "h-3 w-3") %>
+              <%= project.maintenance_mode? ? "Désactiver" : "Maintenance" %>
+            <% end %>
           </td>
         </tr>
       <% end %>
     </tbody>
   </table>
+  </div>
+
+  <div class="divide-y divide-gray-200 dark:divide-gray-800 md:hidden">
+    <% @projects.each do |project| %>
+      <article class="space-y-4 px-4 py-5">
+        <% if ENV['APIFLASH_ACCESS_KEY'].present? %>
+          <% if project.screenshot.attached? %>
+            <img src="<%= url_for(project.screenshot) %>"
+                 alt="Aperçu de <%= project.name %>"
+                 class="aspect-video w-full rounded border border-gray-200 object-cover shadow-sm dark:border-gray-700"
+                 loading="lazy">
+          <% else %>
+            <div class="flex aspect-video w-full items-center justify-center rounded border border-gray-300 bg-gray-200 text-xs text-gray-500 dark:border-gray-700 dark:bg-gray-800">
+              Aucun aperçu
+            </div>
+          <% end %>
+        <% end %>
+
+        <div class="min-w-0">
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            <%= link_to project.name, project_path(project), class: "hover:underline" %>
+          </h3>
+          <p class="mt-1 break-all text-xs text-gray-500 dark:text-gray-400"><%= project.production_url %></p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div>
+            <p class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Statut</p>
+            <span class="mt-1 inline-flex rounded-full px-2 text-xs font-semibold leading-5 <%= project.online? ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : project.offline? ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300' %>">
+              <%= project.status %>
+            </span>
+            <% if project.maintenance_mode? %>
+              <span class="mt-1 inline-flex rounded-full bg-yellow-100 px-2 text-xs font-semibold leading-5 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">Maintenance</span>
+            <% end %>
+          </div>
+          <div>
+            <p class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Retard</p>
+            <% if project.commits_behind.to_i > 0 %>
+              <p class="mt-1 font-medium text-orange-600 dark:text-orange-400"><%= project.commits_behind %> commits</p>
+            <% else %>
+              <p class="mt-1 text-green-600 dark:text-green-400">À jour</p>
+            <% end %>
+          </div>
+          <div class="col-span-2">
+            <p class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Déploiement</p>
+            <% if project.last_commit_deployed %>
+              <code class="mt-1 inline-flex rounded bg-gray-100 px-1 text-xs dark:bg-gray-800 dark:text-gray-200"><%= project.last_commit_deployed.first(7) %></code>
+              <span class="ml-1 text-xs text-gray-400"><%= time_ago_in_words(project.deployments.last.created_at) if project.deployments.last %></span>
+            <% else %>
+              <span class="mt-1 block text-gray-400">—</span>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2 sm:flex-row">
+          <%= button_to deploy_project_path(project), method: :post, class: "inline-flex w-full items-center justify-center gap-1.5 rounded border border-transparent bg-indigo-600 px-3 py-2 text-xs font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto", form: { data: { turbo_confirm: "Déployer #{project.name} ?" } } do %>
+            <%= fa_icon(:play, class_name: "h-3 w-3") %>
+            Deploy
+          <% end %>
+          <%= button_to toggle_maintenance_project_path(project), method: :patch,
+                class: "inline-flex w-full items-center justify-center gap-1.5 rounded border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 sm:w-auto" do %>
+            <%= fa_icon(:wrench, class_name: "h-3 w-3") %>
+            <%= project.maintenance_mode? ? "Désactiver" : "Maintenance" %>
+          <% end %>
+        </div>
+      </article>
+    <% end %>
+  </div>
 </div>
