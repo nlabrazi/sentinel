@@ -18,6 +18,7 @@
         <%= button_to @project.maintenance_mode? ? "Désactiver la maintenance" : "Activer la maintenance",
               toggle_maintenance_project_path(@project), method: :patch,
               class: "px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600" %>
+        <%= button_to "Rafraîchir l'aperçu", refresh_screenshot_project_path(@project), method: :post, class: "px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" %>
       </div>
     </div>
   </div>

@@ -30,6 +30,11 @@ class ProjectsController < ApplicationController
     end
   end
 
+  def refresh_screenshot
+    @project.regenerate_screenshot!
+    redirect_to @project, notice: "Aperçu mis à jour."
+  end
+
   private
 
   def set_project

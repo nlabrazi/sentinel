@@ -36,4 +36,24 @@ class Project < ApplicationRecord
     "&wait_until=page_loaded" \
     "&delay=2"
   end
+
+  def fresh_screenshot_url
+    return nil unless ENV['APIFLASH_ACCESS_KEY'].present?
+
+    "https://api.apiflash.com/v1/urltoimage" \
+      "?access_key=#{ENV['APIFLASH_ACCESS_KEY']}" \
+      "&url=#{CGI.escape(production_url)}" \
+      "&width=1280" \
+      "&height=720" \
+      "&format=jpeg" \
+      "&quality=80" \
+      "&fresh=true" \
+      "&wait_until=page_loaded" \
+      "&delay=2"
+  end
+
+  def regenerate_screenshot!
+    return unless ENV['APIFLASH_ACCESS_KEY'].present?
+    update!(screenshot_url: fresh_screenshot_url)
+  end
 end

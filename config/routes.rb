@@ -6,6 +6,7 @@ Rails.application.routes.draw do
     member do
       post :deploy
       patch :toggle_maintenance
+      post :refresh_screenshot
     end
   end
   # Des routes pour les pages de navigation placeholder (optionnel, on peut les faire en simple lien statique)
