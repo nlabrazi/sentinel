@@ -1,5 +1,9 @@
 FROM ruby:3.4-slim
 
+ENV BUNDLE_PATH="/bundle" \
+    BUNDLE_JOBS="4" \
+    BUNDLE_RETRY="3"
+
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends \
       build-essential \
@@ -12,7 +16,7 @@ RUN apt-get update -qq && \
 WORKDIR /app
 
 COPY Gemfile Gemfile.lock ./
-RUN bundle install --jobs 4 --retry 3
+RUN bundle install
 
 COPY . .
 

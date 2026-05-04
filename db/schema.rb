@@ -155,12 +155,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_04_011743) do
 
   create_table "solid_queue_processes", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.string "hostname", null: false
+    t.string "hostname"
     t.string "kind", null: false
     t.datetime "last_heartbeat_at", null: false
     t.text "metadata"
-    t.string "name"
-    t.string "pid", null: false
+    t.string "name", null: false
+    t.integer "pid", null: false
     t.bigint "supervisor_id"
     t.index ["last_heartbeat_at"], name: "index_solid_queue_processes_on_last_heartbeat_at"
     t.index ["name", "supervisor_id"], name: "index_solid_queue_processes_on_name_and_supervisor_id", unique: true
@@ -208,9 +208,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_04_011743) do
     t.integer "priority", default: 0, null: false
     t.string "queue_name", null: false
     t.datetime "scheduled_at", null: false
-    t.index ["job_id"], name: "index_solid_queue_scheduled_executions_on_job_id"
+    t.index ["job_id"], name: "index_solid_queue_scheduled_executions_on_job_id", unique: true
     t.index ["scheduled_at", "priority", "job_id"], name: "index_solid_queue_dispatch_all"
-    t.index ["scheduled_at", "priority", "job_id"], name: "index_solid_queue_scheduled_executions_for_release"
   end
 
   create_table "solid_queue_semaphores", force: :cascade do |t|
@@ -246,5 +245,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_04_011743) do
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
-  add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id"
+  add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
 end
