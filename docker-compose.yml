@@ -2,12 +2,17 @@ name: sentinel
 
 x-rails-app: &rails-app
   build: .
+  user: "${UID:-1000}:${GID:-1000}"
   environment:
     RAILS_ENV: development
     BUNDLE_PATH: /bundle
     BUNDLE_JOBS: 4
     BUNDLE_RETRY: 3
     DATABASE_URL: postgres://postgres:postgres@sentinel-db:5432/sentinel_development
+    ACTIVE_STORAGE_SERVICE: ${ACTIVE_STORAGE_SERVICE:-local}
+    CLOUDINARY_URL: ${CLOUDINARY_URL:-}
+    CLOUDINARY_FOLDER: ${CLOUDINARY_FOLDER:-sentinel/development}
+    APIFLASH_ACCESS_KEY: ${APIFLASH_ACCESS_KEY:-}
     GITHUB_TOKEN: ${GITHUB_TOKEN:-fake}
     VPS_HOST: ${VPS_HOST:-vps.local}
     VPS_USER: ${VPS_USER:-control-panel}
@@ -28,6 +33,10 @@ services:
       BUNDLE_JOBS: 4
       BUNDLE_RETRY: 3
       DATABASE_URL: postgres://postgres:postgres@sentinel-db:5432/sentinel_development
+      ACTIVE_STORAGE_SERVICE: ${ACTIVE_STORAGE_SERVICE:-local}
+      CLOUDINARY_URL: ${CLOUDINARY_URL:-}
+      CLOUDINARY_FOLDER: ${CLOUDINARY_FOLDER:-sentinel/development}
+      APIFLASH_ACCESS_KEY: ${APIFLASH_ACCESS_KEY:-}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-fake}
       VPS_HOST: ${VPS_HOST:-vps.local}
       VPS_USER: ${VPS_USER:-control-panel}

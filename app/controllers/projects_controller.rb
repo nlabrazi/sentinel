@@ -31,7 +31,7 @@ class ProjectsController < ApplicationController
   end
 
   def refresh_screenshot
-    @project.regenerate_screenshot!
+    @project.regenerate_screenshot!(force: true)
     redirect_to @project, notice: "Aperçu mis à jour."
   end
 

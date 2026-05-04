@@ -56,13 +56,13 @@ class Project < ApplicationRecord
       "&delay=2"
   end
 
-  def regenerate_screenshot!
+  def regenerate_screenshot!(force: false)
+    return if screenshot.attached? && !force
     return unless ENV['APIFLASH_ACCESS_KEY'].present?
 
     url = fresh_screenshot_url
     return unless url
 
-    # Télécharge l'image depuis l'API et l'attache
     io = URI.open(url)
     screenshot.attach(io: io, filename: "#{slug}.jpg", content_type: "image/jpeg")
   end

@@ -47,6 +47,9 @@ gem "net-ssh", "~> 7.3"
 # Healthcheck HTTP
 gem "httparty", "~> 0.22"
 
+# Stockage cloud des previews via Active Storage
+gem "cloudinary"
+
 # Gestion des variables d’environnement en développement/test
 gem "dotenv-rails", "~> 3.1", groups: [:development, :test]
 
