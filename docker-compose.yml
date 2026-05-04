@@ -1,59 +1,66 @@
-version: '3.8'
+name: sentinel
+
+x-rails-app: &rails-app
+  build: .
+  environment:
+    RAILS_ENV: development
+    BUNDLE_PATH: /bundle
+    BUNDLE_JOBS: 4
+    BUNDLE_RETRY: 3
+    DATABASE_URL: postgres://postgres:postgres@sentinel-db:5432/sentinel_development
+    GITHUB_TOKEN: ${GITHUB_TOKEN:-fake}
+    VPS_HOST: ${VPS_HOST:-vps.local}
+    VPS_USER: ${VPS_USER:-control-panel}
+    SSH_KEY_PATH: /root/.ssh/id_rsa
+  volumes:
+    - .:/app
+    - sentinel-bundle:/bundle
 
 services:
-  web:
-    build: .
-    command: bash -c "rm -f tmp/pids/server.pid && bin/rails server -b 0.0.0.0"
+  sentinel-api:
+    <<: *rails-app
+    image: sentinel-api
+    container_name: sentinel-api
+    command: bash -lc "(bundle check || bundle install) && bin/rails db:prepare && rm -f tmp/pids/server.pid && bin/rails server -b 0.0.0.0"
+    environment:
+      RAILS_ENV: development
+      BUNDLE_PATH: /bundle
+      BUNDLE_JOBS: 4
+      BUNDLE_RETRY: 3
+      DATABASE_URL: postgres://postgres:postgres@sentinel-db:5432/sentinel_development
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-fake}
+      VPS_HOST: ${VPS_HOST:-vps.local}
+      VPS_USER: ${VPS_USER:-control-panel}
+      SSH_KEY_PATH: /root/.ssh/id_rsa
+    volumes:
+      - .:/app
+      - sentinel-bundle:/bundle
+      - ssh_key:/root/.ssh:ro
     ports:
       - "3000:3000"
-    environment:
-      RAILS_ENV: development
-      DATABASE_URL: postgres://postgres:postgres@db:5432/sentinel_development
-      GITHUB_TOKEN: ${GITHUB_TOKEN:-fake}
-      VPS_HOST: ${VPS_HOST:-vps.local}
-      VPS_USER: ${VPS_USER:-control-panel}
-      SSH_KEY_PATH: /root/.ssh/id_rsa
-    volumes:
-      - .:/app                             # code monté en direct → hot reload
-      - ssh_key:/root/.ssh:ro              # clé SSH
     depends_on:
-      db:
+      sentinel-db:
         condition: service_healthy
 
-  solidqueue:
-    build: .
-    command: bin/rails solid_queue:start   # commande corrigée
-    environment:
-      RAILS_ENV: development
-      DATABASE_URL: postgres://postgres:postgres@db:5432/sentinel_development
-      GITHUB_TOKEN: ${GITHUB_TOKEN:-fake}
-      VPS_HOST: ${VPS_HOST:-vps.local}
-      VPS_USER: ${VPS_USER:-control-panel}
-      SSH_KEY_PATH: /root/.ssh/id_rsa
-    volumes:
-      - .:/app
-      - ssh_key:/root/.ssh:ro
-    depends_on:
-      db:
-        condition: service_healthy
-
-  tailwind:
-    build: .
-    command: bin/rails tailwindcss:watch
-    environment:
-      RAILS_ENV: development
-    volumes:
-      - .:/app
+  sentinel-ui:
+    <<: *rails-app
+    image: sentinel-ui
+    container_name: sentinel-ui
+    command: bash -lc "(bundle check || bundle install) && bin/rails tailwindcss:watch"
     tty: true
+    depends_on:
+      sentinel-api:
+        condition: service_started
 
-  db:
+  sentinel-db:
     image: postgres:16
+    container_name: sentinel-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: sentinel_development
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - sentinel-postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -61,7 +68,8 @@ services:
       retries: 5
 
 volumes:
-  pgdata:
+  sentinel-postgres-data:
+  sentinel-bundle:
   ssh_key:
     driver: local
     driver_opts:
