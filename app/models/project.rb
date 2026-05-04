@@ -21,4 +21,19 @@ class Project < ApplicationRecord
   def cron_status_command
     "bash -lc 'cd #{vps_path} && ./status.sh'"
   end
+
+  # app/models/project.rb
+  def screenshot_url(width: 1280, height: 720)
+    "https://api.apiflash.com/v1/urltoimage" \
+    "?access_key=#{ENV['APIFLASH_ACCESS_KEY']}" \
+    "&url=#{CGI.escape(production_url)}" \
+    "&width=#{width}" \
+    "&height=#{height}" \
+    "&format=jpeg" \
+    "&quality=80" \
+    "&fresh=true" \
+    "&full_page=false" \
+    "&wait_until=page_loaded" \
+    "&delay=2"
+  end
 end

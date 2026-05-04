@@ -1,4 +1,5 @@
 projects = [
+  { name: "Argan d'ici",        slug: "argandici",          repo_url: "https://github.com/nlabrazi/argandici.git",          branch: "master", production_url: "https://argandici.com",               vps_path: "/srv/projects/argandici" },
   { name: "Games Lab",          slug: "games-lab",          repo_url: "https://github.com/nlabrazi/games-lab.git",          branch: "master", production_url: "https://games-lab.nabster.dev",       vps_path: "/srv/projects/games-lab" },
   { name: "Lazarus Exchange",   slug: "lazarus-exchange",   repo_url: "https://github.com/nlabrazi/lazarus-exchange.git",   branch: "main",   production_url: "https://lazarus-exchange.nabster.dev",  vps_path: "/srv/projects/lazarus-exchange" },
   { name: "L’escale Gourmande", slug: "lescale-gourmande",  repo_url: "https://github.com/nlabrazi/lescale-gourmande.git",  branch: "master", production_url: "https://lescale-gourmande.nabster.dev", vps_path: "/srv/projects/lescale-gourmande" },

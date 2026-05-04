@@ -18,11 +18,13 @@
       <% @projects.each do |project| %>
         <tr class="hover:bg-gray-50">
           <td class="px-6 py-4 whitespace-nowrap">
-            <div class="flex items-center">
-              <span class="relative flex-shrink-0 h-2.5 w-2.5 mr-3">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 <%= project.online? ? 'bg-green-400' : project.offline? ? 'bg-red-400' : 'bg-gray-400' %>"></span>
-                <span class="relative inline-flex rounded-full h-2.5 w-2.5 <%= project.online? ? 'bg-green-500' : project.offline? ? 'bg-red-500' : 'bg-gray-500' %>"></span>
-              </span>
+            <div class="flex items-center gap-3">
+              <% if ENV['APIFLASH_ACCESS_KEY'].present? %>
+                <img src="<%= project.screenshot_url %>"
+                    alt="Aperçu de <%= project.name %>"
+                    class="w-48 h-27 object-cover rounded border border-gray-200 shadow-sm"
+                    loading="lazy">
+              <% end %>
               <div>
                 <div class="text-sm font-medium text-gray-900">
                   <%= link_to project.name, project_path(project), class: "hover:underline" %>
