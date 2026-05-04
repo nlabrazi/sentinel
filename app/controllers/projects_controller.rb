@@ -1,5 +1,5 @@
 class ProjectsController < ApplicationController
-  before_action :set_project, only: [:show, :deploy, :toggle_maintenance]
+  before_action :set_project, only: [:show, :deploy, :refresh_screenshot, :toggle_maintenance]
 
   def show
   end

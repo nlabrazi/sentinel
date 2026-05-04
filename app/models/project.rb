@@ -1,6 +1,10 @@
+require "open-uri"
+
 class Project < ApplicationRecord
+  include ActiveStorage::Attached::Model
   has_many :deployments, dependent: :destroy
   has_many :cron_jobs, dependent: :destroy
+  has_one_attached :screenshot
 
   validates :name, :slug, :repo_url, :branch, :production_url, :vps_path, presence: true
   validates :slug, uniqueness: true
@@ -54,6 +58,12 @@ class Project < ApplicationRecord
 
   def regenerate_screenshot!
     return unless ENV['APIFLASH_ACCESS_KEY'].present?
-    update!(screenshot_url: fresh_screenshot_url)
+
+    url = fresh_screenshot_url
+    return unless url
+
+    # Télécharge l'image depuis l'API et l'attache
+    io = URI.open(url)
+    screenshot.attach(io: io, filename: "#{slug}.jpg", content_type: "image/jpeg")
   end
 end
