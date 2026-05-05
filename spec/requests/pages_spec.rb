@@ -1,6 +1,16 @@
 require 'rails_helper'
 
 RSpec.describe 'Pages', type: :request do
+  describe 'GET /settings' do
+    it 'renders settings for authenticated users' do
+      sign_in create(:user)
+
+      get settings_path
+
+      expect(response).to have_http_status(:success)
+    end
+  end
+
   describe 'GET /deploys' do
     it 'renders the latest deployments newest first' do
       sign_in create(:user)
