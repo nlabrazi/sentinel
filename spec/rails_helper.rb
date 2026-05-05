@@ -21,7 +21,7 @@ RSpec.configure do |config|
   config.include Devise::Test::IntegrationHelpers, type: :request
 
   # Remove this line if you're not using ActiveRecord
-  config.fixture_paths = [Rails.root.join('spec/fixtures')]
+  config.fixture_paths = [ Rails.root.join('spec/fixtures') ]
 
   # If you're not using transactional fixtures, add `config.use_transactional_fixtures = true`
   config.use_transactional_fixtures = true

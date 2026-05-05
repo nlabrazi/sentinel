@@ -52,7 +52,7 @@ gem "httparty", "~> 0.22"
 gem "cloudinary"
 
 # Gestion des variables d’environnement en développement/test
-gem "dotenv-rails", "~> 3.1", groups: [:development, :test]
+gem "dotenv-rails", "~> 3.1", groups: [ :development, :test ]
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

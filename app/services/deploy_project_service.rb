@@ -4,7 +4,7 @@
 # 3. Exécute le script deploy.sh sur le VPS via SSH
 # 4. Met à jour le statut du projet si succès
 class DeployProjectService
-  def initialize(project, triggered_by: 'web')
+  def initialize(project, triggered_by: "web")
     @project = project
     @triggered_by = triggered_by
   end
@@ -32,7 +32,7 @@ class DeployProjectService
     deployment.update!(
       status: success ? :success : :failed,
       duration: duration,
-      log: [result[:stdout], result[:stderr]].compact.join("\n")
+      log: [ result[:stdout], result[:stderr] ].compact.join("\n")
     )
 
     if success

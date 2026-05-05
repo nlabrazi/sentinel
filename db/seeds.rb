@@ -6,7 +6,7 @@ projects = [
   { name: "Media Tools",        slug: "media-tools",        repo_url: "https://github.com/nlabrazi/media-tools.git",        branch: "main",   production_url: "https://media-tools.nabster.dev",       vps_path: "/srv/projects/media-tools" },
   { name: "Portfolio",          slug: "portfolio",          repo_url: "https://github.com/nlabrazi/portfolio-3d.git",      branch: "master", production_url: "https://nabster.dev",                   vps_path: "/srv/projects/portfolio" },
   { name: "Sawt AI",            slug: "sawt-ai",            repo_url: "https://github.com/nlabrazi/sawt-ai.git",            branch: "main",   production_url: "https://sawt-ai.nabster.dev",           vps_path: "/srv/projects/sawt-ai" },
-  { name: "SJVTDM",            slug: "sjvtdm",             repo_url: "https://github.com/nlabrazi/sjvtdm.git",             branch: "master", production_url: "https://sjvtdm.nabster.dev",            vps_path: "/srv/projects/sjvtdm" },
+  { name: "SJVTDM",            slug: "sjvtdm",             repo_url: "https://github.com/nlabrazi/sjvtdm.git",             branch: "master", production_url: "https://sjvtdm.nabster.dev",            vps_path: "/srv/projects/sjvtdm" }
 ]
 
 projects.each do |attrs|

@@ -3,7 +3,7 @@
 class GithubService
   def initialize(project)
     @project = project
-    @client = Octokit::Client.new(access_token: ENV.fetch('GITHUB_TOKEN'))
+    @client = Octokit::Client.new(access_token: ENV.fetch("GITHUB_TOKEN"))
   end
 
   # Retourne le dernier commit de la branche principale sous forme d'objet Sawyer::Resource
