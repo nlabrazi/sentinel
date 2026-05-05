@@ -25,5 +25,16 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include("Deployable")
       expect(response.body).to include("5 minutes")
     end
+
+    it "filters projects by search query" do
+      sign_in create(:user)
+      create(:project, name: "Searchable Alpha", slug: "searchable-alpha")
+      create(:project, name: "Hidden Beta", slug: "hidden-beta")
+
+      get root_path, params: { q: "alpha" }
+
+      expect(response.body).to include("Searchable Alpha")
+      expect(response.body).not_to include("Hidden Beta")
+    end
   end
 end

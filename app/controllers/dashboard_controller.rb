@@ -1,10 +1,19 @@
 class DashboardController < ApplicationController
   def index
-    @projects = Project.order(:name).to_a
+    @project_search = params[:q].to_s.strip
+    @projects = dashboard_projects.to_a
     @latest_deployments_by_project_id = latest_deployments_by_project_id(@projects)
   end
 
   private
+
+  def dashboard_projects
+    projects = Project.order(:name)
+    return projects if @project_search.blank?
+
+    query = "%#{Project.sanitize_sql_like(@project_search)}%"
+    projects.where("name ILIKE :query OR production_url ILIKE :query", query: query)
+  end
 
   def latest_deployments_by_project_id(projects)
     project_ids = projects.map(&:id)

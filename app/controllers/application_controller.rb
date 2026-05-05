@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   before_action :authenticate_user!, unless: :devise_controller?
+  before_action :set_project_count, if: :user_signed_in?
 
   layout :layout_by_resource
 
@@ -13,5 +14,9 @@ class ApplicationController < ActionController::Base
 
   def layout_by_resource
     devise_controller? ? "auth" : "application"
+  end
+
+  def set_project_count
+    @project_count = Project.count
   end
 end
