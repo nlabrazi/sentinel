@@ -7,6 +7,7 @@ ENV BUNDLE_PATH="/bundle" \
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends \
       build-essential \
+      git \
       libpq-dev \
       libyaml-dev \
       curl \
