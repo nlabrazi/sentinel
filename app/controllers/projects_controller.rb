@@ -3,6 +3,7 @@ class ProjectsController < ApplicationController
 
   def show
     @page_title = @project.name
+    @compact_sidebar = true
     @deployments = @project.deployments.order(created_at: :desc).limit(20)
   end
 

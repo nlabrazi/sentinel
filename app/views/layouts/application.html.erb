@@ -9,7 +9,9 @@
     <%= javascript_importmap_tags %>
   </head>
   <body class="bg-gray-950 font-sans text-gray-100">
-    <div class="min-h-screen lg:flex" data-controller="mobile-nav">
+    <div class="min-h-screen lg:flex"
+         data-controller="mobile-nav sidebar"
+         data-sidebar-collapsed-value="<%= @compact_sidebar ? 'true' : 'false' %>">
       <button type="button"
               class="fixed inset-0 z-30 hidden bg-gray-950/70 lg:hidden"
               data-mobile-nav-target="overlay"
@@ -17,8 +19,10 @@
               aria-label="Fermer le menu"></button>
 
       <aside class="fixed inset-y-0 left-0 z-40 hidden w-72 max-w-[85vw] flex-col rounded-r-xl border-r border-gray-800 bg-gray-900 text-gray-300 shadow-xl lg:sticky lg:top-0 lg:z-auto lg:flex lg:h-screen lg:w-64 lg:max-w-none lg:rounded-r-none lg:shadow-none"
-             data-mobile-nav-target="panel">
-        <div class="flex items-center justify-between px-5 py-4">
+             data-mobile-nav-target="panel"
+             data-sidebar-target="sidebar">
+        <div class="flex flex-col gap-3 px-5 py-4">
+          <div class="flex items-center justify-between">
           <%= link_to root_path, class: "inline-flex h-10 w-10 items-center justify-center rounded-md text-cyan-300" do %>
             <span class="relative h-7 w-7">
               <span class="absolute left-3 top-0 h-2 w-1 rounded bg-cyan-300"></span>
@@ -34,9 +38,16 @@
                   aria-label="Fermer le menu">
             <%= fa_icon(:xmark, class_name: "h-5 w-5") %>
           </button>
+          </div>
+          <button type="button"
+                  class="hidden h-9 w-9 items-center justify-center rounded-md text-gray-400 hover:bg-gray-800 hover:text-white lg:inline-flex"
+                  data-action="sidebar#toggle"
+                  aria-label="Réduire ou étendre le menu">
+            <%= fa_icon(:bars, class_name: "h-4 w-4") %>
+          </button>
         </div>
 
-        <div class="px-4">
+        <div class="px-4" data-sidebar-target="full">
           <%= form_with url: root_path, method: :get, class: "relative", data: { turbo_frame: "_top" } do |form| %>
             <%= fa_icon(:magnifying_glass, class_name: "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500") %>
             <%= form.search_field :q, value: params[:q], placeholder: "Search Sentinel...", class: "w-full rounded-md border border-gray-800 bg-gray-950 px-10 py-2 text-sm text-gray-100 placeholder:text-gray-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400" %>
@@ -44,7 +55,7 @@
           <% end %>
         </div>
 
-        <div class="mx-4 mt-5 flex items-center gap-3 rounded-md px-2 py-2">
+        <div class="mx-4 mt-5 flex items-center gap-3 rounded-md px-2 py-2" data-sidebar-target="full">
           <div class="flex h-7 w-7 items-center justify-center rounded bg-cyan-400 text-xs font-bold text-gray-950">S</div>
           <div class="min-w-0 flex-1">
             <p class="truncate text-sm font-semibold text-gray-100">Sentinel</p>
@@ -53,49 +64,49 @@
         </div>
 
         <nav class="mt-4 min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-2 text-sm font-semibold">
-          <%= link_to root_path, data: { action: "mobile-nav#close" }, class: "flex items-center gap-3 rounded-md px-3 py-2 #{current_page?(root_path) ? 'border-l-4 border-cyan-300 bg-gray-800 text-cyan-300' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-100'}" do %>
+          <%= link_to root_path, data: { action: "mobile-nav#close", sidebar_target: "navItem" }, class: "flex items-center gap-3 rounded-md px-3 py-2 #{current_page?(root_path) ? 'border-l-4 border-cyan-300 bg-gray-800 text-cyan-300' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-100'}" do %>
             <%= fa_icon(:rocket, class_name: "h-4 w-4") %>
-            Projects
+            <span data-sidebar-target="full">Projects</span>
           <% end %>
-          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500">
+          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
             <%= fa_icon(:wrench, class_name: "h-4 w-4") %>
-            Builds
+            <span data-sidebar-target="full">Builds</span>
           </span>
-          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500">
+          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
             <%= fa_icon(:gear, class_name: "h-4 w-4") %>
-            Extensions
+            <span data-sidebar-target="full">Extensions</span>
           </span>
-          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500">
+          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
             <%= fa_icon(:house, class_name: "h-4 w-4") %>
-            DNS
+            <span data-sidebar-target="full">DNS</span>
           </span>
-          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500">
+          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
             <%= fa_icon(:right_from_bracket, class_name: "h-4 w-4") %>
-            Members
+            <span data-sidebar-target="full">Members</span>
           </span>
-          <%= link_to deploys_path, data: { action: "mobile-nav#close" }, class: "flex items-center gap-3 rounded-md px-3 py-2 #{current_page?(deploys_path) ? 'border-l-4 border-cyan-300 bg-gray-800 text-cyan-300' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-100'}" do %>
+          <%= link_to deploys_path, data: { action: "mobile-nav#close", sidebar_target: "navItem" }, class: "flex items-center gap-3 rounded-md px-3 py-2 #{current_page?(deploys_path) ? 'border-l-4 border-cyan-300 bg-gray-800 text-cyan-300' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-100'}" do %>
             <%= fa_icon(:rotate, class_name: "h-4 w-4") %>
-            Audit log
+            <span data-sidebar-target="full">Audit log</span>
           <% end %>
-          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500">
+          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
             <%= fa_icon(:moon, class_name: "h-4 w-4") %>
-            Security Scorecard
+            <span data-sidebar-target="full">Security Scorecard</span>
           </span>
-          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500">
+          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
             <%= fa_icon(:play, class_name: "h-4 w-4") %>
-            Usage & billing
+            <span data-sidebar-target="full">Usage & billing</span>
           </span>
-          <%= link_to settings_path, data: { action: "mobile-nav#close" }, class: "flex items-center gap-3 rounded-md px-3 py-2 #{current_page?(settings_path) ? 'border-l-4 border-cyan-300 bg-gray-800 text-cyan-300' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-100'}" do %>
+          <%= link_to settings_path, data: { action: "mobile-nav#close", sidebar_target: "navItem" }, class: "flex items-center gap-3 rounded-md px-3 py-2 #{current_page?(settings_path) ? 'border-l-4 border-cyan-300 bg-gray-800 text-cyan-300' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-100'}" do %>
             <%= fa_icon(:gear, class_name: "h-4 w-4") %>
-            Team settings
+            <span data-sidebar-target="full">Team settings</span>
           <% end %>
-          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500">
+          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
             <%= fa_icon(:magnifying_glass, class_name: "h-4 w-4") %>
-            Visual editor dashboard
+            <span data-sidebar-target="full">Visual editor dashboard</span>
           </span>
         </nav>
 
-        <div class="space-y-3 border-t border-gray-800 px-4 py-4">
+        <div class="space-y-3 border-t border-gray-800 px-4 py-4" data-sidebar-target="full">
           <button id="dark-mode-toggle"
                   data-controller="dark-mode"
                   data-action="click->dark-mode#toggle"
