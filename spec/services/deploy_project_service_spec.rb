@@ -11,6 +11,7 @@ RSpec.describe DeployProjectService, type: :service do
     # Stub SshExecutionService pour simuler une exécution réussie
     allow_any_instance_of(SshExecutionService).to receive(:execute)
       .and_return({ exit_code: 0, stdout: 'Deploy OK', stderr: '' })
+    allow(project).to receive(:regenerate_screenshot!)
   end
 
   it 'creates a deployment with success status' do
