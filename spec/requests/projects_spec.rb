@@ -1,6 +1,20 @@
 require 'rails_helper'
 
 RSpec.describe 'Projects', type: :request do
+  describe 'GET /projects/:id' do
+    it 'renders the project deployment history newest first' do
+      sign_in create(:user)
+      project = create(:project)
+      create(:deployment, project: project, commit_sha: 'oldcommit', created_at: 2.days.ago)
+      create(:deployment, project: project, commit_sha: 'newcommit', created_at: 5.minutes.ago)
+
+      get project_path(project)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body.index('newcomm')).to be < response.body.index('oldcomm')
+    end
+  end
+
   describe 'PATCH /projects/:id/toggle_maintenance' do
     let(:user) { create(:user) }
     let(:project) { create(:project, maintenance_mode: false) }
