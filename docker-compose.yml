@@ -9,7 +9,9 @@ x-rails-app: &rails-app
     BUNDLE_PATH: /bundle
     BUNDLE_JOBS: 4
     BUNDLE_RETRY: 3
-    DATABASE_URL: postgres://postgres:postgres@sentinel-db:5432/sentinel_development
+    POSTGRES_HOST: ${POSTGRES_HOST:-sentinel-db}
+    POSTGRES_USER: ${POSTGRES_USER:-postgres}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ACTIVE_STORAGE_SERVICE: ${ACTIVE_STORAGE_SERVICE:-local}
     CLOUDINARY_URL: ${CLOUDINARY_URL:-}
     CLOUDINARY_FOLDER: ${CLOUDINARY_FOLDER:-sentinel/development}
@@ -34,7 +36,9 @@ services:
       BUNDLE_PATH: /bundle
       BUNDLE_JOBS: 4
       BUNDLE_RETRY: 3
-      DATABASE_URL: postgres://postgres:postgres@sentinel-db:5432/sentinel_development
+      POSTGRES_HOST: ${POSTGRES_HOST:-sentinel-db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       ACTIVE_STORAGE_SERVICE: ${ACTIVE_STORAGE_SERVICE:-local}
       CLOUDINARY_URL: ${CLOUDINARY_URL:-}
       CLOUDINARY_FOLDER: ${CLOUDINARY_FOLDER:-sentinel/development}
