@@ -1,9 +1,11 @@
 class PagesController < ApplicationController
   def deploys
+    @page_title = "Deployments"
     @deployments = Deployment.includes(:project).order(created_at: :desc).limit(20)
   end
 
   def settings
+    @page_title = "Team settings"
     @settings_summary = settings_summary
     @settings_sections = settings_sections
   end

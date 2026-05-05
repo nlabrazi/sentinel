@@ -12,6 +12,11 @@ RSpec.describe "Dashboards", type: :request do
 
       get root_path
       expect(response).to have_http_status(:success)
+      expect(response.body).to include("Search projects")
+      expect(response.body).to include("Add new project")
+      expect(response.body).to include("Want to deploy a new project?")
+      expect(response.body).to include("Docs")
+      expect(response.body).to include("lg:flex")
       expect(response.body).not_to include("Mis à jour il y a quelques secondes")
     end
 

@@ -1,5 +1,6 @@
 class DashboardController < ApplicationController
   def index
+    @page_title = "Projects"
     @project_search = params[:q].to_s.strip
     @projects = dashboard_projects.to_a
     @latest_deployments_by_project_id = latest_deployments_by_project_id(@projects)

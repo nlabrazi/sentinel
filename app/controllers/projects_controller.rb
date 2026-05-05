@@ -2,6 +2,7 @@ class ProjectsController < ApplicationController
   before_action :set_project, only: [ :show, :deploy, :refresh_screenshot, :toggle_maintenance ]
 
   def show
+    @page_title = @project.name
     @deployments = @project.deployments.order(created_at: :desc).limit(20)
   end
 
