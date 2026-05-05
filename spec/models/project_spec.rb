@@ -1,6 +1,14 @@
 require 'rails_helper'
+require 'stringio'
 
 RSpec.describe Project, type: :model do
+  around do |example|
+    original_access_key = ENV['APIFLASH_ACCESS_KEY']
+    example.run
+  ensure
+    ENV['APIFLASH_ACCESS_KEY'] = original_access_key
+  end
+
   describe 'validations' do
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_presence_of(:slug) }
@@ -87,6 +95,51 @@ RSpec.describe Project, type: :model do
 
       expect(project).not_to be_valid
       expect(project.errors[:vps_path]).to be_present
+    end
+  end
+
+  describe '#regenerate_screenshot!' do
+    it 'does not call ApiFlash when no access key is configured' do
+      ENV['APIFLASH_ACCESS_KEY'] = nil
+      project = build(:project)
+
+      expect(URI).not_to receive(:open)
+
+      expect(project.regenerate_screenshot!).to eq(false)
+    end
+
+    it 'downloads screenshots with explicit network timeouts' do
+      ENV['APIFLASH_ACCESS_KEY'] = 'test-key'
+      project = build(:project, slug: 'myapp')
+      screenshot = instance_double(ActiveStorage::Attached::One, attached?: false)
+      image_io = StringIO.new('jpeg')
+
+      allow(project).to receive(:screenshot).and_return(screenshot)
+      allow(screenshot).to receive(:attach)
+
+      expect(URI).to receive(:open)
+        .with(
+          project.fresh_screenshot_url,
+          open_timeout: Project::SCREENSHOT_OPEN_TIMEOUT,
+          read_timeout: Project::SCREENSHOT_READ_TIMEOUT
+        )
+        .and_yield(image_io)
+
+      expect(project.regenerate_screenshot!).to eq(true)
+      expect(screenshot).to have_received(:attach).with(
+        io: image_io,
+        filename: 'myapp.jpg',
+        content_type: 'image/jpeg'
+      )
+    end
+
+    it 'returns false when the screenshot request times out' do
+      ENV['APIFLASH_ACCESS_KEY'] = 'test-key'
+      project = build(:project)
+
+      allow(URI).to receive(:open).and_raise(Net::ReadTimeout)
+
+      expect(project.regenerate_screenshot!).to eq(false)
     end
   end
 end

@@ -2,6 +2,9 @@ require "open-uri"
 require "shellwords"
 
 class Project < ApplicationRecord
+  SCREENSHOT_OPEN_TIMEOUT = 5
+  SCREENSHOT_READ_TIMEOUT = 10
+
   include ActiveStorage::Attached::Model
   has_many :deployments, dependent: :destroy
   has_many :cron_jobs, dependent: :destroy
@@ -64,14 +67,20 @@ class Project < ApplicationRecord
   end
 
   def regenerate_screenshot!(force: false)
-    return if screenshot.attached? && !force
-    return unless ENV["APIFLASH_ACCESS_KEY"].present?
+    return false if screenshot.attached? && !force
+    return false unless ENV["APIFLASH_ACCESS_KEY"].present?
 
     url = fresh_screenshot_url
-    return unless url
+    return false unless url
 
-    io = URI.open(url)
-    screenshot.attach(io: io, filename: "#{slug}.jpg", content_type: "image/jpeg")
+    URI.open(url, open_timeout: SCREENSHOT_OPEN_TIMEOUT, read_timeout: SCREENSHOT_READ_TIMEOUT) do |io|
+      screenshot.attach(io: io, filename: "#{slug}.jpg", content_type: "image/jpeg")
+    end
+
+    true
+  rescue OpenURI::HTTPError, Net::OpenTimeout, Net::ReadTimeout, SocketError, IOError, SystemCallError => e
+    Rails.logger.warn("Screenshot regeneration failed for project #{id || slug}: #{e.class}: #{e.message}")
+    false
   end
 
   private
