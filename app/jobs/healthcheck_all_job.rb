@@ -3,7 +3,11 @@ class HealthcheckAllJob < ApplicationJob
 
   def perform
     Project.find_each do |project|
-      HealthcheckService.new(project).call
+      begin
+        HealthcheckService.new(project).call
+      rescue StandardError => e
+        Rails.logger.error "HealthcheckAllJob failed for #{project.slug}: #{e.message}"
+      end
     end
   end
 end
