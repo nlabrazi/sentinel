@@ -8,6 +8,23 @@ RSpec.describe 'Pages', type: :request do
       get settings_path
 
       expect(response).to have_http_status(:success)
+      expect(response.body).to include('Settings for Sentinel')
+      expect(response.body).to include('General app settings')
+      expect(response.body).to include('Environment variables')
+      expect(response.body).to include('Access & security')
+      expect(response.body).not_to include('Configuration de l’application (placeholder).')
+    end
+
+    it 'does not render secret values' do
+      sign_in create(:user)
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with('GITHUB_TOKEN').and_return('super-secret-token')
+
+      get settings_path
+
+      expect(response.body).to include('GitHub token')
+      expect(response.body).to include('Configured')
+      expect(response.body).not_to include('super-secret-token')
     end
   end
 
