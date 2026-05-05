@@ -1,6 +1,10 @@
 require "open-uri"
+require "shellwords"
 
 class Project < ApplicationRecord
+  SCREENSHOT_OPEN_TIMEOUT = 5
+  SCREENSHOT_READ_TIMEOUT = 10
+
   include ActiveStorage::Attached::Model
   has_many :deployments, dependent: :destroy
   has_many :cron_jobs, dependent: :destroy
@@ -9,21 +13,27 @@ class Project < ApplicationRecord
   validates :name, :slug, :repo_url, :branch, :production_url, :vps_path, presence: true
   validates :slug, uniqueness: true
   validates :status, inclusion: { in: %w[online offline unknown] }
+  validate :vps_path_must_be_allowed
 
   enum :status, { online: 0, offline: 1, unknown: 2 }, default: :unknown
 
   # Extrait le nom du dépôt GitHub depuis l'URL
   def github_repo
-    URI.parse(repo_url).path.sub(/^\//, '').sub(/\.git$/, '')
+    URI.parse(repo_url).path.sub(/^\//, "").sub(/\.git$/, "")
   end
 
   # Commandes SSH prédéfinies
   def deploy_command
-    "bash -lc 'cd #{vps_path} && ./deploy.sh'"
+    bash_command("cd #{Shellwords.escape(vps_path)} && ./deploy.sh")
   end
 
   def cron_status_command
-    "bash -lc 'cd #{vps_path} && ./status.sh'"
+    bash_command("cd #{Shellwords.escape(vps_path)} && ./status.sh")
+  end
+
+  def maintenance_command(enabled)
+    action = enabled ? "touch" : "rm -f"
+    bash_command("#{action} #{Shellwords.escape(maintenance_flag_path)}")
   end
 
   # app/models/project.rb
@@ -42,10 +52,10 @@ class Project < ApplicationRecord
   end
 
   def fresh_screenshot_url
-    return nil unless ENV['APIFLASH_ACCESS_KEY'].present?
+    return nil unless ENV["APIFLASH_ACCESS_KEY"].present?
 
     "https://api.apiflash.com/v1/urltoimage" \
-      "?access_key=#{ENV['APIFLASH_ACCESS_KEY']}" \
+      "?access_key=#{ENV["APIFLASH_ACCESS_KEY"]}" \
       "&url=#{CGI.escape(production_url)}" \
       "&width=1280" \
       "&height=720" \
@@ -57,13 +67,37 @@ class Project < ApplicationRecord
   end
 
   def regenerate_screenshot!(force: false)
-    return if screenshot.attached? && !force
-    return unless ENV['APIFLASH_ACCESS_KEY'].present?
+    return false if screenshot.attached? && !force
+    return false unless ENV["APIFLASH_ACCESS_KEY"].present?
 
     url = fresh_screenshot_url
-    return unless url
+    return false unless url
 
-    io = URI.open(url)
-    screenshot.attach(io: io, filename: "#{slug}.jpg", content_type: "image/jpeg")
+    URI.open(url, open_timeout: SCREENSHOT_OPEN_TIMEOUT, read_timeout: SCREENSHOT_READ_TIMEOUT) do |io|
+      screenshot.attach(io: io, filename: "#{slug}.jpg", content_type: "image/jpeg")
+    end
+
+    true
+  rescue OpenURI::HTTPError, Net::OpenTimeout, Net::ReadTimeout, SocketError, IOError, SystemCallError => e
+    Rails.logger.warn("Screenshot regeneration failed for project #{id || slug}: #{e.class}: #{e.message}")
+    false
+  end
+
+  private
+
+  def maintenance_flag_path
+    File.join(vps_path, "maintenance.on")
+  end
+
+  def bash_command(command)
+    "bash -lc #{Shellwords.escape(command)}"
+  end
+
+  def vps_path_must_be_allowed
+    return if vps_path.blank?
+
+    unless vps_path.match?(%r{\A/srv/projects/[A-Za-z0-9._/-]+\z}) && vps_path.exclude?("..")
+      errors.add(:vps_path, "must stay under /srv/projects and contain only safe path characters")
+    end
   end
 end

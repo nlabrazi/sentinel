@@ -12,11 +12,11 @@ class CronStatusJob < ApplicationJob
           data.each do |job_name, attrs|
             cron_job = project.cron_jobs.find_or_initialize_by(name: job_name)
             cron_job.update!(
-              command: attrs['command'] || '',
-              schedule: attrs['schedule'] || '',
-              last_execution_at: Time.parse(attrs['last_run']) rescue nil,
-              last_status: attrs['status'],
-              last_duration: attrs['duration']
+              command: attrs["command"] || "",
+              schedule: attrs["schedule"] || "",
+              last_execution_at: parse_time(attrs["last_run"]),
+              last_status: attrs["status"],
+              last_duration: attrs["duration"]
             )
           end
         end
@@ -24,5 +24,15 @@ class CronStatusJob < ApplicationJob
         Rails.logger.error "CronStatusJob failed for #{project.slug}: #{e.message}"
       end
     end
+  end
+
+  private
+
+  def parse_time(value)
+    return if value.blank?
+
+    Time.zone.parse(value)
+  rescue ArgumentError, TypeError
+    nil
   end
 end

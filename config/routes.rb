@@ -1,9 +1,9 @@
 Rails.application.routes.draw do
-  devise_for :users, only: [:sessions]
+  devise_for :users, only: [ :sessions ]
   get "pages/deploys"
   get "pages/settings"
   root "dashboard#index"
-  resources :projects, only: [:show] do
+  resources :projects, only: [ :show ] do
     member do
       post :deploy
       patch :toggle_maintenance

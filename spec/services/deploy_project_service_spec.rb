@@ -11,6 +11,7 @@ RSpec.describe DeployProjectService, type: :service do
     # Stub SshExecutionService pour simuler une exécution réussie
     allow_any_instance_of(SshExecutionService).to receive(:execute)
       .and_return({ exit_code: 0, stdout: 'Deploy OK', stderr: '' })
+    allow(project).to receive(:regenerate_screenshot!)
   end
 
   it 'creates a deployment with success status' do
@@ -38,11 +39,37 @@ RSpec.describe DeployProjectService, type: :service do
     expect(project.last_commit_deployed).to be_nil
   end
 
+  it 'truncates oversized deployment logs before storing them' do
+    allow_any_instance_of(SshExecutionService).to receive(:execute)
+      .and_return({
+        exit_code: 1,
+        stdout: 'o' * (DeployProjectService::MAX_LOG_BYTES + 1_000),
+        stderr: 'Command failed'
+      })
+
+    service.call
+
+    deployment = Deployment.last
+    expect(deployment.log.bytesize).to eq(DeployProjectService::MAX_LOG_BYTES)
+    expect(deployment.log).to end_with(DeployProjectService::TRUNCATED_LOG_NOTICE)
+  end
+
   it 'handles an exception from GithubService' do
     allow_any_instance_of(GithubService).to receive(:latest_commit_on_branch)
       .and_raise(Octokit::NotFound)
     result = service.call
     expect(result).to eq(false)
     expect(Deployment.count).to eq(0)
+  end
+
+  it 'does not start a second deployment while one is already running' do
+    create(:deployment, project: project, status: :running)
+
+    expect(GithubService).not_to receive(:new)
+
+    result = service.call
+
+    expect(result).to eq(false)
+    expect(project.deployments.count).to eq(1)
   end
 end

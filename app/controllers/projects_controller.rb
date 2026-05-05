@@ -1,5 +1,5 @@
 class ProjectsController < ApplicationController
-  before_action :set_project, only: [:show, :deploy, :refresh_screenshot, :toggle_maintenance]
+  before_action :set_project, only: [ :show, :deploy, :refresh_screenshot, :toggle_maintenance ]
 
   def show
   end
@@ -11,14 +11,13 @@ class ProjectsController < ApplicationController
 
   def toggle_maintenance
     new_mode = !@project.maintenance_mode?
-    @project.update!(maintenance_mode: new_mode)
 
-    # Action SSH sécurisée – en cas d'échec on prévient sans planter
     begin
       ssh = SshExecutionService.new(@project)
-      command = new_mode ? "touch #{@project.vps_path}/maintenance.on" : "rm -f #{@project.vps_path}/maintenance.on"
-      result = ssh.execute(command)
+      result = ssh.execute(@project.maintenance_command(new_mode))
+
       if result[:exit_code].zero?
+        @project.update!(maintenance_mode: new_mode)
         redirect_to @project, notice: "Mode maintenance #{new_mode ? 'activé' : 'désactivé'}."
       else
         flash[:alert] = "Erreur SSH : #{result[:stderr]}"
