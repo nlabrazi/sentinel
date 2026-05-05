@@ -1,7 +1,7 @@
 <div class="bg-white shadow rounded-lg overflow-hidden dark:bg-gray-900">
   <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center dark:border-gray-800">
     <h2 class="text-lg font-semibold">Tous les projets</h2>
-    <span class="text-xs text-gray-500 dark:text-gray-400">Mis à jour il y a quelques secondes</span>
+    <span class="text-xs text-gray-500 dark:text-gray-400"><%= @projects.size %> projet(s)</span>
   </div>
 
   <div class="hidden overflow-x-auto md:block">
@@ -21,7 +21,7 @@
         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/70">
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="flex items-center gap-3">
-              <% if ENV['APIFLASH_ACCESS_KEY'].present? %>
+              <% if @screenshots_enabled %>
                 <% if project.screenshot.attached? %>
                 <img src="<%= url_for(project.screenshot) %>"
                     alt="Aperçu de <%= project.name %>"
@@ -85,7 +85,7 @@
     <% @projects.each do |project| %>
       <% latest_deployment = @latest_deployments_by_project_id[project.id] %>
       <article class="space-y-4 px-4 py-5">
-        <% if ENV['APIFLASH_ACCESS_KEY'].present? %>
+        <% if @screenshots_enabled %>
           <% if project.screenshot.attached? %>
             <img src="<%= url_for(project.screenshot) %>"
                  alt="Aperçu de <%= project.name %>"

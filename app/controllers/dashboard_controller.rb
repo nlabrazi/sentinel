@@ -3,6 +3,7 @@ class DashboardController < ApplicationController
     @project_search = params[:q].to_s.strip
     @projects = dashboard_projects.to_a
     @latest_deployments_by_project_id = latest_deployments_by_project_id(@projects)
+    @screenshots_enabled = ENV["APIFLASH_ACCESS_KEY"].present?
   end
 
   private
