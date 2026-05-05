@@ -39,6 +39,21 @@ RSpec.describe DeployProjectService, type: :service do
     expect(project.last_commit_deployed).to be_nil
   end
 
+  it 'truncates oversized deployment logs before storing them' do
+    allow_any_instance_of(SshExecutionService).to receive(:execute)
+      .and_return({
+        exit_code: 1,
+        stdout: 'o' * (DeployProjectService::MAX_LOG_BYTES + 1_000),
+        stderr: 'Command failed'
+      })
+
+    service.call
+
+    deployment = Deployment.last
+    expect(deployment.log.bytesize).to eq(DeployProjectService::MAX_LOG_BYTES)
+    expect(deployment.log).to end_with(DeployProjectService::TRUNCATED_LOG_NOTICE)
+  end
+
   it 'handles an exception from GithubService' do
     allow_any_instance_of(GithubService).to receive(:latest_commit_on_branch)
       .and_raise(Octokit::NotFound)

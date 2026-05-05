@@ -4,6 +4,9 @@
 # 3. Exécute le script deploy.sh sur le VPS via SSH
 # 4. Met à jour le statut du projet si succès
 class DeployProjectService
+  MAX_LOG_BYTES = 64.kilobytes
+  TRUNCATED_LOG_NOTICE = "\n\n[Log truncated]\n"
+
   def initialize(project, triggered_by: "web")
     @project = project
     @triggered_by = triggered_by
@@ -34,7 +37,7 @@ class DeployProjectService
     deployment.update!(
       status: success ? :success : :failed,
       duration: duration,
-      log: [ result[:stdout], result[:stderr] ].compact.join("\n")
+      log: deployment_log(result)
     )
 
     if success
@@ -47,7 +50,19 @@ class DeployProjectService
 
     success
   rescue StandardError => e
-    deployment&.update!(status: :failed, log: e.message) if deployment
+    deployment&.update!(status: :failed, log: truncate_log(e.message)) if deployment
     false
+  end
+
+  private
+
+  def deployment_log(result)
+    truncate_log([ result[:stdout], result[:stderr] ].compact.join("\n"))
+  end
+
+  def truncate_log(log)
+    return log if log.bytesize <= MAX_LOG_BYTES
+
+    log.byteslice(0, MAX_LOG_BYTES - TRUNCATED_LOG_NOTICE.bytesize) + TRUNCATED_LOG_NOTICE
   end
 end
