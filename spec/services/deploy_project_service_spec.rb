@@ -46,4 +46,15 @@ RSpec.describe DeployProjectService, type: :service do
     expect(result).to eq(false)
     expect(Deployment.count).to eq(0)
   end
+
+  it 'does not start a second deployment while one is already running' do
+    create(:deployment, project: project, status: :running)
+
+    expect(GithubService).not_to receive(:new)
+
+    result = service.call
+
+    expect(result).to eq(false)
+    expect(project.deployments.count).to eq(1)
+  end
 end

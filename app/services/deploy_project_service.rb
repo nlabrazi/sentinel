@@ -10,6 +10,8 @@ class DeployProjectService
   end
 
   def call
+    return false if @project.deployments.running.exists?
+
     github = GithubService.new(@project)
     latest_commit = github.latest_commit_on_branch
     return false unless latest_commit
