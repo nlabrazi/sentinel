@@ -70,6 +70,26 @@ RSpec.describe SshExecutionService, type: :service do
     expect(result).to eq(exit_code: 42, stdout: 'out', stderr: 'err')
   end
 
+  it 'uses explicit SSH security and timeout options' do
+    channel = FakeSshChannel.new(success: true, exit_code: 0)
+    ssh = FakeSshSession.new(channel)
+    allow(Net::SSH).to receive(:start).and_yield(ssh)
+
+    service.execute('deploy')
+
+    expect(Net::SSH).to have_received(:start).with(
+      SshExecutionService::VPS_HOST,
+      SshExecutionService::SSH_USER,
+      hash_including(
+        auth_methods: %w[publickey],
+        keys: [ SshExecutionService::SSH_KEY_PATH ],
+        non_interactive: true,
+        timeout: SshExecutionService::CONNECT_TIMEOUT_SECONDS,
+        verify_host_key: :always
+      )
+    )
+  end
+
   it 'returns a failure when the remote command cannot be opened' do
     channel = FakeSshChannel.new(success: false, exit_code: 0)
     ssh = FakeSshSession.new(channel)
@@ -79,5 +99,13 @@ RSpec.describe SshExecutionService, type: :service do
 
     expect(result[:exit_code]).to eq(1)
     expect(result[:stderr]).to include('Could not execute command')
+  end
+
+  it 'returns a failure when SSH execution times out' do
+    allow(Net::SSH).to receive(:start).and_raise(Timeout::Error, 'execution expired')
+
+    result = service.execute('deploy')
+
+    expect(result).to eq(exit_code: 1, stdout: '', stderr: 'execution expired')
   end
 end
