@@ -72,6 +72,7 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).to include('Project overview')
       expect(response.body).to include('Release readiness')
       expect(response.body).to include('Deployment command')
+      expect(response.body).to include('Cron jobs')
       expect(response.body).to include('Production deploys')
       expect(response.body).to include('Healthcheck')
       expect(response.body).to include('Current status')
@@ -86,6 +87,32 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).not_to include('Preview Servers')
       expect(response.body).not_to include('Web security')
       expect(response.body).not_to include('Domain management')
+    end
+
+    it 'renders detailed cron job status' do
+      sign_in create(:user)
+      project = create(:project)
+      cron_job = create(
+        :cron_job,
+        project: project,
+        name: 'daily-import',
+        command: './bin/daily-import',
+        schedule: '0 2 * * *',
+        last_execution_at: Time.zone.parse('2026-05-06T02:00:12Z'),
+        last_status: 'failed',
+        last_duration: 42
+      )
+      create(:job_execution, cron_job: cron_job, executed_at: cron_job.last_execution_at, log: 'Import failed on row 12')
+
+      get project_path(project)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('daily-import')
+      expect(response.body).to include('./bin/daily-import')
+      expect(response.body).to include('0 2 * * *')
+      expect(response.body).to include('failed')
+      expect(response.body).to include('42s')
+      expect(response.body).to include('Import failed on row 12')
     end
 
     it 'renders a running deployment state instead of the deploy action' do

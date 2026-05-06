@@ -16,6 +16,7 @@
           Project overview
         </a>
         <a href="#configuration" class="block pl-6 hover:text-gray-100">Project configuration</a>
+        <a href="#cron-jobs" class="block pl-6 hover:text-gray-100">Cron jobs</a>
         <a href="#deploys" class="block pl-6 hover:text-gray-100">Deploys</a>
         <a href="#healthcheck" class="block pl-6 hover:text-gray-100">Healthcheck</a>
       </nav>
@@ -137,6 +138,77 @@
         The command is generated from the validated VPS path and remains read-only from this screen.
       </p>
     </div>
+  </section>
+
+  <section id="cron-jobs" class="overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow">
+    <div class="border-b border-gray-800 px-5 py-4">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-gray-100">Cron jobs</h2>
+          <p class="mt-1 text-sm text-gray-400">Latest status reported by the project status script.</p>
+        </div>
+        <span class="inline-flex w-fit items-center rounded-full bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-300">
+          <%= @cron_jobs.size %> job<%= "s" unless @cron_jobs.size == 1 %>
+        </span>
+      </div>
+    </div>
+
+    <% if @cron_jobs.any? %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-800 text-left text-sm">
+          <thead class="bg-gray-950/70 text-xs uppercase text-gray-500">
+            <tr>
+              <th scope="col" class="px-5 py-3 font-semibold">Name</th>
+              <th scope="col" class="px-5 py-3 font-semibold">Schedule</th>
+              <th scope="col" class="px-5 py-3 font-semibold">Last run</th>
+              <th scope="col" class="px-5 py-3 font-semibold">Status</th>
+              <th scope="col" class="px-5 py-3 font-semibold">Duration</th>
+              <th scope="col" class="px-5 py-3 font-semibold">Last log</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-800">
+            <% @cron_jobs.each do |cron_job| %>
+              <% latest_execution = cron_job.job_executions.max_by { |execution| execution.executed_at || execution.created_at } %>
+              <% last_log = latest_execution&.log.to_s.squish %>
+              <tr class="align-top">
+                <td class="px-5 py-4">
+                  <p class="font-semibold text-gray-100"><%= cron_job.name %></p>
+                  <p class="mt-1 max-w-xs truncate font-mono text-xs text-gray-500"><%= cron_job.command %></p>
+                </td>
+                <td class="whitespace-nowrap px-5 py-4 font-mono text-gray-300"><%= cron_job.schedule %></td>
+                <td class="whitespace-nowrap px-5 py-4 text-gray-300">
+                  <% if cron_job.last_execution_at %>
+                    <%= l(cron_job.last_execution_at, format: :short) %>
+                  <% else %>
+                    <span class="text-gray-500">unknown</span>
+                  <% end %>
+                </td>
+                <td class="whitespace-nowrap px-5 py-4">
+                  <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold <%= cron_job.last_status == 'success' ? 'bg-green-900/40 text-green-300' : cron_job.last_status == 'failed' ? 'bg-red-900/40 text-red-300' : 'bg-gray-800 text-gray-300' %>">
+                    <span class="h-1.5 w-1.5 rounded-full <%= cron_job.last_status == 'success' ? 'bg-green-300' : cron_job.last_status == 'failed' ? 'bg-red-300' : 'bg-gray-400' %>"></span>
+                    <%= cron_job.last_status.presence || "unknown" %>
+                  </span>
+                </td>
+                <td class="whitespace-nowrap px-5 py-4 text-gray-300">
+                  <%= cron_job.last_duration.present? ? "#{cron_job.last_duration}s" : "unknown" %>
+                </td>
+                <td class="px-5 py-4 text-gray-300">
+                  <% if last_log.present? %>
+                    <p class="max-w-xl truncate"><%= truncate(last_log, length: 140) %></p>
+                  <% else %>
+                    <span class="text-gray-500">No log reported</span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="px-5 py-6 text-sm text-gray-400">
+        No cron status has been reported yet. Run <code class="rounded bg-gray-950 px-1.5 py-0.5 text-gray-200">status.sh</code> sync first.
+      </div>
+    <% end %>
   </section>
 
   <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">

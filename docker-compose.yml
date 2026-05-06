@@ -19,7 +19,8 @@ x-rails-app: &rails-app
     GITHUB_TOKEN: ${GITHUB_TOKEN:-fake}
     VPS_HOST: ${VPS_HOST:-vps.local}
     VPS_USER: ${VPS_USER:-control-panel}
-    SSH_KEY_PATH: /root/.ssh/id_rsa
+    SSH_KEY_PATH: ${SSH_KEY_PATH:-/app/config/ssh_key/id_rsa}
+    SSH_KNOWN_HOSTS_PATH: ${SSH_KNOWN_HOSTS_PATH:-/app/config/ssh_key/known_hosts}
   volumes:
     - .:/app
     - sentinel-bundle:/bundle
@@ -46,11 +47,11 @@ services:
       GITHUB_TOKEN: ${GITHUB_TOKEN:-fake}
       VPS_HOST: ${VPS_HOST:-vps.local}
       VPS_USER: ${VPS_USER:-control-panel}
-      SSH_KEY_PATH: /root/.ssh/id_rsa
+      SSH_KEY_PATH: ${SSH_KEY_PATH:-/app/config/ssh_key/id_rsa}
+      SSH_KNOWN_HOSTS_PATH: ${SSH_KNOWN_HOSTS_PATH:-/app/config/ssh_key/known_hosts}
     volumes:
       - .:/app
       - sentinel-bundle:/bundle
-      - ssh_key:/root/.ssh:ro
     ports:
       - "3000:3000"
     depends_on:
@@ -85,9 +86,3 @@ services:
 volumes:
   sentinel-postgres-data:
   sentinel-bundle:
-  ssh_key:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./config/ssh_key

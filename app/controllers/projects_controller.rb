@@ -5,6 +5,7 @@ class ProjectsController < ApplicationController
     @page_title = @project.name
     @compact_sidebar = true
     @deployments = @project.deployments.order(created_at: :desc).limit(20)
+    @cron_jobs = @project.cron_jobs.includes(:job_executions).order(:name)
     @running_deployment = @project.deployments.running.order(created_at: :desc).first
   end
 

@@ -85,6 +85,7 @@ RSpec.describe SshExecutionService, type: :service do
         keys: [ SshExecutionService::SSH_KEY_PATH ],
         non_interactive: true,
         timeout: SshExecutionService::CONNECT_TIMEOUT_SECONDS,
+        user_known_hosts_file: SshExecutionService::SSH_KNOWN_HOSTS_PATH,
         verify_host_key: :always
       )
     )
