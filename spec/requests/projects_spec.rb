@@ -5,13 +5,53 @@ RSpec.describe 'Projects', type: :request do
     it 'renders the project deployment history newest first' do
       sign_in create(:user)
       project = create(:project)
-      create(:deployment, project: project, commit_sha: 'oldcommit', created_at: 2.days.ago)
-      create(:deployment, project: project, commit_sha: 'newcommit', created_at: 5.minutes.ago)
+      other_project = create(:project)
+      old_deployment = create(:deployment, project: project, commit_sha: 'oldcommit', created_at: 2.days.ago)
+      new_deployment = create(:deployment, project: project, commit_sha: 'newcommit', created_at: 5.minutes.ago)
+      other_deployment = create(:deployment, project: other_project, commit_sha: 'othercommit', created_at: 1.minute.ago)
 
       get project_path(project)
 
       expect(response).to have_http_status(:success)
       expect(response.body.index('newcomm')).to be < response.body.index('oldcomm')
+      expect(response.body).to include(deployment_path(new_deployment))
+      expect(response.body).to include(deployment_path(old_deployment))
+      expect(response.body).not_to include(other_deployment.commit_sha.first(7))
+      expect(response.body).not_to include(deployment_path(other_deployment))
+    end
+
+    it 'limits the project deployment history to the 20 newest records' do
+      sign_in create(:user)
+      project = create(:project)
+      oldest_deployment = create(
+        :deployment,
+        project: project,
+        commit_sha: 'oldestcommit',
+        created_at: 30.days.ago
+      )
+      newest_deployment = create(
+        :deployment,
+        project: project,
+        commit_sha: 'newestcommit',
+        created_at: 1.minute.ago
+      )
+
+      19.times do |index|
+        create(
+          :deployment,
+          project: project,
+          commit_sha: "middlecommit#{index}",
+          created_at: (index + 2).minutes.ago
+        )
+      end
+
+      get project_path(project)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('newestc')
+      expect(response.body).to include(deployment_path(newest_deployment))
+      expect(response.body).not_to include('oldest')
+      expect(response.body).not_to include(deployment_path(oldest_deployment))
     end
 
     it 'renders the project overview layout with compact sidebar' do
