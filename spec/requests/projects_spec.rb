@@ -33,10 +33,63 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).to include('Release readiness')
       expect(response.body).to include('Deployment command')
       expect(response.body).to include('Production deploys')
-      expect(response.body).to include('Observability')
+      expect(response.body).to include('Healthcheck')
+      expect(response.body).to include('Current status')
+      expect(response.body).to include('Production URL')
+      expect(response.body).to include('Latest deployment')
+      expect(response.body).to include('Deployment state')
+      expect(response.body).to include('Idle')
       expect(response.body).to include('xl:grid-cols')
       expect(response.body).not_to include('Build with an AI agent')
       expect(response.body).not_to include('Protect and secure access to your project')
+      expect(response.body).not_to include('Synthetic activity placeholder')
+      expect(response.body).not_to include('Preview Servers')
+      expect(response.body).not_to include('Web security')
+      expect(response.body).not_to include('Domain management')
+    end
+
+    it 'renders a running deployment state instead of the deploy action' do
+      sign_in create(:user)
+      project = create(:project)
+      create(:deployment, project: project, status: :running, commit_sha: 'runningcommit')
+
+      get project_path(project)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('Deployment running since')
+      expect(response.body).to include('Deploy running')
+      expect(response.body).to include('Running')
+      expect(response.body).not_to include('Deploy project')
+    end
+  end
+
+  describe 'POST /projects/:id/deploy' do
+    let(:user) { create(:user) }
+    let(:project) { create(:project) }
+
+    before do
+      sign_in user
+    end
+
+    it 'enqueues a deploy job when no deployment is running' do
+      allow(DeployProjectJob).to receive(:perform_later)
+
+      post deploy_project_path(project)
+
+      expect(DeployProjectJob).to have_received(:perform_later).with(project.id)
+      expect(response).to redirect_to(project_path(project))
+      expect(flash[:notice]).to eq('Déploiement lancé en arrière-plan.')
+    end
+
+    it 'does not enqueue another deploy job when one is already running' do
+      create(:deployment, project: project, status: :running)
+      allow(DeployProjectJob).to receive(:perform_later)
+
+      post deploy_project_path(project)
+
+      expect(DeployProjectJob).not_to have_received(:perform_later)
+      expect(response).to redirect_to(project_path(project))
+      expect(flash[:alert]).to eq('Un déploiement est déjà en cours pour ce projet.')
     end
   end
 

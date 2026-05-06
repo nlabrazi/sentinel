@@ -72,4 +72,17 @@ RSpec.describe DeployProjectService, type: :service do
     expect(result).to eq(false)
     expect(project.deployments.count).to eq(1)
   end
+
+  it 'does not execute SSH when another deployment starts after the GitHub lookup' do
+    allow_any_instance_of(GithubService).to receive(:latest_commit_on_branch) do
+      create(:deployment, project: project, status: :running)
+      { sha: 'abc123' }
+    end
+    expect(SshExecutionService).not_to receive(:new)
+
+    result = service.call
+
+    expect(result).to eq(false)
+    expect(project.deployments.running.count).to eq(1)
+  end
 end

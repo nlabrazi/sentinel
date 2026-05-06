@@ -64,42 +64,18 @@
             <%= fa_icon(:rocket, class_name: "h-4 w-4") %>
             <span data-sidebar-target="full">Projects</span>
           <% end %>
-          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
-            <%= fa_icon(:wrench, class_name: "h-4 w-4") %>
-            <span data-sidebar-target="full">Builds</span>
-          </span>
-          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
-            <%= fa_icon(:gear, class_name: "h-4 w-4") %>
-            <span data-sidebar-target="full">Extensions</span>
-          </span>
-          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
-            <%= fa_icon(:house, class_name: "h-4 w-4") %>
-            <span data-sidebar-target="full">DNS</span>
-          </span>
-          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
-            <%= fa_icon(:right_from_bracket, class_name: "h-4 w-4") %>
-            <span data-sidebar-target="full">Members</span>
-          </span>
           <%= link_to deploys_path, data: { action: "mobile-nav#close", sidebar_target: "navItem" }, class: "flex items-center gap-3 rounded-md px-3 py-2 #{current_page?(deploys_path) ? 'border-l-4 border-cyan-300 bg-gray-800 text-cyan-300' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-100'}" do %>
             <%= fa_icon(:rotate, class_name: "h-4 w-4") %>
-            <span data-sidebar-target="full">Audit log</span>
+            <span data-sidebar-target="full">Deployments</span>
           <% end %>
-          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
-            <%= fa_icon(:moon, class_name: "h-4 w-4") %>
-            <span data-sidebar-target="full">Security Scorecard</span>
-          </span>
-          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
-            <%= fa_icon(:play, class_name: "h-4 w-4") %>
-            <span data-sidebar-target="full">Usage & billing</span>
-          </span>
           <%= link_to settings_path, data: { action: "mobile-nav#close", sidebar_target: "navItem" }, class: "flex items-center gap-3 rounded-md px-3 py-2 #{current_page?(settings_path) ? 'border-l-4 border-cyan-300 bg-gray-800 text-cyan-300' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-100'}" do %>
             <%= fa_icon(:gear, class_name: "h-4 w-4") %>
-            <span data-sidebar-target="full">Team settings</span>
+            <span data-sidebar-target="full">Settings</span>
           <% end %>
-          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
+          <%= link_to documentation_path, data: { action: "mobile-nav#close", sidebar_target: "navItem" }, class: "flex items-center gap-3 rounded-md px-3 py-2 #{current_page?(documentation_path) ? 'border-l-4 border-cyan-300 bg-gray-800 text-cyan-300' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-100'}" do %>
             <%= fa_icon(:magnifying_glass, class_name: "h-4 w-4") %>
-            <span data-sidebar-target="full">Visual editor dashboard</span>
-          </span>
+            <span data-sidebar-target="full">Documentation</span>
+          <% end %>
         </nav>
 
         <div class="space-y-3 border-t border-gray-800 px-4 py-4" data-sidebar-target="full">
@@ -112,7 +88,6 @@
             </svg>
             <span data-dark-mode-target="text">Mode sombre</span>
           </button>
-          <span class="block cursor-pointer rounded-md bg-indigo-950 px-3 py-2 text-center text-sm font-semibold text-indigo-200">Upgrade</span>
           <% if user_signed_in? %>
             <div class="flex items-center gap-3 px-1">
               <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-700 text-xs font-bold text-gray-100"><%= current_user.email.first.upcase %></div>
@@ -142,8 +117,10 @@
               <h1 class="text-xl font-semibold text-gray-300"><%= @page_title || "Projects" %></h1>
             </div>
             <div class="flex items-center gap-5 text-sm font-semibold text-gray-400">
-              <span class="hidden items-center gap-2 sm:inline-flex"><%= fa_icon(:rocket, class_name: "h-4 w-4 text-red-400") %> News</span>
-              <span class="hidden items-center gap-2 sm:inline-flex"><%= fa_icon(:gear, class_name: "h-4 w-4") %> Support</span>
+              <%= link_to documentation_path, class: "hidden items-center gap-2 hover:text-gray-200 sm:inline-flex" do %>
+                <%= fa_icon(:magnifying_glass, class_name: "h-4 w-4") %>
+                Documentation
+              <% end %>
             </div>
           </div>
         </header>

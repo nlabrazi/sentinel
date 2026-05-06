@@ -5,7 +5,7 @@ class PagesController < ApplicationController
   end
 
   def settings
-    @page_title = "Team settings"
+    @page_title = "Settings"
     @settings_summary = settings_summary
     @settings_sections = settings_sections
   end
@@ -21,14 +21,13 @@ class PagesController < ApplicationController
       app_name: "Sentinel",
       environment: Rails.env.capitalize,
       project_count: Project.count,
-      user_count: User.count,
       created_at: Project.minimum(:created_at)
     }
   end
 
   def settings_sections
     {
-      team_information: [
+      application_information: [
         [ "Name", "Sentinel" ],
         [ "Environment", Rails.env.capitalize ],
         [ "Projects", Project.count ],

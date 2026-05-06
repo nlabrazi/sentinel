@@ -5,7 +5,7 @@ FactoryBot.define do
     repo_url { "https://github.com/user/#{slug}.git" }
     branch { "master" }
     production_url { "https://#{slug}.example.com" }
-    vps_path { "/srv/projects/#{slug}" }
+    vps_path { "/srv/apps/#{slug}" }
     status { :unknown }
     maintenance_mode { false }
     last_commit_deployed { nil }
