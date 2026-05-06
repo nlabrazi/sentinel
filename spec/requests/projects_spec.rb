@@ -33,10 +33,17 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).to include('Release readiness')
       expect(response.body).to include('Deployment command')
       expect(response.body).to include('Production deploys')
-      expect(response.body).to include('Observability')
+      expect(response.body).to include('Healthcheck')
+      expect(response.body).to include('Current status')
+      expect(response.body).to include('Production URL')
+      expect(response.body).to include('Latest deployment')
       expect(response.body).to include('xl:grid-cols')
       expect(response.body).not_to include('Build with an AI agent')
       expect(response.body).not_to include('Protect and secure access to your project')
+      expect(response.body).not_to include('Synthetic activity placeholder')
+      expect(response.body).not_to include('Preview Servers')
+      expect(response.body).not_to include('Web security')
+      expect(response.body).not_to include('Domain management')
     end
   end
 
