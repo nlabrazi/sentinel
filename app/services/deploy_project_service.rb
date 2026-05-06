@@ -20,12 +20,8 @@ class DeployProjectService
     return false unless latest_commit
 
     commit_sha = latest_commit[:sha]
-
-    deployment = @project.deployments.create!(
-      commit_sha: commit_sha,
-      status: :running,
-      triggered_by: @triggered_by
-    )
+    deployment = start_deployment(commit_sha)
+    return false unless deployment
 
     start_time = Time.current
     ssh = SshExecutionService.new(@project)
@@ -45,7 +41,7 @@ class DeployProjectService
         last_commit_deployed: commit_sha,
         commits_behind: 0
       )
-       @project.regenerate_screenshot!
+      @project.regenerate_screenshot!
     end
 
     success
@@ -55,6 +51,18 @@ class DeployProjectService
   end
 
   private
+
+  def start_deployment(commit_sha)
+    @project.with_lock do
+      return nil if @project.deployments.running.exists?
+
+      @project.deployments.create!(
+        commit_sha: commit_sha,
+        status: :running,
+        triggered_by: @triggered_by
+      )
+    end
+  end
 
   def deployment_log(result)
     truncate_log([ result[:stdout], result[:stderr] ].compact.join("\n"))
