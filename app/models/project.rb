@@ -4,8 +4,9 @@ require "shellwords"
 class Project < ApplicationRecord
   SCREENSHOT_OPEN_TIMEOUT = 5
   SCREENSHOT_READ_TIMEOUT = 10
+  VPS_ROOT = "/srv/apps"
+  SAFE_VPS_PATH_PATTERN = %r{\A#{Regexp.escape(VPS_ROOT)}/[A-Za-z0-9._/-]+\z}
 
-  include ActiveStorage::Attached::Model
   has_many :deployments, dependent: :destroy
   has_many :cron_jobs, dependent: :destroy
   has_one_attached :screenshot
@@ -19,12 +20,10 @@ class Project < ApplicationRecord
 
   enum :status, { online: 0, offline: 1, unknown: 2 }, default: :unknown
 
-  # Extrait le nom du dépôt GitHub depuis l'URL
   def github_repo
     URI.parse(repo_url).path.sub(/^\//, "").sub(/\.git$/, "")
   end
 
-  # Commandes SSH prédéfinies
   def deploy_command
     bash_command("cd #{Shellwords.escape(vps_path)} && ./deploy.sh")
   end
@@ -38,34 +37,10 @@ class Project < ApplicationRecord
     bash_command("#{action} #{Shellwords.escape(maintenance_flag_path)}")
   end
 
-  # app/models/project.rb
-  def screenshot_url(width: 1280, height: 720)
-    "https://api.apiflash.com/v1/urltoimage" \
-    "?access_key=#{ENV['APIFLASH_ACCESS_KEY']}" \
-    "&url=#{CGI.escape(production_url)}" \
-    "&width=#{width}" \
-    "&height=#{height}" \
-    "&format=jpeg" \
-    "&quality=80" \
-    "&fresh=true" \
-    "&full_page=false" \
-    "&wait_until=page_loaded" \
-    "&delay=2"
-  end
-
   def fresh_screenshot_url
     return nil unless ENV["APIFLASH_ACCESS_KEY"].present?
 
-    "https://api.apiflash.com/v1/urltoimage" \
-      "?access_key=#{ENV["APIFLASH_ACCESS_KEY"]}" \
-      "&url=#{CGI.escape(production_url)}" \
-      "&width=1280" \
-      "&height=720" \
-      "&format=jpeg" \
-      "&quality=80" \
-      "&fresh=true" \
-      "&wait_until=page_loaded" \
-      "&delay=2"
+    apiflash_screenshot_url(width: 1280, height: 720)
   end
 
   def regenerate_screenshot!(force: false)
@@ -98,8 +73,8 @@ class Project < ApplicationRecord
   def vps_path_must_be_allowed
     return if vps_path.blank?
 
-    unless vps_path.match?(%r{\A/srv/apps/[A-Za-z0-9._/-]+\z}) && vps_path.exclude?("..")
-      errors.add(:vps_path, "must stay under /srv/apps and contain only safe path characters")
+    unless vps_path.match?(SAFE_VPS_PATH_PATTERN) && vps_path.exclude?("..")
+      errors.add(:vps_path, "must stay under #{VPS_ROOT} and contain only safe path characters")
     end
   end
 
@@ -125,5 +100,21 @@ class Project < ApplicationRecord
     errors.add(:production_url, "must be a HTTP or HTTPS URL")
   rescue URI::InvalidURIError
     errors.add(:production_url, "must be a valid URL")
+  end
+
+  def apiflash_screenshot_url(width:, height:)
+    query = URI.encode_www_form(
+      access_key: ENV["APIFLASH_ACCESS_KEY"],
+      url: production_url,
+      width: width,
+      height: height,
+      format: "jpeg",
+      quality: 80,
+      fresh: true,
+      wait_until: "page_loaded",
+      delay: 2
+    )
+
+    URI::HTTPS.build(host: "api.apiflash.com", path: "/v1/urltoimage", query: query).to_s
   end
 end
