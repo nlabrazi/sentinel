@@ -10,9 +10,19 @@ RSpec.describe 'Pages', type: :request do
       expect(response).to have_http_status(:success)
       expect(response.body).to include('Settings for Sentinel')
       expect(response.body).to include('General app settings')
+      expect(response.body).to include('Application details')
+      expect(response.body).to include('Application information')
+      expect(response.body).to include('Access policy')
       expect(response.body).to include('Environment variables')
       expect(response.body).to include('Access & security')
       expect(response.body).not_to include('Configuration de l’application (placeholder).')
+      expect(response.body).not_to include('Team details')
+      expect(response.body).not_to include('Team information')
+      expect(response.body).not_to include('team member(s)')
+      expect(response.body).not_to include('Notifications')
+      expect(response.body).not_to include('Danger zone')
+      expect(response.body).not_to include('Manage through code')
+      expect(response.body).not_to include('Read-only settings')
     end
 
     it 'does not render secret values' do
