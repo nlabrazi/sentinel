@@ -8,98 +8,167 @@
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body class="bg-gray-50 font-sans text-gray-900 dark:bg-gray-950 dark:text-gray-100">
-    <div class="min-h-screen lg:flex" data-controller="mobile-nav">
+  <body class="bg-gray-950 font-sans text-gray-100">
+    <div class="min-h-screen lg:flex"
+         data-controller="mobile-nav sidebar"
+         data-sidebar-collapsed-value="<%= @compact_sidebar ? 'true' : 'false' %>">
       <button type="button"
-              class="fixed inset-0 z-30 hidden bg-gray-950/60 lg:hidden"
+              class="fixed inset-0 z-30 hidden bg-gray-950/70 lg:hidden"
               data-mobile-nav-target="overlay"
               data-action="mobile-nav#close"
               aria-label="Fermer le menu"></button>
 
-      <aside class="fixed inset-y-0 left-0 z-40 hidden w-72 max-w-[85vw] flex-col bg-gray-900 text-white shadow-xl lg:sticky lg:top-0 lg:z-auto lg:flex lg:h-screen lg:w-64 lg:max-w-none lg:shrink-0 lg:shadow-none"
-             data-mobile-nav-target="panel">
-        <div class="flex items-center justify-between border-b border-gray-800 px-5 py-4">
-          <div>
-            <h1 class="text-xl font-bold tracking-tight">Sentinel</h1>
-            <p class="mt-1 text-xs text-gray-400">Control Panel</p>
-          </div>
+      <aside class="fixed inset-y-0 left-0 z-40 hidden w-72 max-w-[85vw] flex-col rounded-r-xl border-r border-gray-800 bg-gray-900 text-gray-300 shadow-xl lg:sticky lg:top-0 lg:z-auto lg:flex lg:h-screen lg:w-64 lg:max-w-none lg:rounded-r-none lg:shadow-none"
+             data-mobile-nav-target="panel"
+             data-sidebar-target="sidebar">
+        <div class="flex flex-col gap-3 px-5 py-4">
+          <div class="flex items-center justify-between">
+          <%= link_to root_path, class: "inline-flex h-10 w-10 items-center justify-center rounded-md text-cyan-300" do %>
+            <span class="relative h-7 w-7">
+              <img src="favicon.ico" alt="Sentinel logo" class="h-full w-full">
+            </span>
+          <% end %>
           <button type="button"
-                  class="inline-flex h-10 w-10 items-center justify-center rounded-md text-gray-300 hover:bg-gray-800 hover:text-white lg:hidden"
+                  class="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-400 hover:bg-gray-800 hover:text-white lg:hidden"
                   data-action="mobile-nav#close"
                   aria-label="Fermer le menu">
             <%= fa_icon(:xmark, class_name: "h-5 w-5") %>
           </button>
+          </div>
+          <button type="button"
+                  class="hidden cursor-pointer h-9 w-9 items-center justify-center rounded-md text-gray-400 hover:bg-gray-800 hover:text-white lg:inline-flex"
+                  data-action="sidebar#toggle"
+                  aria-label="Réduire ou étendre le menu">
+            <%= fa_icon(:bars, class_name: "h-4 w-4") %>
+          </button>
         </div>
-        <nav class="min-h-0 flex-1 space-y-1 overflow-y-auto px-4 py-4">
-          <%= link_to root_path, data: { action: "mobile-nav#close" }, class: "flex items-center px-3 py-2 rounded-md text-sm font-medium #{current_page?(root_path) ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700'}" do %>
-            <%= fa_icon(:house, class_name: "mr-2 h-4 w-4") %>
-            Projets
+
+        <div class="px-4" data-sidebar-target="full">
+          <%= form_with url: root_path, method: :get, class: "relative", data: { turbo_frame: "_top" } do |form| %>
+            <%= fa_icon(:magnifying_glass, class_name: "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500") %>
+            <%= form.search_field :q, value: params[:q], placeholder: "Search Sentinel...", class: "w-full rounded-md border border-gray-800 bg-gray-950 px-10 py-2 text-sm text-gray-100 placeholder:text-gray-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400" %>
+            <span class="absolute right-3 top-1/2 hidden -translate-y-1/2 text-xs text-gray-500 sm:inline">CtrlK</span>
           <% end %>
-          <%= link_to deploys_path, data: { action: "mobile-nav#close" }, class: "flex items-center px-3 py-2 rounded-md text-sm font-medium #{current_page?(deploys_path) ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700'}" do %>
-            <%= fa_icon(:rocket, class_name: "mr-2 h-4 w-4") %>
-            Déploiements
+        </div>
+
+        <div class="mx-4 mt-5 flex items-center gap-3 rounded-md px-2 py-2" data-sidebar-target="full">
+          <div class="flex h-7 w-7 items-center justify-center rounded bg-cyan-400 text-xs font-bold text-gray-950">S</div>
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-sm font-semibold text-gray-100">Sentinel</p>
+            <p class="truncate text-xs text-gray-500"><%= current_user.email if user_signed_in? %></p>
+          </div>
+        </div>
+
+        <nav class="mt-4 min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-2 text-sm font-semibold">
+          <%= link_to root_path, data: { action: "mobile-nav#close", sidebar_target: "navItem" }, class: "flex items-center gap-3 rounded-md px-3 py-2 #{current_page?(root_path) ? 'border-l-4 border-cyan-300 bg-gray-800 text-cyan-300' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-100'}" do %>
+            <%= fa_icon(:rocket, class_name: "h-4 w-4") %>
+            <span data-sidebar-target="full">Projects</span>
           <% end %>
-          <%= link_to settings_path, data: { action: "mobile-nav#close" }, class: "flex items-center px-3 py-2 rounded-md text-sm font-medium #{current_page?(settings_path) ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700'}" do %>
-            <%= fa_icon(:gear, class_name: "mr-2 h-4 w-4") %>
-            Réglages
+          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
+            <%= fa_icon(:wrench, class_name: "h-4 w-4") %>
+            <span data-sidebar-target="full">Builds</span>
+          </span>
+          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
+            <%= fa_icon(:gear, class_name: "h-4 w-4") %>
+            <span data-sidebar-target="full">Extensions</span>
+          </span>
+          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
+            <%= fa_icon(:house, class_name: "h-4 w-4") %>
+            <span data-sidebar-target="full">DNS</span>
+          </span>
+          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
+            <%= fa_icon(:right_from_bracket, class_name: "h-4 w-4") %>
+            <span data-sidebar-target="full">Members</span>
+          </span>
+          <%= link_to deploys_path, data: { action: "mobile-nav#close", sidebar_target: "navItem" }, class: "flex items-center gap-3 rounded-md px-3 py-2 #{current_page?(deploys_path) ? 'border-l-4 border-cyan-300 bg-gray-800 text-cyan-300' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-100'}" do %>
+            <%= fa_icon(:rotate, class_name: "h-4 w-4") %>
+            <span data-sidebar-target="full">Audit log</span>
           <% end %>
+          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
+            <%= fa_icon(:moon, class_name: "h-4 w-4") %>
+            <span data-sidebar-target="full">Security Scorecard</span>
+          </span>
+          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
+            <%= fa_icon(:play, class_name: "h-4 w-4") %>
+            <span data-sidebar-target="full">Usage & billing</span>
+          </span>
+          <%= link_to settings_path, data: { action: "mobile-nav#close", sidebar_target: "navItem" }, class: "flex items-center gap-3 rounded-md px-3 py-2 #{current_page?(settings_path) ? 'border-l-4 border-cyan-300 bg-gray-800 text-cyan-300' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-100'}" do %>
+            <%= fa_icon(:gear, class_name: "h-4 w-4") %>
+            <span data-sidebar-target="full">Team settings</span>
+          <% end %>
+          <span class="flex items-center gap-3 rounded-md px-3 py-2 text-gray-500" data-sidebar-target="navItem">
+            <%= fa_icon(:magnifying_glass, class_name: "h-4 w-4") %>
+            <span data-sidebar-target="full">Visual editor dashboard</span>
+          </span>
         </nav>
-        <div class="px-4 py-3 border-t border-gray-800">
+
+        <div class="space-y-3 border-t border-gray-800 px-4 py-4" data-sidebar-target="full">
           <button id="dark-mode-toggle"
                   data-controller="dark-mode"
                   data-action="click->dark-mode#toggle"
-                  class="flex items-center w-full px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-md">
+                  class="flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-gray-100">
             <svg data-dark-mode-target="icon" class="mr-2 h-4 w-4" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true">
               <path d="<%= ApplicationHelper::FONT_AWESOME_PATHS.fetch(:moon).last %>" />
             </svg>
             <span data-dark-mode-target="text">Mode sombre</span>
           </button>
-        </div>
-        <% if user_signed_in? %>
-          <div class="px-4 py-3 border-t border-gray-800">
-            <p class="mb-2 truncate px-3 text-xs text-gray-500 dark:text-gray-400"><%= current_user.email %></p>
-            <%= button_to destroy_user_session_path, method: :delete, class: "flex w-full items-center rounded-md px-3 py-2 text-sm text-gray-300 hover:bg-gray-700" do %>
+          <span class="block cursor-pointer rounded-md bg-indigo-950 px-3 py-2 text-center text-sm font-semibold text-indigo-200">Upgrade</span>
+          <% if user_signed_in? %>
+            <div class="flex items-center gap-3 px-1">
+              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-700 text-xs font-bold text-gray-100"><%= current_user.email.first.upcase %></div>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-semibold text-gray-100"><%= current_user.email.split("@").first %></p>
+                <p class="truncate text-xs text-gray-500"><%= current_user.email %></p>
+              </div>
+            </div>
+            <%= button_to destroy_user_session_path, method: :delete, class: "flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-gray-100" do %>
               <%= fa_icon(:right_from_bracket, class_name: "mr-2 h-4 w-4") %>
               Déconnexion
             <% end %>
-          </div>
-        <% end %>
-        <div class="px-4 py-2 border-t border-gray-800">
-          <p class="text-xs text-gray-500 dark:text-gray-400"><%= Rails.env.capitalize %></p>
+          <% end %>
         </div>
       </aside>
 
-      <main class="flex min-h-screen min-w-0 flex-1 flex-col">
-        <header class="sticky top-0 z-20 border-b border-gray-200 bg-white px-4 py-3 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:px-6 lg:static">
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex items-center justify-between gap-3">
+      <main class="flex min-h-screen min-w-0 flex-1 flex-col bg-gray-950">
+        <header class="sticky top-0 z-20 border-b border-gray-900 bg-gray-950 px-4 py-4 sm:px-8 lg:static">
+          <div class="flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
               <button type="button"
-                      class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800 lg:hidden"
+                      class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-gray-800 text-gray-300 hover:bg-gray-900 lg:hidden"
                       data-action="mobile-nav#open"
                       aria-label="Ouvrir le menu">
                 <%= fa_icon(:bars, class_name: "h-5 w-5") %>
               </button>
-              <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 lg:hidden">Sentinel</div>
-              <div class="text-sm text-gray-500 dark:text-gray-400 sm:hidden"><%= Project.count %> projets</div>
+              <h1 class="text-xl font-semibold text-gray-300"><%= @page_title || "Projects" %></h1>
             </div>
-            <div class="flex min-w-0 flex-1 items-center gap-4">
-              <div class="relative min-w-0 flex-1 sm:max-w-lg">
-                <%= fa_icon(:magnifying_glass, class_name: "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400") %>
-                <input type="text" placeholder="Rechercher un projet..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-950 dark:text-gray-100 dark:border-gray-700 dark:placeholder:text-gray-500">
-              </div>
-              <div class="hidden text-sm text-gray-500 dark:text-gray-400 sm:block"><%= Project.count %> projets</div>
+            <div class="flex items-center gap-5 text-sm font-semibold text-gray-400">
+              <span class="hidden items-center gap-2 sm:inline-flex"><%= fa_icon(:rocket, class_name: "h-4 w-4 text-red-400") %> News</span>
+              <span class="hidden items-center gap-2 sm:inline-flex"><%= fa_icon(:gear, class_name: "h-4 w-4") %> Support</span>
             </div>
           </div>
         </header>
-        <div class="flex-1 p-4 sm:p-6">
+
+        <div class="flex-1 px-4 py-6 sm:px-8">
           <% if notice.present? %>
-            <p class="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-900/60 dark:bg-green-900/30 dark:text-green-200"><%= notice %></p>
+            <p class="mb-4 rounded-md border border-green-900/60 bg-green-950/60 px-4 py-3 text-sm text-green-200"><%= notice %></p>
           <% end %>
           <% if alert.present? %>
-            <p class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/60 dark:bg-red-900/30 dark:text-red-200"><%= alert %></p>
+            <p class="mb-4 rounded-md border border-red-900/60 bg-red-950/60 px-4 py-3 text-sm text-red-200"><%= alert %></p>
           <% end %>
           <%= yield %>
         </div>
+
+        <footer class="px-4 pb-6 pt-2 text-sm text-gray-500 sm:px-8">
+          <div class="mx-auto flex max-w-7xl flex-col gap-4">
+            <div class="flex flex-wrap gap-6 font-semibold">
+              <span><%= link_to "Docs", documentation_path, class: "text-gray-400 hover:text-gray-300" %></span>
+              <span><a href="https://nabster.dev" target="_blank" class="text-gray-400 hover:text-gray-300">Blog</a></span>
+              <span><a href="https://github.com/nlabrazi/sentinel" target="_blank" class="text-gray-400 hover:text-gray-300">Github</a></span>
+              <span><a href="mailto:na.labrazi@gmail.com" target="_blank" class="text-gray-400 hover:text-gray-300">Contact</a></span>
+            </div>
+            <p>&copy; <%= Time.current.year %> Sentinel</p>
+          </div>
+        </footer>
       </main>
     </div>
   </body>

@@ -13,6 +13,8 @@ class Project < ApplicationRecord
   validates :name, :slug, :repo_url, :branch, :production_url, :vps_path, presence: true
   validates :slug, uniqueness: true
   validates :status, inclusion: { in: %w[online offline unknown] }
+  validate :repo_url_must_be_github_https
+  validate :production_url_must_be_http_url
   validate :vps_path_must_be_allowed
 
   enum :status, { online: 0, offline: 1, unknown: 2 }, default: :unknown
@@ -99,5 +101,29 @@ class Project < ApplicationRecord
     unless vps_path.match?(%r{\A/srv/projects/[A-Za-z0-9._/-]+\z}) && vps_path.exclude?("..")
       errors.add(:vps_path, "must stay under /srv/projects and contain only safe path characters")
     end
+  end
+
+  def repo_url_must_be_github_https
+    return if repo_url.blank?
+
+    uri = URI.parse(repo_url)
+    valid_path = uri.path.match?(%r{\A/[A-Za-z0-9-]+/[A-Za-z0-9._-]+(?:\.git)?\z})
+
+    return if uri.is_a?(URI::HTTPS) && uri.host == "github.com" && uri.userinfo.blank? && valid_path
+
+    errors.add(:repo_url, "must be a HTTPS GitHub repository URL")
+  rescue URI::InvalidURIError
+    errors.add(:repo_url, "must be a valid URL")
+  end
+
+  def production_url_must_be_http_url
+    return if production_url.blank?
+
+    uri = URI.parse(production_url)
+    return if uri.is_a?(URI::HTTP) && uri.host.present? && uri.userinfo.blank?
+
+    errors.add(:production_url, "must be a HTTP or HTTPS URL")
+  rescue URI::InvalidURIError
+    errors.add(:production_url, "must be a valid URL")
   end
 end

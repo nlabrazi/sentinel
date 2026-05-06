@@ -37,6 +37,50 @@ RSpec.describe Project, type: :model do
     end
   end
 
+  describe 'URL safety' do
+    it 'accepts HTTPS GitHub repository URLs' do
+      project = build(:project, repo_url: 'https://github.com/nlabrazi/argandici.git')
+
+      expect(project).to be_valid
+    end
+
+    it 'rejects non-GitHub repository URLs' do
+      project = build(:project, repo_url: 'https://gitlab.com/nlabrazi/argandici.git')
+
+      expect(project).not_to be_valid
+      expect(project.errors[:repo_url]).to be_present
+    end
+
+    it 'rejects SSH repository URLs' do
+      project = build(:project, repo_url: 'git@github.com:nlabrazi/argandici.git')
+
+      expect(project).not_to be_valid
+      expect(project.errors[:repo_url]).to be_present
+    end
+
+    it 'accepts HTTP and HTTPS production URLs' do
+      https_project = build(:project, production_url: 'https://argandici.com')
+      http_project = build(:project, production_url: 'http://argandici.test')
+
+      expect(https_project).to be_valid
+      expect(http_project).to be_valid
+    end
+
+    it 'rejects production URLs without a HTTP scheme' do
+      project = build(:project, production_url: 'javascript:alert(1)')
+
+      expect(project).not_to be_valid
+      expect(project.errors[:production_url]).to be_present
+    end
+
+    it 'rejects production URLs with embedded credentials' do
+      project = build(:project, production_url: 'https://user:pass@example.com')
+
+      expect(project).not_to be_valid
+      expect(project.errors[:production_url]).to be_present
+    end
+  end
+
   describe '#deploy_command' do
     it 'returns the correct shell command' do
       project = build(:project, vps_path: '/srv/projects/myapp')
