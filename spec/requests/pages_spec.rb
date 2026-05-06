@@ -48,8 +48,14 @@ RSpec.describe 'Pages', type: :request do
       get deploys_path
 
       expect(response).to have_http_status(:success)
+      expect(response.body).to include('Deployments')
+      expect(response.body).to include('Latest deployment activity across managed projects.')
+      expect(response.body).to include('Total')
+      expect(response.body).to include('Success')
+      expect(response.body).to include('Failed')
       expect(response.body).to include('Deployable')
       expect(response.body.index('newcomm')).to be < response.body.index('oldcomm')
+      expect(response.body).not_to include('Derniers déploiements')
     end
   end
 
