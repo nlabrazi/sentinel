@@ -25,11 +25,7 @@
           <div class="flex items-center justify-between">
           <%= link_to root_path, class: "inline-flex h-10 w-10 items-center justify-center rounded-md text-cyan-300" do %>
             <span class="relative h-7 w-7">
-              <span class="absolute left-3 top-0 h-2 w-1 rounded bg-cyan-300"></span>
-              <span class="absolute left-3 bottom-0 h-2 w-1 rounded bg-cyan-300"></span>
-              <span class="absolute left-0 top-3 h-1 w-2 rounded bg-cyan-300"></span>
-              <span class="absolute right-0 top-3 h-1 w-2 rounded bg-cyan-300"></span>
-              <span class="absolute left-3 top-3 h-1 w-1 rounded bg-cyan-300"></span>
+              <img src="favicon.ico" alt="Sentinel logo" class="h-full w-full">
             </span>
           <% end %>
           <button type="button"
@@ -40,7 +36,7 @@
           </button>
           </div>
           <button type="button"
-                  class="hidden h-9 w-9 items-center justify-center rounded-md text-gray-400 hover:bg-gray-800 hover:text-white lg:inline-flex"
+                  class="hidden cursor-pointer h-9 w-9 items-center justify-center rounded-md text-gray-400 hover:bg-gray-800 hover:text-white lg:inline-flex"
                   data-action="sidebar#toggle"
                   aria-label="Réduire ou étendre le menu">
             <%= fa_icon(:bars, class_name: "h-4 w-4") %>
@@ -110,13 +106,13 @@
           <button id="dark-mode-toggle"
                   data-controller="dark-mode"
                   data-action="click->dark-mode#toggle"
-                  class="flex w-full items-center rounded-md px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-gray-100">
+                  class="flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-gray-100">
             <svg data-dark-mode-target="icon" class="mr-2 h-4 w-4" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true">
               <path d="<%= ApplicationHelper::FONT_AWESOME_PATHS.fetch(:moon).last %>" />
             </svg>
             <span data-dark-mode-target="text">Mode sombre</span>
           </button>
-          <span class="block rounded-md bg-indigo-950 px-3 py-2 text-center text-sm font-semibold text-indigo-200">Upgrade</span>
+          <span class="block cursor-pointer rounded-md bg-indigo-950 px-3 py-2 text-center text-sm font-semibold text-indigo-200">Upgrade</span>
           <% if user_signed_in? %>
             <div class="flex items-center gap-3 px-1">
               <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-700 text-xs font-bold text-gray-100"><%= current_user.email.first.upcase %></div>
@@ -125,7 +121,7 @@
                 <p class="truncate text-xs text-gray-500"><%= current_user.email %></p>
               </div>
             </div>
-            <%= button_to destroy_user_session_path, method: :delete, class: "flex w-full items-center rounded-md px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-gray-100" do %>
+            <%= button_to destroy_user_session_path, method: :delete, class: "flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-gray-100" do %>
               <%= fa_icon(:right_from_bracket, class_name: "mr-2 h-4 w-4") %>
               Déconnexion
             <% end %>
@@ -165,12 +161,10 @@
         <footer class="px-4 pb-6 pt-2 text-sm text-gray-500 sm:px-8">
           <div class="mx-auto flex max-w-7xl flex-col gap-4">
             <div class="flex flex-wrap gap-6 font-semibold">
-              <span>Docs</span>
-              <span>Pricing</span>
-              <span>Support</span>
-              <span>Blog</span>
-              <span>Changelog</span>
-              <span>Terms</span>
+              <span><%= link_to "Docs", documentation_path, class: "text-gray-400 hover:text-gray-300" %></span>
+              <span><a href="https://nabster.dev" target="_blank" class="text-gray-400 hover:text-gray-300">Blog</a></span>
+              <span><a href="https://github.com/nlabrazi/sentinel" target="_blank" class="text-gray-400 hover:text-gray-300">Github</a></span>
+              <span><a href="mailto:na.labrazi@gmail.com" target="_blank" class="text-gray-400 hover:text-gray-300">Contact</a></span>
             </div>
             <p>&copy; <%= Time.current.year %> Sentinel</p>
           </div>

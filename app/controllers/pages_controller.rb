@@ -10,6 +10,10 @@ class PagesController < ApplicationController
     @settings_sections = settings_sections
   end
 
+  def documentation
+    @page_title = "Documentation"
+  end
+
   private
 
   def settings_summary

@@ -42,4 +42,20 @@ RSpec.describe 'Pages', type: :request do
       expect(response.body.index('newcomm')).to be < response.body.index('oldcomm')
     end
   end
+
+  describe 'GET /documentation' do
+    it 'renders product documentation for authenticated users' do
+      sign_in create(:user)
+
+      get documentation_path
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('Sentinel product overview')
+      expect(response.body).to include('Une console simple pour suivre')
+      expect(response.body).to include('Questions fréquentes')
+      expect(response.body).to include('Est-ce que Sentinel remplace une CI/CD complète ?')
+      expect(response.body).to include('docker compose exec sentinel-api bundle exec rspec')
+      expect(response.body.scan('<details').size).to eq(4)
+    end
+  end
 end

@@ -10,4 +10,5 @@ Rails.application.routes.draw do
   end
   get "/deploys", to: "pages#deploys", as: :deploys
   get "/settings", to: "pages#settings", as: :settings
+  get "/documentation", to: "pages#documentation", as: :documentation
 end
