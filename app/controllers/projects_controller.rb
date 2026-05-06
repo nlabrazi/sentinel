@@ -5,9 +5,15 @@ class ProjectsController < ApplicationController
     @page_title = @project.name
     @compact_sidebar = true
     @deployments = @project.deployments.order(created_at: :desc).limit(20)
+    @running_deployment = @project.deployments.running.order(created_at: :desc).first
   end
 
   def deploy
+    if @project.deployments.running.exists?
+      redirect_to @project, alert: "Un déploiement est déjà en cours pour ce projet."
+      return
+    end
+
     DeployProjectJob.perform_later(@project.id)
     redirect_to @project, notice: "Déploiement lancé en arrière-plan."
   end
