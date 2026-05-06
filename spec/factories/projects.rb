@@ -9,6 +9,7 @@ FactoryBot.define do
     status { :unknown }
     maintenance_mode { false }
     last_commit_deployed { nil }
+    latest_commit_available { nil }
     commits_behind { 0 }
   end
 end

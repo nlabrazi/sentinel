@@ -41,7 +41,7 @@ RSpec.describe GithubService, type: :service do
     it 'returns the number of commits behind the remote branch' do
       allow(client).to receive(:compare)
         .with('nlabrazi/argandici', 'abc123', 'heads/main')
-        .and_return({ behind_by: 3 })
+        .and_return({ ahead_by: 3 })
 
       expect(service.commits_behind('abc123')).to eq(3)
     end

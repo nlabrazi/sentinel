@@ -20,7 +20,7 @@ class GithubService
     return 0 unless base_sha
 
     comparison = @client.compare(@project.github_repo, base_sha, "heads/#{@project.branch}")
-    comparison[:behind_by] || 0
+    comparison[:ahead_by] || 0
   rescue Octokit::Error, Faraday::Error => e
     log_github_error("commit comparison", e)
     0

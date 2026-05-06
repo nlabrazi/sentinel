@@ -3,12 +3,16 @@ class SyncCommitStatusJob < ApplicationJob
 
   def perform
     Project.find_each do |project|
-      next if project.last_commit_deployed.blank?
-
       begin
         github = GithubService.new(project)
-        behind = github.commits_behind(project.last_commit_deployed)
-        project.update!(commits_behind: behind)
+        latest_commit = github.latest_commit_on_branch
+        latest_commit_sha = latest_commit&.fetch(:sha, nil)
+        behind = project.last_commit_deployed.present? ? github.commits_behind(project.last_commit_deployed) : 0
+
+        project.update!(
+          latest_commit_available: latest_commit_sha,
+          commits_behind: behind
+        )
       rescue StandardError => e
         Rails.logger.error "SyncCommitStatusJob failed for #{project.slug}: #{e.message}"
       end

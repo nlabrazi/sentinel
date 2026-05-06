@@ -37,6 +37,16 @@ class Project < ApplicationRecord
     bash_command("#{action} #{Shellwords.escape(maintenance_flag_path)}")
   end
 
+  def cron_summary_status
+    has_cron_jobs = cron_jobs.loaded? ? cron_jobs.any? : cron_jobs.exists?
+    return "unknown" unless has_cron_jobs
+
+    return "failed" if cron_jobs.any? { |cron_job| cron_job.last_status == "failed" }
+    return "ok" if cron_jobs.all? { |cron_job| cron_job.last_status == "success" }
+
+    "unknown"
+  end
+
   def fresh_screenshot_url
     return nil unless ENV["APIFLASH_ACCESS_KEY"].present?
 

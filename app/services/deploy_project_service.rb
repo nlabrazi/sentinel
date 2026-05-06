@@ -39,6 +39,7 @@ class DeployProjectService
     if success
       @project.update!(
         last_commit_deployed: commit_sha,
+        latest_commit_available: commit_sha,
         commits_behind: 0
       )
       @project.regenerate_screenshot!
