@@ -1,4 +1,4 @@
-<section class="mx-auto max-w-7xl space-y-6">
+<section class="w-full space-y-6">
   <nav class="flex flex-wrap items-center gap-3 text-sm text-gray-400">
     <%= link_to "Projects", root_path, class: "hover:text-gray-100" %>
     <span>/</span>
@@ -8,7 +8,7 @@
     </span>
   </nav>
 
-  <div class="grid grid-cols-1 gap-6 lg:grid-cols-[16rem_1fr]">
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-[13rem_minmax(0,1fr)]">
     <aside class="hidden text-sm lg:block">
       <nav class="space-y-4 text-gray-400">
         <a href="#overview" class="flex items-center gap-2 font-semibold text-cyan-300">
@@ -25,10 +25,10 @@
     </aside>
 
     <div class="min-w-0 space-y-6">
-  <div id="overview" class="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_36rem]">
+  <div id="overview" class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(22rem,1fr)]">
     <article class="rounded-lg border border-gray-800 bg-gray-900 p-6 shadow">
-      <div class="flex flex-col gap-5 md:flex-row">
-        <div class="relative overflow-hidden rounded border border-gray-800 bg-gray-950 md:w-48">
+      <div class="flex flex-col gap-5 md:flex-row md:items-start">
+        <div class="relative overflow-hidden rounded border border-gray-800 bg-gray-950 md:w-56 md:shrink-0 md:self-start">
           <% if @project.screenshot.attached? %>
             <img src="<%= url_for(@project.screenshot) %>"
                  alt="Aperçu de <%= @project.name %>"
