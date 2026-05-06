@@ -1,10 +1,10 @@
 FactoryBot.define do
   factory :deployment do
-    project { nil }
-    commit_sha { "MyString" }
-    status { 1 }
-    duration { 1 }
-    log { "MyText" }
-    triggered_by { "MyString" }
+    project
+    commit_sha { "abcdef1234567890" }
+    status { :success }
+    duration { 12 }
+    log { "Deploy OK" }
+    triggered_by { "web" }
   end
 end

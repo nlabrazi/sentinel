@@ -152,7 +152,9 @@
             <article class="flex items-center justify-between gap-4 py-5">
               <div class="min-w-0">
                 <p class="truncate font-semibold text-gray-100">
-                  Production: <%= @project.branch %>@<%= deploy.commit_sha.first(7) %>
+                  <%= link_to deployment_path(deploy), class: "hover:underline" do %>
+                    Production: <%= @project.branch %>@<%= deploy.commit_sha.first(7) %>
+                  <% end %>
                   <% if deploy.success? %>
                     <span class="ml-2 rounded bg-green-900/40 px-2 py-0.5 text-xs text-green-300">Published</span>
                   <% elsif deploy.failed? %>
@@ -163,7 +165,9 @@
                 </p>
                 <p class="mt-1 text-sm text-gray-400"><%= l(deploy.created_at, format: :short) %><%= deploy.duration ? " · #{deploy.duration}s" : "" %></p>
               </div>
-              <span class="text-2xl text-gray-600">&rsaquo;</span>
+              <%= link_to deployment_path(deploy), class: "text-2xl text-gray-600 hover:text-gray-300", aria: { label: "View deployment #{deploy.commit_sha.first(7)}" } do %>
+                &rsaquo;
+              <% end %>
             </article>
           <% end %>
         <% else %>

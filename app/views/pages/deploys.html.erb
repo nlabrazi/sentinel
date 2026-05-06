@@ -40,7 +40,7 @@
             <% @deployments.each do |deploy| %>
               <tr class="hover:bg-gray-800/60">
                 <td class="px-6 py-4 text-sm font-semibold text-gray-100"><%= link_to deploy.project.name, deploy.project, class: "hover:underline" %></td>
-                <td class="px-6 py-4"><code class="rounded bg-gray-950 px-1.5 py-0.5 text-xs text-gray-200"><%= deploy.commit_sha.first(7) %></code></td>
+                <td class="px-6 py-4"><%= link_to deployment_path(deploy), class: "hover:underline" do %><code class="rounded bg-gray-950 px-1.5 py-0.5 text-xs text-gray-200"><%= deploy.commit_sha.first(7) %></code><% end %></td>
                 <td class="px-6 py-4">
                   <span class="text-sm font-semibold <%= deploy.success? ? 'text-green-400' : deploy.failed? ? 'text-red-400' : 'text-yellow-300' %>"><%= deploy.status %></span>
                 </td>
@@ -60,7 +60,9 @@
                 <h2 class="text-sm font-semibold text-gray-100">
                   <%= link_to deploy.project.name, deploy.project, class: "hover:underline" %>
                 </h2>
-                <code class="mt-1 inline-flex rounded bg-gray-950 px-1.5 py-0.5 text-xs text-gray-200"><%= deploy.commit_sha.first(7) %></code>
+                <%= link_to deployment_path(deploy), class: "mt-1 inline-flex hover:underline" do %>
+                  <code class="rounded bg-gray-950 px-1.5 py-0.5 text-xs text-gray-200"><%= deploy.commit_sha.first(7) %></code>
+                <% end %>
               </div>
               <span class="text-sm font-semibold <%= deploy.success? ? 'text-green-400' : deploy.failed? ? 'text-red-400' : 'text-yellow-300' %>"><%= deploy.status %></span>
             </div>

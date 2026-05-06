@@ -8,6 +8,7 @@ Rails.application.routes.draw do
       post :refresh_screenshot
     end
   end
+  resources :deployments, only: [ :show ]
   get "/deploys", to: "pages#deploys", as: :deploys
   get "/settings", to: "pages#settings", as: :settings
   get "/documentation", to: "pages#documentation", as: :documentation
