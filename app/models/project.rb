@@ -98,8 +98,8 @@ class Project < ApplicationRecord
   def vps_path_must_be_allowed
     return if vps_path.blank?
 
-    unless vps_path.match?(%r{\A/srv/projects/[A-Za-z0-9._/-]+\z}) && vps_path.exclude?("..")
-      errors.add(:vps_path, "must stay under /srv/projects and contain only safe path characters")
+    unless vps_path.match?(%r{\A/srv/apps/[A-Za-z0-9._/-]+\z}) && vps_path.exclude?("..")
+      errors.add(:vps_path, "must stay under /srv/apps and contain only safe path characters")
     end
   end
 

@@ -83,44 +83,44 @@ RSpec.describe Project, type: :model do
 
   describe '#deploy_command' do
     it 'returns the correct shell command' do
-      project = build(:project, vps_path: '/srv/projects/myapp')
-      expect(project.deploy_command).to eq('bash -lc cd\ /srv/projects/myapp\ \&\&\ ./deploy.sh')
+      project = build(:project, vps_path: '/srv/apps/myapp')
+      expect(project.deploy_command).to eq('bash -lc cd\ /srv/apps/myapp\ \&\&\ ./deploy.sh')
     end
 
     it 'escapes the VPS path before interpolating it into the shell command' do
-      project = build(:project, vps_path: '/srv/projects/my app')
+      project = build(:project, vps_path: '/srv/apps/my app')
 
       expect(Shellwords.split(project.deploy_command)).to eq([
         'bash',
         '-lc',
-        'cd /srv/projects/my\ app && ./deploy.sh'
+        'cd /srv/apps/my\ app && ./deploy.sh'
       ])
     end
   end
 
   describe '#cron_status_command' do
     it 'returns the correct shell command' do
-      project = build(:project, vps_path: '/srv/projects/myapp')
-      expect(project.cron_status_command).to eq('bash -lc cd\ /srv/projects/myapp\ \&\&\ ./status.sh')
+      project = build(:project, vps_path: '/srv/apps/myapp')
+      expect(project.cron_status_command).to eq('bash -lc cd\ /srv/apps/myapp\ \&\&\ ./status.sh')
     end
   end
 
   describe '#maintenance_command' do
     it 'builds the activation command with an escaped flag path' do
-      project = build(:project, vps_path: '/srv/projects/myapp')
+      project = build(:project, vps_path: '/srv/apps/myapp')
 
-      expect(project.maintenance_command(true)).to eq('bash -lc touch\ /srv/projects/myapp/maintenance.on')
+      expect(project.maintenance_command(true)).to eq('bash -lc touch\ /srv/apps/myapp/maintenance.on')
     end
 
     it 'builds the deactivation command with an escaped flag path' do
-      project = build(:project, vps_path: '/srv/projects/myapp')
+      project = build(:project, vps_path: '/srv/apps/myapp')
 
-      expect(project.maintenance_command(false)).to eq('bash -lc rm\ -f\ /srv/projects/myapp/maintenance.on')
+      expect(project.maintenance_command(false)).to eq('bash -lc rm\ -f\ /srv/apps/myapp/maintenance.on')
     end
   end
 
   describe 'vps_path safety' do
-    it 'rejects paths outside /srv/projects' do
+    it 'rejects paths outside /srv/apps' do
       project = build(:project, vps_path: '/tmp/myapp')
 
       expect(project).not_to be_valid
@@ -128,14 +128,14 @@ RSpec.describe Project, type: :model do
     end
 
     it 'rejects shell metacharacters' do
-      project = build(:project, vps_path: '/srv/projects/myapp; rm -rf /')
+      project = build(:project, vps_path: '/srv/apps/myapp; rm -rf /')
 
       expect(project).not_to be_valid
       expect(project.errors[:vps_path]).to be_present
     end
 
     it 'rejects path traversal' do
-      project = build(:project, vps_path: '/srv/projects/../secrets')
+      project = build(:project, vps_path: '/srv/apps/../secrets')
 
       expect(project).not_to be_valid
       expect(project.errors[:vps_path]).to be_present
