@@ -58,62 +58,87 @@
             </p>
           <% end %>
 
-          <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
-            <%= button_to refresh_github_commits_project_path(@project),
-                  method: :post,
-                  class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-cyan-900/60 px-3 py-1.5 text-xs font-semibold text-cyan-300 hover:bg-cyan-950/40",
-                  title: "Synchronise les commits et pull requests GitHub",
-                  aria: { label: "Synchroniser GitHub" } do %>
-              <%= fa_icon(:rotate, class_name: "h-3.5 w-3.5") %>
-              Sync GitHub
-            <% end %>
-            <%= button_to refresh_runtime_project_path(@project),
-                  method: :post,
-                  class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-sky-900/60 px-3 py-1.5 text-xs font-semibold text-sky-300 hover:bg-sky-950/40",
-                  title: "Lance un healthcheck HTTP immédiat",
-                  aria: { label: "Vérifier le runtime" } do %>
-              <%= fa_icon(:rotate, class_name: "h-3.5 w-3.5") %>
-              Check status
-            <% end %>
-            <%= button_to refresh_cron_status_project_path(@project),
-                  method: :post,
-                  class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-emerald-900/60 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-950/40",
-                  title: "Synchronise les statuts cron publiés par le projet",
-                  aria: { label: "Synchroniser les statuts cron" } do %>
-              <%= fa_icon(:rotate, class_name: "h-3.5 w-3.5") %>
-              Sync cron
-            <% end %>
-            <% if @running_deployment %>
-              <span class="inline-flex w-full items-center justify-center gap-2 rounded border border-yellow-900/60 px-3 py-1.5 text-xs font-semibold text-yellow-300" title="Un déploiement est déjà en cours">
-                <%= fa_icon(:rotate, class_name: "h-3.5 w-3.5") %>
-                Deploy running
-              </span>
-            <% else %>
-              <%= button_to deploy_project_path(@project),
-                    method: :post,
-                    class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-green-900/60 bg-green-950/60 px-3 py-1.5 text-xs font-semibold text-green-200 hover:bg-green-900/40",
-                    title: "Déploie le dernier commit disponible pour ce projet",
-                    aria: { label: "Déployer le dernier commit" } do %>
-                <%= fa_icon(:play, class_name: "h-3.5 w-3.5") %>
-                Deploy latest
-              <% end %>
-            <% end %>
-            <%= button_to toggle_maintenance_project_path(@project), method: :patch,
-                  class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-yellow-900/60 px-3 py-1.5 text-xs font-semibold text-yellow-300 hover:bg-yellow-950/40",
-                  title: "Active ou désactive le mode maintenance côté VPS",
-                  aria: { label: "Basculer le mode maintenance" } do %>
-              <%= fa_icon(:wrench, class_name: "h-3.5 w-3.5") %>
-              <%= @project.maintenance_mode? ? "Disable maint." : "Enable maint." %>
-            <% end %>
-            <%= button_to refresh_screenshot_project_path(@project),
-                  method: :post,
-                  class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-indigo-900/60 px-3 py-1.5 text-xs font-semibold text-indigo-400 hover:bg-indigo-950/40",
-                  title: "Régénère l’aperçu visuel du site",
-                  aria: { label: "Rafraîchir l’aperçu" } do %>
-              <%= fa_icon(:rotate, class_name: "h-3.5 w-3.5") %>
-              Refresh preview
-            <% end %>
-          </div>
+<div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+  <% if @running_deployment %>
+    <span class="inline-flex w-full items-center justify-center gap-2 rounded-md border border-yellow-900/60 bg-yellow-950/40 px-4 py-2 text-sm font-semibold text-yellow-300 sm:w-auto"
+          title="Un déploiement est déjà en cours">
+      <%= fa_icon(:rotate, class_name: "h-4 w-4") %>
+      Deploy running
+    </span>
+  <% else %>
+    <%= button_to deploy_project_path(@project),
+          method: :post,
+          class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-cyan-300 px-4 py-2 text-sm font-bold text-gray-950 hover:bg-cyan-200 sm:w-auto",
+          title: "Déploie le dernier commit disponible pour ce projet",
+          aria: { label: "Déployer le dernier commit" } do %>
+      <%= fa_icon(:play, class_name: "h-4 w-4") %>
+      Deploy latest
+    <% end %>
+  <% end %>
+
+  <%= link_to @project.production_url,
+        target: "_blank",
+        rel: "noopener",
+        class: "inline-flex w-full items-center justify-center gap-2 rounded-md border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-200 hover:border-gray-500 hover:bg-gray-800 sm:w-auto",
+        title: "Ouvre le site en production" do %>
+    <%= fa_icon(:arrow_up_right_from_square, class_name: "h-4 w-4") %>
+    Open site
+  <% end %>
+
+  <%= button_to toggle_maintenance_project_path(@project),
+        method: :patch,
+        class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-yellow-900/60 px-4 py-2 text-sm font-semibold text-yellow-300 hover:bg-yellow-950/40 sm:w-auto",
+        title: "Active ou désactive le mode maintenance côté VPS",
+        aria: { label: "Basculer le mode maintenance" } do %>
+    <%= fa_icon(:wrench, class_name: "h-4 w-4") %>
+    <%= @project.maintenance_mode? ? "Disable maintenance" : "Enable maintenance" %>
+  <% end %>
+
+  <details class="group relative w-full sm:w-auto">
+    <summary class="flex w-full cursor-pointer list-none items-center justify-center gap-2 rounded-md border border-gray-800 px-4 py-2 text-sm font-semibold text-gray-400 hover:border-gray-600 hover:bg-gray-800 hover:text-gray-100 sm:w-auto">
+      <%= fa_icon(:ellipsis, class_name: "h-4 w-4") %>
+      More
+    </summary>
+
+    <div class="absolute left-0 z-20 mt-2 w-60 overflow-hidden rounded-lg border border-gray-800 bg-gray-950 shadow-xl sm:left-auto sm:right-0">
+      <%= button_to refresh_github_commits_project_path(@project),
+            method: :post,
+            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100",
+            title: "Synchronise les commits et pull requests GitHub",
+            aria: { label: "Synchroniser GitHub" } do %>
+        <%= fa_icon(:rotate, class_name: "h-4 w-4 text-gray-500") %>
+        Sync GitHub
+      <% end %>
+
+      <%= button_to refresh_runtime_project_path(@project),
+            method: :post,
+            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100",
+            title: "Lance un healthcheck HTTP immédiat",
+            aria: { label: "Vérifier le runtime" } do %>
+        <%= fa_icon(:heart_pulse, class_name: "h-4 w-4 text-gray-500") %>
+        Check runtime
+      <% end %>
+
+      <%= button_to refresh_cron_status_project_path(@project),
+            method: :post,
+            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100",
+            title: "Synchronise les statuts cron publiés par le projet",
+            aria: { label: "Synchroniser les statuts cron" } do %>
+        <%= fa_icon(:clock, class_name: "h-4 w-4 text-gray-500") %>
+        Sync cron
+      <% end %>
+
+      <%= button_to refresh_screenshot_project_path(@project),
+            method: :post,
+            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100",
+            title: "Régénère l’aperçu visuel du site",
+            aria: { label: "Rafraîchir l’aperçu" } do %>
+        <%= fa_icon(:image, class_name: "h-4 w-4 text-gray-500") %>
+        Refresh preview
+      <% end %>
+    </div>
+  </details>
+</div>
         </div>
       </div>
     </article>

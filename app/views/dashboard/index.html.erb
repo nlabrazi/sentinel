@@ -124,50 +124,72 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-2 sm:grid-cols-3 xl:grid-cols-1 xl:justify-end">
-              <%= button_to refresh_github_commits_project_path(project),
-                    method: :post,
-                    class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-gray-700 px-3 py-2 text-sm font-semibold text-gray-200 hover:border-gray-500 hover:bg-gray-800",
-                    title: "Synchronise les commits et pull requests GitHub pour ce projet",
-                    aria: { label: "Synchroniser GitHub pour #{project.name}" } do %>
-                <%= fa_icon(:rotate, class_name: "h-4 w-4") %>
-                Sync GitHub
-              <% end %>
-              <%= button_to refresh_runtime_project_path(project),
-                    method: :post,
-                    class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-gray-700 px-3 py-2 text-sm font-semibold text-gray-200 hover:border-gray-500 hover:bg-gray-800",
-                    title: "Lance un healthcheck HTTP immédiat pour ce projet",
-                    aria: { label: "Vérifier le runtime de #{project.name}" } do %>
-                <%= fa_icon(:rotate, class_name: "h-4 w-4") %>
-                Check status
-              <% end %>
-              <%= button_to refresh_cron_status_project_path(project),
-                    method: :post,
-                    class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-gray-700 px-3 py-2 text-sm font-semibold text-gray-200 hover:border-gray-500 hover:bg-gray-800",
-                    title: "Synchronise les statuts cron publiés par le projet",
-                    aria: { label: "Synchroniser les statuts cron de #{project.name}" } do %>
-                <%= fa_icon(:rotate, class_name: "h-4 w-4") %>
-                Sync cron
-              <% end %>
-              <% if running_deployment %>
-                <span class="inline-flex w-full items-center justify-center gap-2 rounded bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-400" title="Un déploiement est déjà en cours">
-                  <%= fa_icon(:rotate, class_name: "h-4 w-4") %>
-                  Running
-                </span>
-              <% else %>
-                <%= button_to deploy_project_path(project),
-                      method: :post,
-                      class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded bg-cyan-300 px-3 py-2 text-sm font-bold text-gray-950 hover:bg-cyan-200",
-                      title: "Déploie le dernier commit connu de la branche suivie",
-                      aria: { label: "Déployer #{project.name}" } do %>
-                  <%= fa_icon(:play, class_name: "h-4 w-4") %>
-                  Deploy latest
-                <% end %>
-              <% end %>
-              <%= link_to "Open project", project_path(project),
-                    class: "inline-flex w-full items-center justify-center rounded border border-gray-700 px-3 py-2 text-sm font-semibold text-gray-200 hover:border-gray-500 hover:bg-gray-800",
-                    title: "Ouvre la page détaillée du projet" %>
-            </div>
+          <div class="flex flex-col gap-2 xl:items-end">
+  <% if running_deployment %>
+    <span class="inline-flex w-full items-center justify-center gap-2 rounded-md bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-400 xl:w-40"
+          title="Un déploiement est déjà en cours">
+      <%= fa_icon(:rotate, class_name: "h-4 w-4") %>
+      Running
+    </span>
+  <% elsif project.commits_behind.to_i.positive? %>
+    <%= button_to deploy_project_path(project),
+          method: :post,
+          class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-cyan-300 px-3 py-2 text-sm font-bold text-gray-950 hover:bg-cyan-200 xl:w-40",
+          title: "Déploie le dernier commit connu de la branche suivie",
+          aria: { label: "Déployer #{project.name}" } do %>
+      <%= fa_icon(:play, class_name: "h-4 w-4") %>
+      Deploy
+    <% end %>
+  <% else %>
+    <%= link_to project_path(project),
+          class: "inline-flex w-full items-center justify-center gap-2 rounded-md border border-gray-700 px-3 py-2 text-sm font-semibold text-gray-200 hover:border-gray-500 hover:bg-gray-800 xl:w-40",
+          title: "Ouvre la page détaillée du projet" do %>
+      Open project
+    <% end %>
+  <% end %>
+
+  <details class="group relative w-full xl:w-40">
+    <summary class="flex w-full cursor-pointer list-none items-center justify-center gap-2 rounded-md border border-gray-800 px-3 py-2 text-sm font-semibold text-gray-400 hover:border-gray-600 hover:bg-gray-800 hover:text-gray-100">
+      <%= fa_icon(:ellipsis, class_name: "h-4 w-4") %>
+      More
+    </summary>
+
+      <div class="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-lg border border-gray-800 bg-gray-950 shadow-xl">
+        <%= link_to project_path(project),
+              class: "flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100" do %>
+          <%= fa_icon(:arrow_up_right_from_square, class_name: "h-4 w-4 text-gray-500") %>
+          Open project
+        <% end %>
+
+        <%= button_to refresh_github_commits_project_path(project),
+              method: :post,
+              class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100",
+              title: "Synchronise les commits et pull requests GitHub pour ce projet",
+              aria: { label: "Synchroniser GitHub pour #{project.name}" } do %>
+          <%= fa_icon(:rotate, class_name: "h-4 w-4 text-gray-500") %>
+          Sync GitHub
+        <% end %>
+
+        <%= button_to refresh_runtime_project_path(project),
+              method: :post,
+              class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100",
+              title: "Lance un healthcheck HTTP immédiat pour ce projet",
+              aria: { label: "Vérifier le runtime de #{project.name}" } do %>
+          <%= fa_icon(:heart_pulse, class_name: "h-4 w-4 text-gray-500") %>
+          Check status
+        <% end %>
+
+        <%= button_to refresh_cron_status_project_path(project),
+              method: :post,
+              class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100",
+              title: "Synchronise les statuts cron publiés par le projet",
+              aria: { label: "Synchroniser les statuts cron de #{project.name}" } do %>
+          <%= fa_icon(:clock, class_name: "h-4 w-4 text-gray-500") %>
+          Sync cron
+        <% end %>
+      </div>
+    </details>
+  </div>
           </article>
         <% end %>
       <% else %>
