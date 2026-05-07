@@ -62,7 +62,8 @@ RSpec.describe "Dashboards", type: :request do
         last_commit_deployed: "a82f31c999",
         latest_commit_available: "a91dd20999",
         commits_behind: 3,
-        github_synced_at: 4.minutes.ago
+        github_synced_at: 4.minutes.ago,
+        cron_synced_at: 2.minutes.ago
       )
       create(:cron_job, project: project, last_status: "success")
       create(:ping, project: project, http_status: 200, response_time_ms: 88, checked_at: 3.minutes.ago)
@@ -87,6 +88,7 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include("Sync cron")
       expect(response.body).to include("Runtime checked")
       expect(response.body).to include("HTTP 200")
+      expect(response.body).to include("Cron synced")
       expect(response.body).to include("Deploy latest")
       expect(response.body).to include("Open project")
     end

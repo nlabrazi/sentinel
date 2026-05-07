@@ -62,7 +62,8 @@ RSpec.describe 'Projects', type: :request do
         slug: 'project-overview',
         production_url: 'https://project-overview.example.com',
         last_commit_deployed: 'abcdef123',
-        github_synced_at: 6.minutes.ago
+        github_synced_at: 6.minutes.ago,
+        cron_synced_at: 8.minutes.ago
       )
       create(:deployment, project: project, commit_sha: 'abcdef123', status: :success, created_at: 5.minutes.ago)
 
@@ -81,6 +82,7 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).to include('Sync cron')
       expect(response.body).to include('Deployment command')
       expect(response.body).to include('Cron jobs')
+      expect(response.body).to include('Cron synced')
       expect(response.body).to include('Production deploys')
       expect(response.body).to include('Healthcheck')
       expect(response.body).to include('Current status')
@@ -368,6 +370,7 @@ RSpec.describe 'Projects', type: :request do
       post refresh_cron_status_project_path(project)
 
       expect(service).to have_received(:call)
+      expect(project.reload.cron_synced_at).to be_present
       expect(response).to redirect_to(project_path(project))
       expect(flash[:notice]).to eq('Statuts cron synchronisés.')
     end
@@ -387,6 +390,7 @@ RSpec.describe 'Projects', type: :request do
 
       post refresh_cron_status_project_path(project)
 
+      expect(project.reload.cron_synced_at).to be_nil
       expect(response).to redirect_to(project_path(project))
       expect(flash[:alert]).to eq('Synchronisation cron impossible pour le moment.')
     end

@@ -86,6 +86,11 @@
                 <% else %>
                   <span>No runtime check yet</span>
                 <% end %>
+                <% if project.cron_synced_at %>
+                  <span>Cron synced <%= time_ago_in_words(project.cron_synced_at) %> ago</span>
+                <% else %>
+                  <span>Cron never synced</span>
+                <% end %>
               </div>
             </div>
 

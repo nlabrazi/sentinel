@@ -80,6 +80,7 @@ class ProjectsController < ApplicationController
     synced = CronStatusSyncService.new(@project).call
 
     if synced
+      @project.update!(cron_synced_at: Time.current)
       redirect_back fallback_location: @project, notice: "Statuts cron synchronisés."
     else
       redirect_back fallback_location: @project, alert: "Synchronisation cron impossible pour le moment."
