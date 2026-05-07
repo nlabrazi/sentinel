@@ -56,11 +56,11 @@ class ProjectsController < ApplicationController
     synced_commits_count = GithubCommitsSyncService.new(@project).call
     synced_pull_requests_count = GithubPullRequestsSyncService.new(@project).call
 
-    redirect_to @project,
+    redirect_back fallback_location: @project,
                 notice: "#{synced_commits_count} commit(s) et #{synced_pull_requests_count} pull request(s) synchronisé(s) depuis GitHub."
   rescue StandardError => e
     Rails.logger.error "GitHub refresh failed for #{@project.slug}: #{e.message}"
-    redirect_to @project, alert: "Synchronisation GitHub impossible pour le moment."
+    redirect_back fallback_location: @project, alert: "Synchronisation GitHub impossible pour le moment."
   end
 
   private

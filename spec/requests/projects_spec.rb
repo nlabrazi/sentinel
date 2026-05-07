@@ -69,11 +69,13 @@ RSpec.describe 'Projects', type: :request do
 
       expect(response).to have_http_status(:success)
       expect(response.body).to include('data-sidebar-collapsed-value="true"')
+      expect(response.body).to include('href="/favicon.ico"')
+      expect(response.body).to include('src="/favicon.ico"')
       expect(response.body).to include('Project overview')
       expect(response.body).to include('Release readiness')
       expect(response.body).to include('Recent commits')
       expect(response.body).to include('Pull requests')
-      expect(response.body).to include('Refresh GitHub')
+      expect(response.body).to include('Sync GitHub')
       expect(response.body).to include('Deployment command')
       expect(response.body).to include('Cron jobs')
       expect(response.body).to include('Production deploys')
@@ -200,7 +202,7 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).to include('Deployment running since')
       expect(response.body).to include('Deploy running')
       expect(response.body).to include('Running')
-      expect(response.body).not_to include('Deploy project')
+      expect(response.body).not_to include('Deploy latest')
     end
   end
 
@@ -254,6 +256,17 @@ RSpec.describe 'Projects', type: :request do
       expect(pull_requests_service).to have_received(:call)
       expect(response).to redirect_to(project_path(project))
       expect(flash[:notice]).to eq('3 commit(s) et 2 pull request(s) synchronisé(s) depuis GitHub.')
+    end
+
+    it 'redirects back after GitHub synchronization when a previous page is available' do
+      commits_service = instance_double(GithubCommitsSyncService, call: 1)
+      pull_requests_service = instance_double(GithubPullRequestsSyncService, call: 0)
+      allow(GithubCommitsSyncService).to receive(:new).with(project).and_return(commits_service)
+      allow(GithubPullRequestsSyncService).to receive(:new).with(project).and_return(pull_requests_service)
+
+      post refresh_github_commits_project_path(project), headers: { 'HTTP_REFERER' => root_url }
+
+      expect(response).to redirect_to(root_url)
     end
 
     it 'shows an alert when GitHub synchronization fails' do

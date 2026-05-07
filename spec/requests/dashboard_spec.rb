@@ -79,7 +79,9 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include("PRs")
       expect(response.body).to include("1 open")
       expect(response.body).to include("1 merged")
+      expect(response.body).to include("Sync GitHub")
       expect(response.body).to include("Deploy latest")
+      expect(response.body).to include("Open project")
     end
 
     it "renders a running state instead of the deploy action when a project is deploying" do
