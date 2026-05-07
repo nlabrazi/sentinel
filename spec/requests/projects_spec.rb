@@ -82,6 +82,12 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).to include('Healthcheck')
       expect(response.body).to include('Current status')
       expect(response.body).to include('Production URL')
+      expect(response.body).to include('Last check')
+      expect(response.body).to include('Last result')
+      expect(response.body).to include('HTTP code')
+      expect(response.body).to include('Response time')
+      expect(response.body).to include('Last error')
+      expect(response.body).to include('Check status')
       expect(response.body).to include('Latest deployment')
       expect(response.body).to include('Deployment state')
       expect(response.body).to include('Idle')
@@ -191,6 +197,28 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).to include('Import failed on row 12')
     end
 
+    it 'renders the latest healthcheck details' do
+      sign_in create(:user)
+      project = create(:project, status: :offline)
+      create(
+        :ping,
+        project: project,
+        status: 'offline',
+        http_status: 503,
+        response_time_ms: 456,
+        error: 'Net::ReadTimeout: execution expired',
+        checked_at: Time.zone.parse('2026-05-06T10:15:00Z')
+      )
+
+      get project_path(project)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('offline')
+      expect(response.body).to include('503')
+      expect(response.body).to include('456 ms')
+      expect(response.body).to include('Net::ReadTimeout: execution expired')
+    end
+
     it 'renders a running deployment state instead of the deploy action' do
       sign_in create(:user)
       project = create(:project)
@@ -278,6 +306,46 @@ RSpec.describe 'Projects', type: :request do
 
       expect(response).to redirect_to(project_path(project))
       expect(flash[:alert]).to eq('Synchronisation GitHub impossible pour le moment.')
+    end
+  end
+
+  describe 'POST /projects/:id/refresh_runtime' do
+    let(:user) { create(:user) }
+    let(:project) { create(:project) }
+
+    before do
+      sign_in user
+    end
+
+    it 'runs an immediate healthcheck for the project' do
+      service = instance_double(HealthcheckService, call: :online)
+      allow(HealthcheckService).to receive(:new).with(project).and_return(service)
+
+      post refresh_runtime_project_path(project)
+
+      expect(service).to have_received(:call)
+      expect(response).to redirect_to(project_path(project))
+      expect(flash[:notice]).to eq('Healthcheck terminé : online.')
+    end
+
+    it 'redirects back after runtime refresh when a previous page is available' do
+      service = instance_double(HealthcheckService, call: :offline)
+      allow(HealthcheckService).to receive(:new).with(project).and_return(service)
+
+      post refresh_runtime_project_path(project), headers: { 'HTTP_REFERER' => root_url }
+
+      expect(response).to redirect_to(root_url)
+    end
+
+    it 'shows an alert when runtime refresh fails' do
+      service = instance_double(HealthcheckService)
+      allow(HealthcheckService).to receive(:new).with(project).and_return(service)
+      allow(service).to receive(:call).and_raise(StandardError, 'HTTP unavailable')
+
+      post refresh_runtime_project_path(project)
+
+      expect(response).to redirect_to(project_path(project))
+      expect(flash[:alert]).to eq('Healthcheck impossible pour le moment.')
     end
   end
 

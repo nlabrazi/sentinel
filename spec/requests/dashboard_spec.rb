@@ -64,6 +64,7 @@ RSpec.describe "Dashboards", type: :request do
         commits_behind: 3
       )
       create(:cron_job, project: project, last_status: "success")
+      create(:ping, project: project, http_status: 200, response_time_ms: 88, checked_at: 3.minutes.ago)
       create(:github_pull_request, project: project, state: "open", title: "Open PR")
       create(:github_pull_request, project: project, state: "merged", title: "Merged PR")
 
@@ -80,6 +81,9 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include("1 open")
       expect(response.body).to include("1 merged")
       expect(response.body).to include("Sync GitHub")
+      expect(response.body).to include("Check status")
+      expect(response.body).to include("Runtime checked")
+      expect(response.body).to include("HTTP 200")
       expect(response.body).to include("Deploy latest")
       expect(response.body).to include("Open project")
     end

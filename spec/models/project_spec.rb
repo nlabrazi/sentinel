@@ -210,4 +210,15 @@ RSpec.describe Project, type: :model do
       expect(project.regenerate_screenshot!).to eq(false)
     end
   end
+
+  describe '#latest_ping' do
+    it 'returns the newest runtime check' do
+      project = create(:project)
+      old_ping = create(:ping, project: project, checked_at: 2.hours.ago)
+      new_ping = create(:ping, project: project, checked_at: 5.minutes.ago)
+
+      expect(project.latest_ping).to eq(new_ping)
+      expect(project.latest_ping).not_to eq(old_ping)
+    end
+  end
 end

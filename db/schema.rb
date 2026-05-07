@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_07_110000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_07_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -119,9 +119,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_07_110000) do
   end
 
   create_table "pings", force: :cascade do |t|
+    t.datetime "checked_at"
     t.datetime "created_at", null: false
+    t.string "error"
+    t.integer "http_status"
     t.string "name"
+    t.bigint "project_id"
+    t.integer "response_time_ms"
+    t.string "status"
     t.datetime "updated_at", null: false
+    t.index ["project_id", "checked_at"], name: "index_pings_on_project_id_and_checked_at"
+    t.index ["project_id"], name: "index_pings_on_project_id"
   end
 
   create_table "projects", force: :cascade do |t|
@@ -283,6 +291,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_07_110000) do
   add_foreign_key "github_commits", "projects"
   add_foreign_key "github_pull_requests", "projects"
   add_foreign_key "job_executions", "cron_jobs"
+  add_foreign_key "pings", "projects"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

@@ -9,6 +9,7 @@ class Project < ApplicationRecord
 
   has_many :deployments, dependent: :destroy
   has_many :cron_jobs, dependent: :destroy
+  has_many :pings, dependent: :destroy
   has_many :github_commits, dependent: :destroy
   has_many :github_pull_requests, dependent: :destroy
   has_one_attached :screenshot
@@ -47,6 +48,14 @@ class Project < ApplicationRecord
     return "ok" if cron_jobs.all? { |cron_job| cron_job.last_status == "success" }
 
     "unknown"
+  end
+
+  def latest_ping
+    if pings.loaded?
+      pings.max_by { |ping| ping.checked_at || ping.created_at }
+    else
+      pings.order(checked_at: :desc, created_at: :desc).first
+    end
   end
 
   def open_pull_requests_count

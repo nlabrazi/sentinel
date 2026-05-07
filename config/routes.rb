@@ -7,6 +7,7 @@ Rails.application.routes.draw do
       patch :toggle_maintenance
       post :refresh_screenshot
       post :refresh_github_commits
+      post :refresh_runtime
     end
   end
   resources :deployments, only: [ :show ]

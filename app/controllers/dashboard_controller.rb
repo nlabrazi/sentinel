@@ -5,6 +5,7 @@ class DashboardController < ApplicationController
     @projects = dashboard_projects.to_a
     @latest_deployments_by_project_id = latest_deployments_by_project_id(@projects)
     @running_deployments_by_project_id = running_deployments_by_project_id(@projects)
+    @latest_pings_by_project_id = latest_pings_by_project_id(@projects)
     @screenshots_enabled = ENV["APIFLASH_ACCESS_KEY"].present?
   end
 
@@ -38,6 +39,17 @@ class DashboardController < ApplicationController
       .where(project_id: project_ids)
       .select("DISTINCT ON (project_id) deployments.*")
       .order(:project_id, created_at: :desc)
+      .index_by(&:project_id)
+  end
+
+  def latest_pings_by_project_id(projects)
+    project_ids = projects.map(&:id)
+    return {} if project_ids.empty?
+
+    Ping
+      .where(project_id: project_ids)
+      .select("DISTINCT ON (project_id) pings.*")
+      .order(:project_id, checked_at: :desc, created_at: :desc)
       .index_by(&:project_id)
   end
 end

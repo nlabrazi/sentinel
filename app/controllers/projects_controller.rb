@@ -4,6 +4,7 @@ class ProjectsController < ApplicationController
     :deploy,
     :refresh_screenshot,
     :refresh_github_commits,
+    :refresh_runtime,
     :toggle_maintenance
   ]
 
@@ -15,6 +16,7 @@ class ProjectsController < ApplicationController
     @github_commits = @project.github_commits.order(committed_at: :desc, created_at: :desc).limit(20)
     @github_pull_requests = @project.github_pull_requests.order(github_updated_at: :desc, created_at: :desc).limit(20)
     @running_deployment = @project.deployments.running.order(created_at: :desc).first
+    @latest_ping = @project.latest_ping
   end
 
   def deploy
@@ -61,6 +63,15 @@ class ProjectsController < ApplicationController
   rescue StandardError => e
     Rails.logger.error "GitHub refresh failed for #{@project.slug}: #{e.message}"
     redirect_back fallback_location: @project, alert: "Synchronisation GitHub impossible pour le moment."
+  end
+
+  def refresh_runtime
+    status = HealthcheckService.new(@project).call
+
+    redirect_back fallback_location: @project, notice: "Healthcheck terminé : #{status}."
+  rescue StandardError => e
+    Rails.logger.error "Runtime refresh failed for #{@project.slug}: #{e.message}"
+    redirect_back fallback_location: @project, alert: "Healthcheck impossible pour le moment."
   end
 
   private
