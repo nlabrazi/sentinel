@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_05_202000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_07_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -69,6 +69,44 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_05_202000) do
     t.index ["project_id"], name: "index_deployments_on_project_id"
   end
 
+  create_table "github_commits", force: :cascade do |t|
+    t.string "author_login"
+    t.string "author_name"
+    t.datetime "authored_at"
+    t.datetime "committed_at"
+    t.datetime "created_at", null: false
+    t.string "html_url"
+    t.string "message", null: false
+    t.bigint "project_id", null: false
+    t.string "sha", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id", "committed_at"], name: "index_github_commits_on_project_id_and_committed_at"
+    t.index ["project_id", "sha"], name: "index_github_commits_on_project_id_and_sha", unique: true
+    t.index ["project_id"], name: "index_github_commits_on_project_id"
+  end
+
+  create_table "github_pull_requests", force: :cascade do |t|
+    t.string "author_login"
+    t.string "base_ref"
+    t.datetime "closed_at"
+    t.datetime "created_at", null: false
+    t.boolean "draft", default: false, null: false
+    t.datetime "github_updated_at"
+    t.string "head_ref"
+    t.string "html_url"
+    t.datetime "merged_at"
+    t.integer "number", null: false
+    t.datetime "opened_at"
+    t.bigint "project_id", null: false
+    t.string "state", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id", "github_updated_at"], name: "index_github_pull_requests_on_project_id_and_github_updated_at"
+    t.index ["project_id", "number"], name: "index_github_pull_requests_on_project_id_and_number", unique: true
+    t.index ["project_id", "state"], name: "index_github_pull_requests_on_project_id_and_state"
+    t.index ["project_id"], name: "index_github_pull_requests_on_project_id"
+  end
+
   create_table "job_executions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "cron_job_id", null: false
@@ -81,16 +119,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_05_202000) do
   end
 
   create_table "pings", force: :cascade do |t|
+    t.datetime "checked_at"
     t.datetime "created_at", null: false
+    t.string "error"
+    t.integer "http_status"
     t.string "name"
+    t.bigint "project_id"
+    t.integer "response_time_ms"
+    t.string "status"
     t.datetime "updated_at", null: false
+    t.index ["project_id", "checked_at"], name: "index_pings_on_project_id_and_checked_at"
+    t.index ["project_id"], name: "index_pings_on_project_id"
   end
 
   create_table "projects", force: :cascade do |t|
     t.string "branch"
     t.integer "commits_behind"
     t.datetime "created_at", null: false
+    t.datetime "cron_synced_at"
+    t.datetime "github_synced_at"
     t.string "last_commit_deployed"
+    t.string "latest_commit_available"
     t.boolean "maintenance_mode"
     t.string "name"
     t.string "production_url"
@@ -241,7 +290,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_05_202000) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "cron_jobs", "projects"
   add_foreign_key "deployments", "projects"
+  add_foreign_key "github_commits", "projects"
+  add_foreign_key "github_pull_requests", "projects"
   add_foreign_key "job_executions", "cron_jobs"
+  add_foreign_key "pings", "projects"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

@@ -140,6 +140,77 @@
 
   <section class="rounded-lg border border-gray-800 bg-gray-900 p-6">
     <div class="max-w-3xl">
+      <p class="text-sm font-semibold uppercase tracking-wider text-cyan-300">Cron visibility</p>
+      <h2 class="mt-3 text-2xl font-bold text-gray-100">Contrat standard pour remonter les tâches planifiées</h2>
+      <p class="mt-3 text-sm leading-6 text-gray-400">
+        Sentinel ne lance pas vos cron jobs. Chaque projet publie simplement un fichier JSON lu par <code class="rounded bg-gray-950 px-1.5 py-0.5 text-gray-100">status.sh</code>, puis l’interface synchronise cet état avec l’action <span class="font-semibold text-gray-200">Sync cron</span>.
+      </p>
+    </div>
+
+    <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div class="rounded-lg bg-gray-950 p-4">
+        <h3 class="font-semibold text-gray-100">Emplacement attendu</h3>
+        <p class="mt-2 text-sm leading-6 text-gray-400">
+          Chaque projet expose son état dans <code class="rounded bg-gray-900 px-1.5 py-0.5 text-gray-100">/srv/apps/&lt;project&gt;/sentinel/cron-status.json</code>.
+        </p>
+        <pre class="mt-4 overflow-x-auto rounded-md border border-gray-800 bg-gray-900 p-4 text-xs leading-5 text-gray-200"><code>{
+  "cron_jobs": [
+    {
+      "name": "daily-import",
+      "command": "./bin/daily-import",
+      "schedule": "0 2 * * *",
+      "last_execution_at": "2026-05-06T02:00:12Z",
+      "last_status": "success",
+      "last_duration": 42,
+      "last_log": "Import completed"
+    }
+  ]
+}</code></pre>
+      </div>
+
+      <div class="rounded-lg bg-gray-950 p-4">
+        <h3 class="font-semibold text-gray-100">Wrapper conseillé</h3>
+        <p class="mt-2 text-sm leading-6 text-gray-400">
+          Un wrapper par tâche cron exécute le job réel, capture le résultat, puis réécrit le JSON de statut de façon atomique.
+        </p>
+        <pre class="mt-4 overflow-x-auto rounded-md border border-gray-800 bg-gray-900 p-4 text-xs leading-5 text-gray-200"><code>#!/usr/bin/env bash
+set -u
+
+started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+started_seconds="$(date +%s)"
+log_file="$(mktemp)"
+
+if ./bin/daily-import > "$log_file" 2>&1; then
+  status="success"
+else
+  status="failed"
+fi
+
+duration="$(($(date +%s) - started_seconds))"
+last_log="$(tail -c 4000 "$log_file" | jq -Rs .)"
+mkdir -p sentinel
+
+cat > sentinel/cron-status.json.tmp <<JSON
+{"cron_jobs":[{"name":"daily-import","command":"./bin/daily-import","schedule":"0 2 * * *","last_execution_at":"$started_at","last_status":"$status","last_duration":$duration,"last_log":$last_log}]}
+JSON
+mv sentinel/cron-status.json.tmp sentinel/cron-status.json
+rm -f "$log_file"</code></pre>
+      </div>
+    </div>
+
+    <div class="mt-4 rounded-lg border border-yellow-900/60 bg-yellow-950/30 p-4">
+      <h3 class="font-semibold text-yellow-200">Règles de sécurité</h3>
+      <ul class="mt-3 space-y-2 text-sm leading-6 text-yellow-100/80">
+        <li>Le user SSH <code class="rounded bg-yellow-950 px-1.5 py-0.5 text-yellow-100">sentinel</code> lit seulement l’état existant.</li>
+        <li><code class="rounded bg-yellow-950 px-1.5 py-0.5 text-yellow-100">status.sh</code> retourne uniquement du JSON et ne lance jamais les cron jobs.</li>
+        <li>Aucun sudo n’est nécessaire pour cette sonde.</li>
+        <li>Le chemin projet doit rester validé sous <code class="rounded bg-yellow-950 px-1.5 py-0.5 text-yellow-100">/srv/apps</code>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="rounded-lg border border-gray-800 bg-gray-900 p-6">
+    <div class="max-w-3xl">
       <p class="text-sm font-semibold uppercase tracking-wider text-cyan-300">FAQ</p>
       <h2 class="mt-3 text-2xl font-bold text-gray-100">Questions fréquentes</h2>
       <p class="mt-3 text-sm leading-6 text-gray-400">

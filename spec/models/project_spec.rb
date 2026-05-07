@@ -105,6 +105,30 @@ RSpec.describe Project, type: :model do
     end
   end
 
+  describe '#cron_summary_status' do
+    it 'returns unknown when no cron job is configured' do
+      project = create(:project)
+
+      expect(project.cron_summary_status).to eq('unknown')
+    end
+
+    it 'returns ok when all cron jobs succeeded' do
+      project = create(:project)
+      create(:cron_job, project: project, last_status: 'success')
+      create(:cron_job, project: project, name: 'Other job', last_status: 'success')
+
+      expect(project.cron_summary_status).to eq('ok')
+    end
+
+    it 'returns failed when at least one cron job failed' do
+      project = create(:project)
+      create(:cron_job, project: project, last_status: 'success')
+      create(:cron_job, project: project, name: 'Failing job', last_status: 'failed')
+
+      expect(project.cron_summary_status).to eq('failed')
+    end
+  end
+
   describe '#maintenance_command' do
     it 'builds the activation command with an escaped flag path' do
       project = build(:project, vps_path: '/srv/apps/myapp')
@@ -184,6 +208,17 @@ RSpec.describe Project, type: :model do
       allow(URI).to receive(:open).and_raise(Net::ReadTimeout)
 
       expect(project.regenerate_screenshot!).to eq(false)
+    end
+  end
+
+  describe '#latest_ping' do
+    it 'returns the newest runtime check' do
+      project = create(:project)
+      old_ping = create(:ping, project: project, checked_at: 2.hours.ago)
+      new_ping = create(:ping, project: project, checked_at: 5.minutes.ago)
+
+      expect(project.latest_ping).to eq(new_ping)
+      expect(project.latest_ping).not_to eq(old_ping)
     end
   end
 end

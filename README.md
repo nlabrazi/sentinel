@@ -31,6 +31,7 @@
         <li><a href="#️-usage">Usage</a></li>
         <li><a href="#-local-notes">Local Notes</a></li>
         <li><a href="#-deploysh-contract">deploy.sh Contract</a></li>
+        <li><a href="#-statussh-contract">status.sh Contract</a></li>
         <li><a href="#-scripts">Scripts</a></li>
       </ul>
     </li>
@@ -184,6 +185,45 @@ The script must:
 - Keep project-specific deployment logic inside the project directory.
 
 Sentinel only calls this predefined script. It does not accept arbitrary commands from the web interface.
+
+### 📡 status.sh Contract
+
+Each managed project should expose a status script at:
+
+```bash
+/srv/apps/<project>/status.sh
+```
+
+The script must:
+
+- Be executable by the configured VPS SSH user.
+- Run without interactive prompts.
+- Return exit code `0` when status data was collected.
+- Return a non-zero exit code when status collection failed.
+- Write valid JSON to stdout.
+- Keep project-specific cron inspection logic inside the project directory.
+
+Sentinel expects this JSON shape:
+
+```json
+{
+  "cron_jobs": [
+    {
+      "name": "daily-import",
+      "command": "./bin/daily-import",
+      "schedule": "0 2 * * *",
+      "last_execution_at": "2026-05-06T02:00:12Z",
+      "last_status": "success",
+      "last_duration": 42,
+      "last_log": "Import completed"
+    }
+  ]
+}
+```
+
+Accepted statuses are normalized to `success` and `failed` when possible. For example, `ok` becomes `success`, and `error` becomes `failed`.
+
+Sentinel stores the latest cron state on each cron job and creates one execution history entry per `last_execution_at` timestamp.
 
 ### 🧪 Scripts
 

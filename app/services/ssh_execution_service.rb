@@ -4,6 +4,7 @@ class SshExecutionService
   COMMAND_TIMEOUT_SECONDS = ENV.fetch("SSH_COMMAND_TIMEOUT_SECONDS", 10.minutes.to_i).to_i
   CONNECT_TIMEOUT_SECONDS = ENV.fetch("SSH_CONNECT_TIMEOUT_SECONDS", 10).to_i
   SSH_KEY_PATH = ENV.fetch("SSH_KEY_PATH", "config/ssh_key/id_rsa")
+  SSH_KNOWN_HOSTS_PATH = ENV.fetch("SSH_KNOWN_HOSTS_PATH", File.join(File.dirname(SSH_KEY_PATH), "known_hosts"))
   SSH_USER = ENV.fetch("VPS_USER", "control-panel")
   VPS_HOST = ENV.fetch("VPS_HOST", "vps.example.com")
 
@@ -52,6 +53,7 @@ class SshExecutionService
       keys: [ SSH_KEY_PATH ],
       non_interactive: true,
       timeout: CONNECT_TIMEOUT_SECONDS,
+      user_known_hosts_file: SSH_KNOWN_HOSTS_PATH,
       verify_host_key: :always
     }
   end

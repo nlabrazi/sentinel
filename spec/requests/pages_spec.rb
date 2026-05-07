@@ -42,8 +42,8 @@ RSpec.describe 'Pages', type: :request do
     it 'renders the latest deployments newest first' do
       sign_in create(:user)
       project = create(:project, name: 'Deployable')
-      create(:deployment, project: project, commit_sha: 'oldcommit', created_at: 2.days.ago)
-      create(:deployment, project: project, commit_sha: 'newcommit', created_at: 5.minutes.ago)
+      old_deployment = create(:deployment, project: project, commit_sha: 'oldcommit', created_at: 2.days.ago)
+      new_deployment = create(:deployment, project: project, commit_sha: 'newcommit', created_at: 5.minutes.ago)
 
       get deploys_path
 
@@ -55,7 +55,43 @@ RSpec.describe 'Pages', type: :request do
       expect(response.body).to include('Failed')
       expect(response.body).to include('Deployable')
       expect(response.body.index('newcomm')).to be < response.body.index('oldcomm')
+      expect(response.body).to include(deployment_path(new_deployment))
+      expect(response.body).to include(deployment_path(old_deployment))
       expect(response.body).not_to include('Derniers déploiements')
+    end
+
+    it 'limits the global deployment history to the 20 newest records' do
+      sign_in create(:user)
+      project = create(:project)
+      oldest_deployment = create(
+        :deployment,
+        project: project,
+        commit_sha: 'oldestcommit',
+        created_at: 30.days.ago
+      )
+      newest_deployment = create(
+        :deployment,
+        project: project,
+        commit_sha: 'newestcommit',
+        created_at: 1.minute.ago
+      )
+
+      19.times do |index|
+        create(
+          :deployment,
+          project: project,
+          commit_sha: "middlecommit#{index}",
+          created_at: (index + 2).minutes.ago
+        )
+      end
+
+      get deploys_path
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('newestc')
+      expect(response.body).to include(deployment_path(newest_deployment))
+      expect(response.body).not_to include('oldest')
+      expect(response.body).not_to include(deployment_path(oldest_deployment))
     end
   end
 
@@ -68,6 +104,11 @@ RSpec.describe 'Pages', type: :request do
       expect(response).to have_http_status(:success)
       expect(response.body).to include('Sentinel product overview')
       expect(response.body).to include('Une console simple pour suivre')
+      expect(response.body).to include('Cron visibility')
+      expect(response.body).to include('/srv/apps/&lt;project&gt;/sentinel/cron-status.json')
+      expect(response.body).to include('Sync cron')
+      expect(response.body).to include('status.sh')
+      expect(response.body).to include('Aucun sudo')
       expect(response.body).to include('Questions fréquentes')
       expect(response.body).to include('Est-ce que Sentinel remplace une CI/CD complète ?')
       expect(response.body).to include('docker compose exec sentinel-api bundle exec rspec')

@@ -4,35 +4,10 @@ class CronStatusJob < ApplicationJob
   def perform
     Project.find_each do |project|
       begin
-        ssh = SshExecutionService.new(project)
-        result = ssh.execute(project.cron_status_command)
-
-        if result[:exit_code].zero?
-          data = JSON.parse(result[:stdout])
-          data.each do |job_name, attrs|
-            cron_job = project.cron_jobs.find_or_initialize_by(name: job_name)
-            cron_job.update!(
-              command: attrs["command"] || "",
-              schedule: attrs["schedule"] || "",
-              last_execution_at: parse_time(attrs["last_run"]),
-              last_status: attrs["status"],
-              last_duration: attrs["duration"]
-            )
-          end
-        end
+        CronStatusSyncService.new(project).call
       rescue StandardError => e
         Rails.logger.error "CronStatusJob failed for #{project.slug}: #{e.message}"
       end
     end
-  end
-
-  private
-
-  def parse_time(value)
-    return if value.blank?
-
-    Time.zone.parse(value)
-  rescue ArgumentError, TypeError
-    nil
   end
 end

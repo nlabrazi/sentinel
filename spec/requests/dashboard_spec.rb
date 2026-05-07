@@ -16,6 +16,7 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include("Projects")
       expect(response.body).to include("Online")
       expect(response.body).to include("Behind")
+      expect(response.body).to include("Open PRs")
       expect(response.body).to include("Maintenance")
       expect(response.body).not_to include("Add new project")
       expect(response.body).not_to include("Want to deploy a new project?")
@@ -47,6 +48,61 @@ RSpec.describe "Dashboards", type: :request do
 
       expect(response.body).to include("Deployable")
       expect(response.body).to include("5 minutes")
+    end
+
+    it "renders release, runtime, cron, pull requests and deploy controls for each project" do
+      sign_in create(:user)
+      project = create(
+        :project,
+        name: "Sawt AI",
+        repo_url: "https://github.com/nlabrazi/sawt-ai.git",
+        branch: "main",
+        production_url: "https://sawt.example.com",
+        status: :online,
+        last_commit_deployed: "a82f31c999",
+        latest_commit_available: "a91dd20999",
+        commits_behind: 3,
+        github_synced_at: 4.minutes.ago,
+        cron_synced_at: 2.minutes.ago
+      )
+      create(:cron_job, project: project, last_status: "success")
+      create(:ping, project: project, http_status: 200, response_time_ms: 88, checked_at: 3.minutes.ago)
+      create(:github_pull_request, project: project, state: "open", title: "Open PR")
+      create(:github_pull_request, project: project, state: "merged", title: "Merged PR")
+
+      get root_path
+
+      expect(response.body).to include("Sawt AI")
+      expect(response.body).to include("https://sawt.example.com")
+      expect(response.body).to include("nlabrazi/sawt-ai")
+      expect(response.body).to include("GitHub synced")
+      expect(response.body).to include("a82f31c")
+      expect(response.body).to include("a91dd20")
+      expect(response.body).to include("3 commits")
+      expect(response.body).to include("ok")
+      expect(response.body).to include("PRs")
+      expect(response.body).to include("1 open")
+      expect(response.body).to include("1 merged")
+      expect(response.body).to include("Sync GitHub")
+      expect(response.body).to include("Check status")
+      expect(response.body).to include("Sync cron")
+      expect(response.body).to include("Runtime checked")
+      expect(response.body).to include("HTTP 200")
+      expect(response.body).to include("Cron synced")
+      expect(response.body).to include("Deploy latest")
+      expect(response.body).to include("Open project")
+    end
+
+    it "renders a running state instead of the deploy action when a project is deploying" do
+      sign_in create(:user)
+      project = create(:project, name: "Running Project")
+      create(:deployment, project: project, status: :running)
+
+      get root_path
+
+      expect(response.body).to include("Running Project")
+      expect(response.body).to include("Running")
+      expect(response.body).not_to include("Deploy latest")
     end
 
     it "filters projects by search query" do

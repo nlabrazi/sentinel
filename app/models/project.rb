@@ -9,6 +9,9 @@ class Project < ApplicationRecord
 
   has_many :deployments, dependent: :destroy
   has_many :cron_jobs, dependent: :destroy
+  has_many :pings, dependent: :destroy
+  has_many :github_commits, dependent: :destroy
+  has_many :github_pull_requests, dependent: :destroy
   has_one_attached :screenshot
 
   validates :name, :slug, :repo_url, :branch, :production_url, :vps_path, presence: true
@@ -35,6 +38,32 @@ class Project < ApplicationRecord
   def maintenance_command(enabled)
     action = enabled ? "touch" : "rm -f"
     bash_command("#{action} #{Shellwords.escape(maintenance_flag_path)}")
+  end
+
+  def cron_summary_status
+    has_cron_jobs = cron_jobs.loaded? ? cron_jobs.any? : cron_jobs.exists?
+    return "unknown" unless has_cron_jobs
+
+    return "failed" if cron_jobs.any? { |cron_job| cron_job.last_status == "failed" }
+    return "ok" if cron_jobs.all? { |cron_job| cron_job.last_status == "success" }
+
+    "unknown"
+  end
+
+  def latest_ping
+    if pings.loaded?
+      pings.max_by { |ping| ping.checked_at || ping.created_at }
+    else
+      pings.order(checked_at: :desc, created_at: :desc).first
+    end
+  end
+
+  def open_pull_requests_count
+    count_github_pull_requests_by_state("open")
+  end
+
+  def merged_pull_requests_count
+    count_github_pull_requests_by_state("merged")
   end
 
   def fresh_screenshot_url
@@ -68,6 +97,14 @@ class Project < ApplicationRecord
 
   def bash_command(command)
     "bash -lc #{Shellwords.escape(command)}"
+  end
+
+  def count_github_pull_requests_by_state(state)
+    if github_pull_requests.loaded?
+      github_pull_requests.count { |pull_request| pull_request.state == state }
+    else
+      github_pull_requests.where(state: state).count
+    end
   end
 
   def vps_path_must_be_allowed
