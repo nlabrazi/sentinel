@@ -48,7 +48,41 @@ class GithubService
     []
   end
 
+  def recent_pull_requests(limit: 20)
+    @client.pull_requests(
+      @project.github_repo,
+      state: "all",
+      sort: "updated",
+      direction: "desc",
+      per_page: limit
+    ).map do |pull_request|
+      {
+        number: pull_request[:number],
+        title: pull_request[:title],
+        state: pull_request_state(pull_request),
+        draft: pull_request[:draft] || false,
+        author_login: (pull_request[:user] || {})[:login],
+        head_ref: (pull_request[:head] || {})[:ref],
+        base_ref: (pull_request[:base] || {})[:ref],
+        opened_at: pull_request[:created_at],
+        closed_at: pull_request[:closed_at],
+        merged_at: pull_request[:merged_at],
+        github_updated_at: pull_request[:updated_at],
+        html_url: pull_request[:html_url]
+      }
+    end
+  rescue Octokit::Error, Faraday::Error => e
+    log_github_error("recent pull requests lookup", e)
+    []
+  end
+
   private
+
+  def pull_request_state(pull_request)
+    return "merged" if pull_request[:merged_at].present?
+
+    pull_request[:state].presence || "closed"
+  end
 
   def log_github_error(action, error)
     Rails.logger.warn(

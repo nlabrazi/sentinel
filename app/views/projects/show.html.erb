@@ -16,6 +16,7 @@
           Project overview
         </a>
         <a href="#commits" class="block pl-6 hover:text-gray-100">Commits</a>
+        <a href="#pull-requests" class="block pl-6 hover:text-gray-100">Pull requests</a>
         <a href="#configuration" class="block pl-6 hover:text-gray-100">Project configuration</a>
         <a href="#cron-jobs" class="block pl-6 hover:text-gray-100">Cron jobs</a>
         <a href="#deploys" class="block pl-6 hover:text-gray-100">Deploys</a>
@@ -164,6 +165,58 @@
     <% else %>
       <div class="px-5 py-6 text-sm text-gray-400">
         No GitHub commit history has been synchronized yet.
+      </div>
+    <% end %>
+  </section>
+
+  <section id="pull-requests" class="overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow">
+    <div class="border-b border-gray-800 px-5 py-4">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-gray-100">Pull requests</h2>
+          <p class="mt-1 text-sm text-gray-400">Open and recently updated GitHub pull requests for this repository.</p>
+        </div>
+        <span class="inline-flex w-fit items-center rounded-full bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-300">
+          <%= @github_pull_requests.size %> PR<%= "s" unless @github_pull_requests.size == 1 %>
+        </span>
+      </div>
+    </div>
+
+    <% if @github_pull_requests.any? %>
+      <div class="divide-y divide-gray-800">
+        <% @github_pull_requests.each do |pull_request| %>
+          <article class="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:justify-between">
+            <div class="min-w-0">
+              <p class="truncate font-semibold text-gray-100">
+                #<%= pull_request.number %> <%= pull_request.title %>
+              </p>
+              <p class="mt-1 text-sm text-gray-400">
+                <% if pull_request.author_login.present? %>
+                  <%= pull_request.author_login %>
+                  <span class="mx-1 text-gray-600">·</span>
+                <% end %>
+                <span class="font-mono text-xs"><%= pull_request.head_ref.presence || "unknown" %> -> <%= pull_request.base_ref.presence || @project.branch %></span>
+              </p>
+            </div>
+            <div class="flex shrink-0 items-center gap-3 text-sm">
+              <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold <%= pull_request.state == 'open' ? 'bg-green-900/40 text-green-300' : pull_request.state == 'merged' ? 'bg-purple-900/40 text-purple-300' : 'bg-gray-800 text-gray-300' %>">
+                <span class="h-1.5 w-1.5 rounded-full <%= pull_request.state == 'open' ? 'bg-green-300' : pull_request.state == 'merged' ? 'bg-purple-300' : 'bg-gray-400' %>"></span>
+                <%= pull_request.state %><%= pull_request.draft? ? " draft" : "" %>
+              </span>
+              <span class="text-gray-400">
+                <% if pull_request.github_updated_at %>
+                  <%= l(pull_request.github_updated_at, format: :short) %>
+                <% else %>
+                  unknown
+                <% end %>
+              </span>
+            </div>
+          </article>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="px-5 py-6 text-sm text-gray-400">
+        No GitHub pull requests have been synchronized yet.
       </div>
     <% end %>
   </section>

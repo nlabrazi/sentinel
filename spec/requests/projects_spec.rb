@@ -72,6 +72,7 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).to include('Project overview')
       expect(response.body).to include('Release readiness')
       expect(response.body).to include('Recent commits')
+      expect(response.body).to include('Pull requests')
       expect(response.body).to include('Refresh GitHub')
       expect(response.body).to include('Deployment command')
       expect(response.body).to include('Cron jobs')
@@ -89,6 +90,45 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).not_to include('Preview Servers')
       expect(response.body).not_to include('Web security')
       expect(response.body).not_to include('Domain management')
+    end
+
+    it 'renders recent GitHub pull requests newest first' do
+      sign_in create(:user)
+      project = create(:project)
+      old_pull_request = create(
+        :github_pull_request,
+        project: project,
+        number: 12,
+        title: 'Old pull request',
+        state: 'closed',
+        author_login: 'old-author',
+        head_ref: 'old-branch',
+        base_ref: 'main',
+        github_updated_at: 2.days.ago
+      )
+      new_pull_request = create(
+        :github_pull_request,
+        project: project,
+        number: 13,
+        title: 'New pull request',
+        state: 'merged',
+        author_login: 'new-author',
+        head_ref: 'new-branch',
+        base_ref: 'main',
+        github_updated_at: 5.minutes.ago
+      )
+      other_pull_request = create(:github_pull_request, title: 'Other project pull request')
+
+      get project_path(project)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body.index('New pull request')).to be < response.body.index('Old pull request')
+      expect(response.body).to include("##{new_pull_request.number}")
+      expect(response.body).to include("##{old_pull_request.number}")
+      expect(response.body).to include('new-author')
+      expect(response.body).to include('new-branch')
+      expect(response.body).to include('merged')
+      expect(response.body).not_to include(other_pull_request.title)
     end
 
     it 'renders recent GitHub commits newest first' do
@@ -203,20 +243,23 @@ RSpec.describe 'Projects', type: :request do
     end
 
     it 'synchronizes GitHub commits for the project' do
-      service = instance_double(GithubCommitsSyncService, call: 3)
-      allow(GithubCommitsSyncService).to receive(:new).with(project).and_return(service)
+      commits_service = instance_double(GithubCommitsSyncService, call: 3)
+      pull_requests_service = instance_double(GithubPullRequestsSyncService, call: 2)
+      allow(GithubCommitsSyncService).to receive(:new).with(project).and_return(commits_service)
+      allow(GithubPullRequestsSyncService).to receive(:new).with(project).and_return(pull_requests_service)
 
       post refresh_github_commits_project_path(project)
 
-      expect(service).to have_received(:call)
+      expect(commits_service).to have_received(:call)
+      expect(pull_requests_service).to have_received(:call)
       expect(response).to redirect_to(project_path(project))
-      expect(flash[:notice]).to eq('3 commit(s) synchronisé(s) depuis GitHub.')
+      expect(flash[:notice]).to eq('3 commit(s) et 2 pull request(s) synchronisé(s) depuis GitHub.')
     end
 
     it 'shows an alert when GitHub synchronization fails' do
-      service = instance_double(GithubCommitsSyncService)
-      allow(GithubCommitsSyncService).to receive(:new).with(project).and_return(service)
-      allow(service).to receive(:call).and_raise(StandardError, 'GitHub is unavailable')
+      commits_service = instance_double(GithubCommitsSyncService)
+      allow(GithubCommitsSyncService).to receive(:new).with(project).and_return(commits_service)
+      allow(commits_service).to receive(:call).and_raise(StandardError, 'GitHub is unavailable')
 
       post refresh_github_commits_project_path(project)
 

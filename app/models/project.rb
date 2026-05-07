@@ -10,6 +10,7 @@ class Project < ApplicationRecord
   has_many :deployments, dependent: :destroy
   has_many :cron_jobs, dependent: :destroy
   has_many :github_commits, dependent: :destroy
+  has_many :github_pull_requests, dependent: :destroy
   has_one_attached :screenshot
 
   validates :name, :slug, :repo_url, :branch, :production_url, :vps_path, presence: true

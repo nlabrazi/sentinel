@@ -13,6 +13,7 @@ class ProjectsController < ApplicationController
     @deployments = @project.deployments.order(created_at: :desc).limit(20)
     @cron_jobs = @project.cron_jobs.includes(:job_executions).order(:name)
     @github_commits = @project.github_commits.order(committed_at: :desc, created_at: :desc).limit(20)
+    @github_pull_requests = @project.github_pull_requests.order(github_updated_at: :desc, created_at: :desc).limit(20)
     @running_deployment = @project.deployments.running.order(created_at: :desc).first
   end
 
@@ -52,11 +53,13 @@ class ProjectsController < ApplicationController
   end
 
   def refresh_github_commits
-    synced_count = GithubCommitsSyncService.new(@project).call
+    synced_commits_count = GithubCommitsSyncService.new(@project).call
+    synced_pull_requests_count = GithubPullRequestsSyncService.new(@project).call
 
-    redirect_to @project, notice: "#{synced_count} commit(s) synchronisé(s) depuis GitHub."
+    redirect_to @project,
+                notice: "#{synced_commits_count} commit(s) et #{synced_pull_requests_count} pull request(s) synchronisé(s) depuis GitHub."
   rescue StandardError => e
-    Rails.logger.error "GitHub commits refresh failed for #{@project.slug}: #{e.message}"
+    Rails.logger.error "GitHub refresh failed for #{@project.slug}: #{e.message}"
     redirect_to @project, alert: "Synchronisation GitHub impossible pour le moment."
   end
 

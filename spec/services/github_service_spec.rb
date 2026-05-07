@@ -91,4 +91,51 @@ RSpec.describe GithubService, type: :service do
       expect(Rails.logger).to have_received(:warn).with(/GitHub recent commits lookup failed/)
     end
   end
+
+  describe '#recent_pull_requests' do
+    it 'returns normalized recent pull requests for the repository' do
+      allow(client).to receive(:pull_requests)
+        .with('nlabrazi/argandici', state: 'all', sort: 'updated', direction: 'desc', per_page: 20)
+        .and_return([
+          {
+            number: 12,
+            title: 'Add Pull Request visibility',
+            state: 'closed',
+            draft: false,
+            html_url: 'https://github.com/nlabrazi/argandici/pull/12',
+            created_at: Time.zone.parse('2026-05-06T08:00:00Z'),
+            closed_at: Time.zone.parse('2026-05-07T08:00:00Z'),
+            merged_at: Time.zone.parse('2026-05-07T08:00:00Z'),
+            updated_at: Time.zone.parse('2026-05-07T08:01:00Z'),
+            user: { login: 'nlabrazi' },
+            head: { ref: 'feature/pr-visibility' },
+            base: { ref: 'main' }
+          }
+        ])
+
+      expect(service.recent_pull_requests).to eq([
+        {
+          number: 12,
+          title: 'Add Pull Request visibility',
+          state: 'merged',
+          draft: false,
+          author_login: 'nlabrazi',
+          head_ref: 'feature/pr-visibility',
+          base_ref: 'main',
+          opened_at: Time.zone.parse('2026-05-06T08:00:00Z'),
+          closed_at: Time.zone.parse('2026-05-07T08:00:00Z'),
+          merged_at: Time.zone.parse('2026-05-07T08:00:00Z'),
+          github_updated_at: Time.zone.parse('2026-05-07T08:01:00Z'),
+          html_url: 'https://github.com/nlabrazi/argandici/pull/12'
+        }
+      ])
+    end
+
+    it 'returns an empty list and logs when GitHub pull request lookup fails' do
+      allow(client).to receive(:pull_requests).and_raise(Octokit::TooManyRequests)
+
+      expect(service.recent_pull_requests).to eq([])
+      expect(Rails.logger).to have_received(:warn).with(/GitHub recent pull requests lookup failed/)
+    end
+  end
 end
