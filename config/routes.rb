@@ -8,6 +8,7 @@ Rails.application.routes.draw do
       post :refresh_screenshot
       post :refresh_github_commits
       post :refresh_runtime
+      post :refresh_cron_status
     end
   end
   resources :deployments, only: [ :show ]

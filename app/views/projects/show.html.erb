@@ -58,7 +58,7 @@
             </p>
           <% end %>
 
-          <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
             <%= button_to refresh_github_commits_project_path(@project),
                   method: :post,
                   class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-cyan-900/60 px-3 py-1.5 text-xs font-semibold text-cyan-300 hover:bg-cyan-950/40",
@@ -74,6 +74,14 @@
                   aria: { label: "Vérifier le runtime" } do %>
               <%= fa_icon(:rotate, class_name: "h-3.5 w-3.5") %>
               Check status
+            <% end %>
+            <%= button_to refresh_cron_status_project_path(@project),
+                  method: :post,
+                  class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-emerald-900/60 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-950/40",
+                  title: "Synchronise les statuts cron publiés par le projet",
+                  aria: { label: "Synchroniser les statuts cron" } do %>
+              <%= fa_icon(:rotate, class_name: "h-3.5 w-3.5") %>
+              Sync cron
             <% end %>
             <% if @running_deployment %>
               <span class="inline-flex w-full items-center justify-center gap-2 rounded border border-yellow-900/60 px-3 py-1.5 text-xs font-semibold text-yellow-300" title="Un déploiement est déjà en cours">
@@ -288,9 +296,19 @@
           <h2 class="text-xl font-bold text-gray-100">Cron jobs</h2>
           <p class="mt-1 text-sm text-gray-400">Latest status reported by the project status script.</p>
         </div>
-        <span class="inline-flex w-fit items-center rounded-full bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-300">
-          <%= @cron_jobs.size %> job<%= "s" unless @cron_jobs.size == 1 %>
-        </span>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="inline-flex w-fit items-center rounded-full bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-300">
+            <%= @cron_jobs.size %> job<%= "s" unless @cron_jobs.size == 1 %>
+          </span>
+          <%= button_to refresh_cron_status_project_path(@project),
+                method: :post,
+                class: "inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded border border-gray-700 px-3 py-1.5 text-xs font-semibold text-gray-200 hover:border-gray-500 hover:bg-gray-800",
+                title: "Synchronise les statuts cron publiés par le projet",
+                aria: { label: "Synchroniser les statuts cron" } do %>
+            <%= fa_icon(:rotate, class_name: "h-3.5 w-3.5") %>
+            Sync cron
+          <% end %>
+        </div>
       </div>
     </div>
 
@@ -347,7 +365,7 @@
       </div>
     <% else %>
       <div class="px-5 py-6 text-sm text-gray-400">
-        No cron status has been reported yet. Run <code class="rounded bg-gray-950 px-1.5 py-0.5 text-gray-200">status.sh</code> sync first.
+        No cron status has been reported yet. Use Sync cron once the project exposes its read-only status JSON.
       </div>
     <% end %>
   </section>

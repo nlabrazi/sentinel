@@ -84,6 +84,7 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include("1 merged")
       expect(response.body).to include("Sync GitHub")
       expect(response.body).to include("Check status")
+      expect(response.body).to include("Sync cron")
       expect(response.body).to include("Runtime checked")
       expect(response.body).to include("HTTP 200")
       expect(response.body).to include("Deploy latest")

@@ -78,6 +78,7 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).to include('Pull requests')
       expect(response.body).to include('GitHub synced')
       expect(response.body).to include('Sync GitHub')
+      expect(response.body).to include('Sync cron')
       expect(response.body).to include('Deployment command')
       expect(response.body).to include('Cron jobs')
       expect(response.body).to include('Production deploys')
@@ -349,6 +350,56 @@ RSpec.describe 'Projects', type: :request do
 
       expect(response).to redirect_to(project_path(project))
       expect(flash[:alert]).to eq('Healthcheck impossible pour le moment.')
+    end
+  end
+
+  describe 'POST /projects/:id/refresh_cron_status' do
+    let(:user) { create(:user) }
+    let(:project) { create(:project) }
+
+    before do
+      sign_in user
+    end
+
+    it 'runs an immediate cron status sync for the project' do
+      service = instance_double(CronStatusSyncService, call: true)
+      allow(CronStatusSyncService).to receive(:new).with(project).and_return(service)
+
+      post refresh_cron_status_project_path(project)
+
+      expect(service).to have_received(:call)
+      expect(response).to redirect_to(project_path(project))
+      expect(flash[:notice]).to eq('Statuts cron synchronisés.')
+    end
+
+    it 'redirects back after cron status sync when a previous page is available' do
+      service = instance_double(CronStatusSyncService, call: true)
+      allow(CronStatusSyncService).to receive(:new).with(project).and_return(service)
+
+      post refresh_cron_status_project_path(project), headers: { 'HTTP_REFERER' => root_url }
+
+      expect(response).to redirect_to(root_url)
+    end
+
+    it 'shows an alert when the cron status script cannot be synchronized' do
+      service = instance_double(CronStatusSyncService, call: false)
+      allow(CronStatusSyncService).to receive(:new).with(project).and_return(service)
+
+      post refresh_cron_status_project_path(project)
+
+      expect(response).to redirect_to(project_path(project))
+      expect(flash[:alert]).to eq('Synchronisation cron impossible pour le moment.')
+    end
+
+    it 'shows an alert when cron status synchronization raises an error' do
+      service = instance_double(CronStatusSyncService)
+      allow(CronStatusSyncService).to receive(:new).with(project).and_return(service)
+      allow(service).to receive(:call).and_raise(StandardError, 'SSH unavailable')
+
+      post refresh_cron_status_project_path(project)
+
+      expect(response).to redirect_to(project_path(project))
+      expect(flash[:alert]).to eq('Synchronisation cron impossible pour le moment.')
     end
   end
 

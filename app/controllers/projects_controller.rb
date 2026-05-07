@@ -5,6 +5,7 @@ class ProjectsController < ApplicationController
     :refresh_screenshot,
     :refresh_github_commits,
     :refresh_runtime,
+    :refresh_cron_status,
     :toggle_maintenance
   ]
 
@@ -73,6 +74,19 @@ class ProjectsController < ApplicationController
   rescue StandardError => e
     Rails.logger.error "Runtime refresh failed for #{@project.slug}: #{e.message}"
     redirect_back fallback_location: @project, alert: "Healthcheck impossible pour le moment."
+  end
+
+  def refresh_cron_status
+    synced = CronStatusSyncService.new(@project).call
+
+    if synced
+      redirect_back fallback_location: @project, notice: "Statuts cron synchronisés."
+    else
+      redirect_back fallback_location: @project, alert: "Synchronisation cron impossible pour le moment."
+    end
+  rescue StandardError => e
+    Rails.logger.error "Cron status refresh failed for #{@project.slug}: #{e.message}"
+    redirect_back fallback_location: @project, alert: "Synchronisation cron impossible pour le moment."
   end
 
   private
