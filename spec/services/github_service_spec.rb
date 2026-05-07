@@ -53,4 +53,42 @@ RSpec.describe GithubService, type: :service do
       expect(Rails.logger).to have_received(:warn).with(/GitHub commit comparison failed/)
     end
   end
+
+  describe '#recent_commits' do
+    it 'returns normalized recent commits for the project branch' do
+      allow(client).to receive(:commits)
+        .with('nlabrazi/argandici', sha: 'main', per_page: 20)
+        .and_return([
+          {
+            sha: 'abc123',
+            html_url: 'https://github.com/nlabrazi/argandici/commit/abc123',
+            author: { login: 'nlabrazi' },
+            commit: {
+              message: "Add Sentinel commit visibility\n\nLonger body",
+              author: { name: 'Nicolas Labrazi', date: Time.zone.parse('2026-05-07T08:00:00Z') },
+              committer: { date: Time.zone.parse('2026-05-07T08:01:00Z') }
+            }
+          }
+        ])
+
+      expect(service.recent_commits).to eq([
+        {
+          sha: 'abc123',
+          message: 'Add Sentinel commit visibility',
+          author_name: 'Nicolas Labrazi',
+          author_login: 'nlabrazi',
+          authored_at: Time.zone.parse('2026-05-07T08:00:00Z'),
+          committed_at: Time.zone.parse('2026-05-07T08:01:00Z'),
+          html_url: 'https://github.com/nlabrazi/argandici/commit/abc123'
+        }
+      ])
+    end
+
+    it 'returns an empty list and logs when GitHub commit history lookup fails' do
+      allow(client).to receive(:commits).and_raise(Octokit::TooManyRequests)
+
+      expect(service.recent_commits).to eq([])
+      expect(Rails.logger).to have_received(:warn).with(/GitHub recent commits lookup failed/)
+    end
+  end
 end

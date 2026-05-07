@@ -71,6 +71,8 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).to include('data-sidebar-collapsed-value="true"')
       expect(response.body).to include('Project overview')
       expect(response.body).to include('Release readiness')
+      expect(response.body).to include('Recent commits')
+      expect(response.body).to include('Refresh GitHub')
       expect(response.body).to include('Deployment command')
       expect(response.body).to include('Cron jobs')
       expect(response.body).to include('Production deploys')
@@ -87,6 +89,38 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).not_to include('Preview Servers')
       expect(response.body).not_to include('Web security')
       expect(response.body).not_to include('Domain management')
+    end
+
+    it 'renders recent GitHub commits newest first' do
+      sign_in create(:user)
+      project = create(:project)
+      old_commit = create(
+        :github_commit,
+        project: project,
+        sha: 'oldcommit123',
+        message: 'Old commit',
+        author_login: 'old-author',
+        committed_at: 2.days.ago
+      )
+      new_commit = create(
+        :github_commit,
+        project: project,
+        sha: 'newcommit123',
+        message: 'New commit',
+        author_login: 'new-author',
+        committed_at: 5.minutes.ago,
+        html_url: 'https://github.com/user/project/commit/newcommit123'
+      )
+      other_commit = create(:github_commit, message: 'Other project commit')
+
+      get project_path(project)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body.index('New commit')).to be < response.body.index('Old commit')
+      expect(response.body).to include(new_commit.sha.first(7))
+      expect(response.body).to include(old_commit.sha.first(7))
+      expect(response.body).to include('new-author')
+      expect(response.body).not_to include(other_commit.message)
     end
 
     it 'renders detailed cron job status' do
@@ -157,6 +191,37 @@ RSpec.describe 'Projects', type: :request do
       expect(DeployProjectJob).not_to have_received(:perform_later)
       expect(response).to redirect_to(project_path(project))
       expect(flash[:alert]).to eq('Un déploiement est déjà en cours pour ce projet.')
+    end
+  end
+
+  describe 'POST /projects/:id/refresh_github_commits' do
+    let(:user) { create(:user) }
+    let(:project) { create(:project) }
+
+    before do
+      sign_in user
+    end
+
+    it 'synchronizes GitHub commits for the project' do
+      service = instance_double(GithubCommitsSyncService, call: 3)
+      allow(GithubCommitsSyncService).to receive(:new).with(project).and_return(service)
+
+      post refresh_github_commits_project_path(project)
+
+      expect(service).to have_received(:call)
+      expect(response).to redirect_to(project_path(project))
+      expect(flash[:notice]).to eq('3 commit(s) synchronisé(s) depuis GitHub.')
+    end
+
+    it 'shows an alert when GitHub synchronization fails' do
+      service = instance_double(GithubCommitsSyncService)
+      allow(GithubCommitsSyncService).to receive(:new).with(project).and_return(service)
+      allow(service).to receive(:call).and_raise(StandardError, 'GitHub is unavailable')
+
+      post refresh_github_commits_project_path(project)
+
+      expect(response).to redirect_to(project_path(project))
+      expect(flash[:alert]).to eq('Synchronisation GitHub impossible pour le moment.')
     end
   end
 

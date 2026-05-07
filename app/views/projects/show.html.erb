@@ -15,6 +15,7 @@
           <span class="h-2 w-2 rotate-45 bg-cyan-300"></span>
           Project overview
         </a>
+        <a href="#commits" class="block pl-6 hover:text-gray-100">Commits</a>
         <a href="#configuration" class="block pl-6 hover:text-gray-100">Project configuration</a>
         <a href="#cron-jobs" class="block pl-6 hover:text-gray-100">Cron jobs</a>
         <a href="#deploys" class="block pl-6 hover:text-gray-100">Deploys</a>
@@ -57,6 +58,10 @@
           <% end %>
 
           <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <%= button_to refresh_github_commits_project_path(@project), method: :post, class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded bg-gray-700 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-600 sm:w-auto" do %>
+              <%= fa_icon(:rotate, class_name: "h-4 w-4") %>
+              Refresh GitHub
+            <% end %>
             <% if @running_deployment %>
               <span class="inline-flex w-full items-center justify-center gap-2 rounded bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-400 sm:w-auto">
                 <%= fa_icon(:rotate, class_name: "h-4 w-4") %>
@@ -115,6 +120,53 @@
       </div>
     </aside>
   </div>
+
+  <section id="commits" class="overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow">
+    <div class="border-b border-gray-800 px-5 py-4">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-gray-100">Recent commits</h2>
+          <p class="mt-1 text-sm text-gray-400">Latest commits synchronized from the tracked GitHub branch.</p>
+        </div>
+        <span class="inline-flex w-fit items-center rounded-full bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-300">
+          <%= @github_commits.size %> commit<%= "s" unless @github_commits.size == 1 %>
+        </span>
+      </div>
+    </div>
+
+    <% if @github_commits.any? %>
+      <div class="divide-y divide-gray-800">
+        <% @github_commits.each do |commit| %>
+          <% short_sha = commit.sha.first(7) %>
+          <article class="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:justify-between">
+            <div class="min-w-0">
+              <p class="truncate font-semibold text-gray-100">
+                <%= commit.message %>
+              </p>
+              <p class="mt-1 text-sm text-gray-400">
+                <code class="rounded bg-gray-950 px-1.5 py-0.5 text-xs text-gray-200"><%= short_sha %></code>
+                <% if commit.author_login.present? || commit.author_name.present? %>
+                  <span class="mx-1 text-gray-600">·</span>
+                  <%= commit.author_login.presence || commit.author_name %>
+                <% end %>
+              </p>
+            </div>
+            <p class="shrink-0 text-sm text-gray-400">
+              <% if commit.committed_at %>
+                <%= l(commit.committed_at, format: :short) %>
+              <% else %>
+                unknown
+              <% end %>
+            </p>
+          </article>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="px-5 py-6 text-sm text-gray-400">
+        No GitHub commit history has been synchronized yet.
+      </div>
+    <% end %>
+  </section>
 
   <section id="configuration" class="overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow">
     <div class="border-b border-gray-800 bg-gradient-to-r from-indigo-950 via-purple-950 to-gray-900 px-5 py-4">
