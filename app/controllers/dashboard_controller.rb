@@ -11,7 +11,7 @@ class DashboardController < ApplicationController
   private
 
   def dashboard_projects
-    projects = Project.includes(:cron_jobs).order(:name)
+    projects = Project.includes(:cron_jobs, :github_pull_requests).order(:name)
     return projects if @project_search.blank?
 
     query = "%#{Project.sanitize_sql_like(@project_search)}%"

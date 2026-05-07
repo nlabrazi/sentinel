@@ -49,6 +49,14 @@ class Project < ApplicationRecord
     "unknown"
   end
 
+  def open_pull_requests_count
+    count_github_pull_requests_by_state("open")
+  end
+
+  def merged_pull_requests_count
+    count_github_pull_requests_by_state("merged")
+  end
+
   def fresh_screenshot_url
     return nil unless ENV["APIFLASH_ACCESS_KEY"].present?
 
@@ -80,6 +88,14 @@ class Project < ApplicationRecord
 
   def bash_command(command)
     "bash -lc #{Shellwords.escape(command)}"
+  end
+
+  def count_github_pull_requests_by_state(state)
+    if github_pull_requests.loaded?
+      github_pull_requests.count { |pull_request| pull_request.state == state }
+    else
+      github_pull_requests.where(state: state).count
+    end
   end
 
   def vps_path_must_be_allowed

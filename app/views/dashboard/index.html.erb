@@ -9,7 +9,7 @@
           <% end %>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4 lg:min-w-[32rem]">
+        <div class="grid grid-cols-2 gap-3 text-sm sm:grid-cols-5 lg:min-w-[40rem]">
           <div class="rounded-md border border-gray-800 bg-gray-950 px-3 py-2">
             <p class="text-xs text-gray-500">Projects</p>
             <p class="mt-1 font-semibold text-gray-100"><%= @projects.size %></p>
@@ -21,6 +21,10 @@
           <div class="rounded-md border border-gray-800 bg-gray-950 px-3 py-2">
             <p class="text-xs text-gray-500">Behind</p>
             <p class="mt-1 font-semibold text-yellow-300"><%= @projects.count { |project| project.commits_behind.to_i.positive? } %></p>
+          </div>
+          <div class="rounded-md border border-gray-800 bg-gray-950 px-3 py-2">
+            <p class="text-xs text-gray-500">Open PRs</p>
+            <p class="mt-1 font-semibold text-cyan-300"><%= @projects.sum(&:open_pull_requests_count) %></p>
           </div>
           <div class="rounded-md border border-gray-800 bg-gray-950 px-3 py-2">
             <p class="text-xs text-gray-500">Maintenance</p>
@@ -36,7 +40,7 @@
           <% latest_deployment = @latest_deployments_by_project_id[project.id] %>
           <% running_deployment = @running_deployments_by_project_id[project.id] %>
           <% cron_status = project.cron_summary_status %>
-          <article class="grid grid-cols-1 gap-4 px-4 py-6 transition hover:bg-gray-800/40 sm:px-6 xl:grid-cols-[8rem_minmax(0,1.25fr)_minmax(24rem,1fr)_11rem] xl:items-center">
+          <article class="grid grid-cols-1 gap-4 px-4 py-6 transition hover:bg-gray-800/40 sm:px-6 xl:grid-cols-[8rem_minmax(0,1.25fr)_minmax(28rem,1fr)_11rem] xl:items-center">
             <div class="overflow-hidden rounded border border-gray-800 bg-gray-950">
               <% if @screenshots_enabled && project.screenshot.attached? %>
                 <img src="<%= url_for(project.screenshot) %>"
@@ -71,7 +75,7 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4 xl:grid-cols-4">
+            <div class="grid grid-cols-2 gap-3 text-sm sm:grid-cols-5 xl:grid-cols-5">
               <div>
                 <p class="text-xs text-gray-500">Prod</p>
                 <p class="mt-1 font-mono font-semibold text-gray-100"><%= project.last_commit_deployed.present? ? project.last_commit_deployed.first(7) : "unknown" %></p>
@@ -91,6 +95,13 @@
                 <p class="mt-1 font-semibold <%= cron_status == 'ok' ? 'text-green-300' : cron_status == 'failed' ? 'text-red-300' : 'text-gray-300' %>">
                   <%= cron_status %>
                 </p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500">PRs</p>
+                <p class="mt-1 font-semibold <%= project.open_pull_requests_count.positive? ? 'text-cyan-300' : 'text-gray-300' %>">
+                  <%= project.open_pull_requests_count %> open
+                </p>
+                <p class="mt-0.5 text-xs text-gray-500"><%= project.merged_pull_requests_count %> merged</p>
               </div>
             </div>
 

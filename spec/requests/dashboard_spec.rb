@@ -16,6 +16,7 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include("Projects")
       expect(response.body).to include("Online")
       expect(response.body).to include("Behind")
+      expect(response.body).to include("Open PRs")
       expect(response.body).to include("Maintenance")
       expect(response.body).not_to include("Add new project")
       expect(response.body).not_to include("Want to deploy a new project?")
@@ -49,7 +50,7 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include("5 minutes")
     end
 
-    it "renders release, runtime, cron and deploy controls for each project" do
+    it "renders release, runtime, cron, pull requests and deploy controls for each project" do
       sign_in create(:user)
       project = create(
         :project,
@@ -63,6 +64,8 @@ RSpec.describe "Dashboards", type: :request do
         commits_behind: 3
       )
       create(:cron_job, project: project, last_status: "success")
+      create(:github_pull_request, project: project, state: "open", title: "Open PR")
+      create(:github_pull_request, project: project, state: "merged", title: "Merged PR")
 
       get root_path
 
@@ -73,6 +76,9 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include("a91dd20")
       expect(response.body).to include("3 commits")
       expect(response.body).to include("ok")
+      expect(response.body).to include("PRs")
+      expect(response.body).to include("1 open")
+      expect(response.body).to include("1 merged")
       expect(response.body).to include("Deploy latest")
     end
 
