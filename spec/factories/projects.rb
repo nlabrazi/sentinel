@@ -11,5 +11,6 @@ FactoryBot.define do
     last_commit_deployed { nil }
     latest_commit_available { nil }
     commits_behind { 0 }
+    github_synced_at { nil }
   end
 end

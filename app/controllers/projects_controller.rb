@@ -57,6 +57,7 @@ class ProjectsController < ApplicationController
   def refresh_github_commits
     synced_commits_count = GithubCommitsSyncService.new(@project).call
     synced_pull_requests_count = GithubPullRequestsSyncService.new(@project).call
+    @project.update!(github_synced_at: Time.current)
 
     redirect_back fallback_location: @project,
                 notice: "#{synced_commits_count} commit(s) et #{synced_pull_requests_count} pull request(s) synchronisé(s) depuis GitHub."

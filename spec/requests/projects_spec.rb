@@ -61,7 +61,8 @@ RSpec.describe 'Projects', type: :request do
         name: 'Project Overview',
         slug: 'project-overview',
         production_url: 'https://project-overview.example.com',
-        last_commit_deployed: 'abcdef123'
+        last_commit_deployed: 'abcdef123',
+        github_synced_at: 6.minutes.ago
       )
       create(:deployment, project: project, commit_sha: 'abcdef123', status: :success, created_at: 5.minutes.ago)
 
@@ -75,6 +76,7 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).to include('Release readiness')
       expect(response.body).to include('Recent commits')
       expect(response.body).to include('Pull requests')
+      expect(response.body).to include('GitHub synced')
       expect(response.body).to include('Sync GitHub')
       expect(response.body).to include('Deployment command')
       expect(response.body).to include('Cron jobs')
@@ -282,6 +284,7 @@ RSpec.describe 'Projects', type: :request do
 
       expect(commits_service).to have_received(:call)
       expect(pull_requests_service).to have_received(:call)
+      expect(project.reload.github_synced_at).to be_present
       expect(response).to redirect_to(project_path(project))
       expect(flash[:notice]).to eq('3 commit(s) et 2 pull request(s) synchronisé(s) depuis GitHub.')
     end

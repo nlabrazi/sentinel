@@ -61,7 +61,8 @@ RSpec.describe "Dashboards", type: :request do
         status: :online,
         last_commit_deployed: "a82f31c999",
         latest_commit_available: "a91dd20999",
-        commits_behind: 3
+        commits_behind: 3,
+        github_synced_at: 4.minutes.ago
       )
       create(:cron_job, project: project, last_status: "success")
       create(:ping, project: project, http_status: 200, response_time_ms: 88, checked_at: 3.minutes.ago)
@@ -73,6 +74,7 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include("Sawt AI")
       expect(response.body).to include("https://sawt.example.com")
       expect(response.body).to include("nlabrazi/sawt-ai")
+      expect(response.body).to include("GitHub synced")
       expect(response.body).to include("a82f31c")
       expect(response.body).to include("a91dd20")
       expect(response.body).to include("3 commits")

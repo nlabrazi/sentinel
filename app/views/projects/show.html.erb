@@ -149,7 +149,14 @@
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 class="text-xl font-bold text-gray-100">Recent commits</h2>
-          <p class="mt-1 text-sm text-gray-400">Latest commits synchronized from the tracked GitHub branch.</p>
+          <p class="mt-1 text-sm text-gray-400">
+            Latest commits synchronized from the tracked GitHub branch.
+            <% if @project.github_synced_at %>
+              GitHub synced <%= time_ago_in_words(@project.github_synced_at) %> ago.
+            <% else %>
+              GitHub never synced.
+            <% end %>
+          </p>
         </div>
         <span class="inline-flex w-fit items-center rounded-full bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-300">
           <%= @github_commits.size %> commit<%= "s" unless @github_commits.size == 1 %>
@@ -196,7 +203,14 @@
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 class="text-xl font-bold text-gray-100">Pull requests</h2>
-          <p class="mt-1 text-sm text-gray-400">Open and recently updated GitHub pull requests for this repository.</p>
+          <p class="mt-1 text-sm text-gray-400">
+            Open and recently updated GitHub pull requests for this repository.
+            <% if @project.github_synced_at %>
+              GitHub synced <%= time_ago_in_words(@project.github_synced_at) %> ago.
+            <% else %>
+              GitHub never synced.
+            <% end %>
+          </p>
         </div>
         <span class="inline-flex w-fit items-center rounded-full bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-300">
           <%= @github_pull_requests.size %> PR<%= "s" unless @github_pull_requests.size == 1 %>
