@@ -19,41 +19,42 @@
       </div>
 
       <div class="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 xl:grid-cols-6">
-        <div class="rounded-lg border border-gray-800 bg-gray-950 px-4 py-3">
-          <p class="text-xs font-medium text-gray-500">Projects</p>
-          <p class="mt-1 text-xl font-bold text-gray-100"><%= @projects.size %></p>
-        </div>
+        <%= render "shared/ui/status_metric",
+          label: "Projects",
+          value: @projects.size,
+          tone: :neutral,
+          html_class: "bg-gray-950" %>
 
-        <div class="rounded-lg border border-gray-800 bg-gray-950 px-4 py-3">
-          <p class="text-xs font-medium text-gray-500">Online</p>
-          <p class="mt-1 text-xl font-bold text-green-300"><%= @projects.count(&:online?) %></p>
-        </div>
+        <%= render "shared/ui/status_metric",
+          label: "Online",
+          value: @projects.count(&:online?),
+          tone: :success,
+          html_class: "bg-gray-950" %>
 
-        <div class="rounded-lg border border-gray-800 bg-gray-950 px-4 py-3">
-          <p class="text-xs font-medium text-gray-500">Offline</p>
-          <p class="mt-1 text-xl font-bold text-red-300"><%= @projects.count(&:offline?) %></p>
-        </div>
+        <%= render "shared/ui/status_metric",
+          label: "Offline",
+          value: @projects.count(&:offline?),
+          tone: :danger,
+          html_class: "bg-gray-950" %>
 
-        <div class="rounded-lg border border-gray-800 bg-gray-950 px-4 py-3">
-          <p class="text-xs font-medium text-gray-500">Behind</p>
-          <p class="mt-1 text-xl font-bold text-yellow-300">
-            <%= @projects.count { |project| project.commits_behind.to_i.positive? } %>
-          </p>
-        </div>
+        <%= render "shared/ui/status_metric",
+          label: "Behind",
+          value: @projects.count { |project| project.commits_behind.to_i.positive? },
+          tone: :warning,
+          html_class: "bg-gray-950" %>
 
-        <div class="rounded-lg border border-gray-800 bg-gray-950 px-4 py-3">
-          <p class="text-xs font-medium text-gray-500">Cron issues</p>
-          <p class="mt-1 text-xl font-bold text-red-300">
-            <%= @projects.count { |project| project.cron_summary_status == "failed" } %>
-          </p>
-        </div>
+        <%= render "shared/ui/status_metric",
+          label: "Cron issues",
+          value: @projects.count { |project| project.cron_summary_status == "failed" },
+          tone: :danger,
+          html_class: "bg-gray-950" %>
 
-        <div class="rounded-lg border border-gray-800 bg-gray-950 px-4 py-3">
-          <p class="text-xs font-medium text-gray-500">Maintenance</p>
-          <p class="mt-1 text-xl font-bold text-yellow-300"><%= @projects.count(&:maintenance_mode?) %></p>
-        </div>
+        <%= render "shared/ui/status_metric",
+          label: "Maintenance",
+          value: @projects.count(&:maintenance_mode?),
+          tone: :warning,
+          html_class: "bg-gray-950" %>
       </div>
-    </div>
 
     <div class="divide-y divide-gray-800">
       <% if @projects.any? %>

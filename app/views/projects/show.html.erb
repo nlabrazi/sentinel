@@ -158,50 +158,30 @@
       </div>
 
       <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="rounded-lg border border-gray-800 bg-gray-950/70 px-4 py-3">
-          <div class="flex items-center gap-2 text-xs text-gray-500">
-            <%= fa_icon(:code_branch, class_name: "text-xs") %>
-            <span>Version</span>
-          </div>
-          <p class="mt-2 font-semibold <%= behind_count.positive? ? 'text-yellow-300' : 'text-green-300' %>">
-            <%= behind_count.positive? ? "#{behind_count} update(s)" : "Up to date" %>
-          </p>
-        </div>
+  <%= render "shared/ui/status_metric",
+    label: "Version",
+    value: behind_count.positive? ? "#{behind_count} update(s)" : "Up to date",
+    icon: :code_branch,
+    tone: behind_count.positive? ? :warning : :success %>
 
-        <div class="rounded-lg border border-gray-800 bg-gray-950/70 px-4 py-3">
-          <div class="flex items-center gap-2 text-xs text-gray-500">
-            <%= fa_icon(:clock, class_name: "text-xs") %>
-            <span>Jobs</span>
-          </div>
-          <p class="mt-2 font-semibold <%= cron_status == 'ok' ? 'text-green-300' : cron_status == 'failed' ? 'text-red-300' : 'text-gray-300' %>">
-            <%= cron_status %>
-          </p>
-        </div>
+  <%= render "shared/ui/status_metric",
+    label: "Jobs",
+    value: cron_status,
+    icon: :clock,
+    tone: cron_status == "ok" ? :success : cron_status == "failed" ? :danger : :muted %>
 
-        <div class="rounded-lg border border-gray-800 bg-gray-950/70 px-4 py-3">
-          <div class="flex items-center gap-2 text-xs text-gray-500">
-            <%= fa_icon(:rocket, class_name: "text-xs") %>
-            <span>Last deploy</span>
-          </div>
-          <p class="mt-2 font-semibold text-gray-100">
-            <% if latest_deployment %>
-              <%= time_ago_in_words(latest_deployment.created_at) %> ago
-            <% else %>
-              Never
-            <% end %>
-          </p>
-        </div>
+  <%= render "shared/ui/status_metric",
+    label: "Last deploy",
+    value: latest_deployment ? "#{time_ago_in_words(latest_deployment.created_at)} ago" : "Never",
+    icon: :rocket,
+    tone: :neutral %>
 
-        <div class="rounded-lg border border-gray-800 bg-gray-950/70 px-4 py-3">
-          <div class="flex items-center gap-2 text-xs text-gray-500">
-            <%= fa_icon(:globe, class_name: "text-xs") %>
-            <span>HTTP</span>
-          </div>
-          <p class="mt-2 font-semibold text-gray-100">
-            <%= latest_ping&.http_status || "unknown" %>
-          </p>
-        </div>
-      </div>
+  <%= render "shared/ui/status_metric",
+    label: "HTTP",
+    value: latest_ping&.http_status || "unknown",
+    icon: :globe,
+    tone: :neutral %>
+</div>
     </div>
   </div>
 <% end %>
