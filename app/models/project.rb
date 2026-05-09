@@ -41,13 +41,34 @@ class Project < ApplicationRecord
   end
 
   def cron_summary_status
-    has_cron_jobs = cron_jobs.loaded? ? cron_jobs.any? : cron_jobs.exists?
-    return "unknown" unless has_cron_jobs
+    jobs = loaded_or_query_cron_jobs
+    return "not_reported" if jobs.empty?
 
-    return "failed" if cron_jobs.any? { |cron_job| cron_job.last_status == "failed" }
-    return "ok" if cron_jobs.all? { |cron_job| cron_job.last_status == "success" }
+    return "failed" if jobs.any?(&:failed?)
+    return "never_run" if jobs.any?(&:never_run?)
+    return "unknown" if jobs.any?(&:unknown?)
+    return "ok" if jobs.all?(&:success?)
 
     "unknown"
+  end
+
+  def cron_needs_attention?
+    %w[failed unknown never_run not_reported].include?(cron_summary_status)
+  end
+
+  def cron_summary_label
+    case cron_summary_status
+    when "ok"
+      "OK"
+    when "failed"
+      "Failed"
+    when "never_run"
+      "Never run"
+    when "not_reported"
+      "Not reported"
+    else
+      "Unknown"
+    end
   end
 
   def latest_ping
@@ -153,5 +174,9 @@ class Project < ApplicationRecord
     )
 
     URI::HTTPS.build(host: "api.apiflash.com", path: "/v1/urltoimage", query: query).to_s
+  end
+
+  def loaded_or_query_cron_jobs
+    cron_jobs.to_a
   end
 end
