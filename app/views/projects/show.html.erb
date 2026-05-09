@@ -415,9 +415,10 @@
       <% end %>
     </div>
   <% else %>
-    <div class="px-5 py-6 text-sm text-gray-400">
-      No GitHub commit history has been synchronized yet.
-    </div>
+    <%= render "shared/ui/empty_state",
+  title: "No GitHub commit history yet.",
+  description: "Synchronisez GitHub pour récupérer les derniers commits de la branche suivie.",
+  icon: :code_commit %>
   <% end %>
 </details>
 
@@ -480,9 +481,10 @@
       <% end %>
     </div>
   <% else %>
-    <div class="px-5 py-6 text-sm text-gray-400">
-      No GitHub pull requests have been synchronized yet.
-    </div>
+    <%= render "shared/ui/empty_state",
+  title: "No pull requests synchronized yet.",
+  description: "Synchronisez GitHub pour afficher les pull requests ouvertes ou récemment mises à jour.",
+  icon: :code_pull_request %>
   <% end %>
 </details>
   <section id="configuration" class="overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow">
@@ -591,9 +593,10 @@
         </table>
       </div>
     <% else %>
-      <div class="px-5 py-6 text-sm text-gray-400">
-        No cron status has been reported yet. Use Sync cron once the project exposes its read-only status JSON.
-      </div>
+      <%= render "shared/ui/empty_state",
+  title: "No job status reported yet.",
+  description: "Utilisez Sync cron quand le projet expose son JSON de statut en lecture seule.",
+  icon: :clock %>
     <% end %>
   </section>
 
@@ -629,7 +632,11 @@
             </article>
           <% end %>
         <% else %>
-          <p class="py-6 text-sm text-gray-400">No deployment history yet.</p>
+          <%= render "shared/ui/empty_state",
+  title: "No deployment history yet.",
+  description: "Les prochains déploiements apparaîtront ici avec leur statut, leur durée et leur commit.",
+  icon: :rocket,
+  html_class: "py-8" %>
         <% end %>
       </div>
     </section>

@@ -255,10 +255,11 @@
           </article>
         <% end %>
       <% else %>
-        <div class="px-6 py-12 text-center">
-          <p class="text-sm font-semibold text-gray-300">No project matches this search.</p>
-          <p class="mt-1 text-sm text-gray-500">Essayez un autre nom de projet ou videz la recherche.</p>
-        </div>
+        <%= render "shared/ui/empty_state",
+  title: "No project matches this search.",
+  description: "Essayez un autre nom de projet ou videz la recherche.",
+  icon: :magnifying_glass,
+  html_class: "px-6 py-12" %>
       <% end %>
     </div>
   <% end %>
