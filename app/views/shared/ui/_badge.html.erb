@@ -1,0 +1,27 @@
+<% variant ||= :neutral %>
+<% label ||= "" %>
+<% icon ||= nil %>
+<% html_class ||= "" %>
+
+<%
+  base_classes = "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold"
+
+  variant_classes = {
+    success: "bg-green-900/40 text-green-300",
+    warning: "bg-yellow-900/40 text-yellow-300",
+    danger: "bg-red-900/40 text-red-300",
+    info: "bg-cyan-900/40 text-cyan-300",
+    neutral: "bg-gray-800 text-gray-300"
+  }
+
+  classes = [
+    base_classes,
+    variant_classes.fetch(variant.to_sym),
+    html_class
+  ].join(" ")
+%>
+
+<span class="<%= classes %>">
+  <%= fa_icon(icon, class_name: "h-3 w-3") if icon.present? %>
+  <%= label %>
+</span>

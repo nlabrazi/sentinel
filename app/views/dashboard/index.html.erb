@@ -1,14 +1,13 @@
 <section class="mx-auto max-w-7xl space-y-6">
-  <div class="rounded-xl border border-gray-800 bg-gray-900 shadow">
+  <%= render layout: "shared/ui/card", locals: { padding: false } do %>
     <div class="border-b border-gray-800 px-4 py-5 sm:px-6">
       <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-        <div class="min-w-0">
-          <p class="text-sm font-semibold text-cyan-300">Sentinel overview</p>
-          <h2 class="mt-1 text-2xl font-bold text-gray-100">Projects cockpit</h2>
-          <p class="mt-2 max-w-2xl text-sm leading-6 text-gray-400">
-            Vue rapide des projets qui demandent votre attention : runtime, retard GitHub, cron jobs et maintenance.
-          </p>
-        </div>
+        <%= render "shared/ui/section_header",
+          eyebrow: "Sentinel overview",
+          title: "Projects cockpit",
+          description: "Vue rapide des projets qui demandent votre attention : site status, version, jobs et maintenance.",
+          icon: :gauge_high,
+          title_class: "text-2xl" %>
 
         <%= form_with url: root_path, method: :get, class: "relative w-full xl:max-w-sm", data: { turbo_frame: "_top" } do |form| %>
           <%= fa_icon(:magnifying_glass, class_name: "absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500") %>
@@ -87,19 +86,22 @@
                           class: "break-words text-base font-bold text-gray-100 hover:text-cyan-300" %>
 
                     <% if needs_attention %>
-                      <span class="inline-flex items-center rounded-full bg-yellow-900/40 px-2 py-0.5 text-xs font-semibold text-yellow-300">
-                        Warning
-                      </span>
+                      <%= render "shared/ui/badge",
+                        label: "Needs review",
+                        variant: :warning,
+                        icon: :triangle_exclamation %>
                     <% else %>
-                      <span class="inline-flex items-center rounded-full bg-green-900/40 px-2 py-0.5 text-xs font-semibold text-green-300">
-                        Good
-                      </span>
+                      <%= render "shared/ui/badge",
+                        label: "No action needed",
+                        variant: :success,
+                        icon: :circle_check %>
                     <% end %>
 
                     <% if project.maintenance_mode? %>
-                      <span class="inline-flex items-center rounded-full bg-yellow-900/40 px-2 py-0.5 text-xs font-semibold text-yellow-300">
-                        Maintenance
-                      </span>
+                      <%= render "shared/ui/badge",
+                        label: "Maintenance",
+                        variant: :warning,
+                        icon: :wrench %>
                     <% end %>
                   </div>
 
@@ -197,11 +199,13 @@
                     Deploy
                   <% end %>
                 <% else %>
-                  <%= link_to project_path(project),
-                        class: "inline-flex w-full items-center justify-center gap-2 rounded-md border border-gray-700 px-3 py-2 text-sm font-semibold text-gray-200 hover:border-gray-500 hover:bg-gray-800 xl:w-40",
-                        title: "Ouvre la page détaillée du projet" do %>
-                    Open project
-                  <% end %>
+                  <%= render "shared/ui/button",
+                    label: "Open project",
+                    href: project_path(project),
+                    variant: :secondary,
+                    size: :md,
+                    title: "Ouvre la page détaillée du projet",
+                    html_class: "w-full xl:w-40" %>
                 <% end %>
 
                 <details class="group/menu relative w-full xl:w-40">
@@ -256,5 +260,5 @@
         </div>
       <% end %>
     </div>
-  </div>
+  <% end %>
 </section>

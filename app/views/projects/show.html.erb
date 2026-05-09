@@ -31,7 +31,7 @@
   <% cron_status = @project.cron_summary_status %>
   <% behind_count = @project.commits_behind.to_i %>
 
-<section class="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow">
+<%= render layout: "shared/ui/card" do %>
   <div class="grid grid-cols-1 gap-5 xl:grid-cols-[19rem_minmax(0,1fr)] xl:items-start">
     <div class="overflow-hidden rounded-xl border border-gray-800 bg-gray-950">
       <% if @project.screenshot.attached? %>
@@ -54,16 +54,16 @@
               <%= @project.name %>
             </h1>
 
-            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold <%= @project.online? ? 'bg-green-900/40 text-green-300' : @project.offline? ? 'bg-red-900/40 text-red-300' : 'bg-gray-800 text-gray-300' %>">
-              <span class="h-1.5 w-1.5 rounded-full <%= @project.online? ? 'bg-green-300' : @project.offline? ? 'bg-red-300' : 'bg-gray-400' %>"></span>
-              <%= @project.status %>
-            </span>
+            <%= render "shared/ui/badge",
+              label: @project.status,
+              variant: @project.online? ? :success : @project.offline? ? :danger : :neutral,
+              icon: @project.online? ? :circle_check : @project.offline? ? :circle_xmark : :circle_question %>
 
             <% if @project.maintenance_mode? %>
-              <span class="inline-flex items-center gap-1 rounded-full bg-yellow-900/40 px-2.5 py-1 text-xs font-semibold text-yellow-300">
-                <%= fa_icon(:wrench, class_name: "text-xs") %>
-                Maintenance
-              </span>
+              <%= render "shared/ui/badge",
+                label: "Maintenance",
+                variant: :warning,
+                icon: :wrench %>
             <% end %>
           </div>
 
@@ -97,14 +97,15 @@
             <% end %>
           <% end %>
 
-          <%= link_to @project.production_url,
-                target: "_blank",
-                rel: "noopener",
-                class: "inline-flex items-center justify-center gap-2 rounded-md border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-200 hover:border-gray-500 hover:bg-gray-800",
-                title: "Ouvre le site en production" do %>
-            <%= fa_icon(:arrow_up_right_from_square, class_name: "text-sm") %>
-            Open site
-          <% end %>
+          <%= render "shared/ui/button",
+            label: "Open site",
+            href: @project.production_url,
+            icon: :arrow_up_right_from_square,
+            variant: :secondary,
+            size: :md,
+            target: "_blank",
+            rel: "noopener",
+            title: "Ouvre le site en production" %>
 
           <%= button_to refresh_runtime_project_path(@project),
                 method: :post,
@@ -203,14 +204,17 @@
       </div>
     </div>
   </div>
-</section>
+<% end %>
 
 <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
   <div class="space-y-6">
     <section class="overflow-hidden rounded-xl border border-gray-800 bg-gray-900 shadow">
       <div class="border-b border-gray-800 px-5 py-4">
-        <h2 class="text-lg font-bold text-gray-100">Release status</h2>
-        <p class="mt-1 text-sm text-gray-400">État court de la production.</p>
+        <%= render "shared/ui/section_header",
+          title: "Release status",
+          description: "État court de la production.",
+          icon: :code_branch,
+          title_class: "text-lg" %>
       </div>
 
       <dl class="grid grid-cols-1 text-sm sm:grid-cols-2">
@@ -481,10 +485,9 @@
           </div>
 
           <div class="flex shrink-0 items-center gap-3 text-sm">
-            <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold <%= pull_request.state == 'open' ? 'bg-green-900/40 text-green-300' : pull_request.state == 'merged' ? 'bg-purple-900/40 text-purple-300' : 'bg-gray-800 text-gray-300' %>">
-              <span class="h-1.5 w-1.5 rounded-full <%= pull_request.state == 'open' ? 'bg-green-300' : pull_request.state == 'merged' ? 'bg-purple-300' : 'bg-gray-400' %>"></span>
-              <%= pull_request.state %><%= pull_request.draft? ? " draft" : "" %>
-            </span>
+            <%= render "shared/ui/badge",
+              label: "#{pull_request.state}#{pull_request.draft? ? ' draft' : ''}",
+              variant: pull_request.state == "open" ? :success : pull_request.state == "merged" ? :info : :neutral %>
             <span class="text-gray-400">
               <% if pull_request.github_updated_at %>
                 <%= l(pull_request.github_updated_at, format: :short) %>
@@ -587,10 +590,10 @@
                   <% end %>
                 </td>
                 <td class="whitespace-nowrap px-5 py-4">
-                  <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold <%= cron_job.last_status == 'success' ? 'bg-green-900/40 text-green-300' : cron_job.last_status == 'failed' ? 'bg-red-900/40 text-red-300' : 'bg-gray-800 text-gray-300' %>">
-                    <span class="h-1.5 w-1.5 rounded-full <%= cron_job.last_status == 'success' ? 'bg-green-300' : cron_job.last_status == 'failed' ? 'bg-red-300' : 'bg-gray-400' %>"></span>
-                    <%= cron_job.last_status.presence || "unknown" %>
-                  </span>
+                  <%= render "shared/ui/badge",
+                    label: cron_job.last_status.presence || "unknown",
+                    variant: cron_job.last_status == "success" ? :success : cron_job.last_status == "failed" ? :danger : :neutral,
+                    icon: cron_job.last_status == "success" ? :circle_check : cron_job.last_status == "failed" ? :circle_xmark : :circle_question %>
                 </td>
                 <td class="whitespace-nowrap px-5 py-4 text-gray-300">
                   <%= cron_job.last_duration.present? ? "#{cron_job.last_duration}s" : "unknown" %>
@@ -631,11 +634,11 @@
                     Production: <%= @project.branch %>@<%= deploy.commit_sha.first(7) %>
                   <% end %>
                   <% if deploy.success? %>
-                    <span class="ml-2 rounded bg-green-900/40 px-2 py-0.5 text-xs text-green-300">Published</span>
+                    <%= render "shared/ui/badge", label: "Published", variant: :success, html_class: "ml-2" %>
                   <% elsif deploy.failed? %>
-                    <span class="ml-2 rounded bg-red-900/40 px-2 py-0.5 text-xs text-red-300">Failed</span>
+                    <%= render "shared/ui/badge", label: "Failed", variant: :danger, html_class: "ml-2" %>
                   <% else %>
-                    <span class="ml-2 rounded bg-yellow-900/40 px-2 py-0.5 text-xs text-yellow-300"><%= deploy.status %></span>
+                    <%= render "shared/ui/badge", label: deploy.status, variant: :warning, html_class: "ml-2" %>
                   <% end %>
                 </p>
                 <p class="mt-1 text-sm text-gray-400"><%= l(deploy.created_at, format: :short) %><%= deploy.duration ? " · #{deploy.duration}s" : "" %></p>
@@ -725,4 +728,5 @@
   </div>
     </div>
   </div>
-</details>
+  </div>
+</section>
