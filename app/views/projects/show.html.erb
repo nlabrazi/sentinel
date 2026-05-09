@@ -9,287 +9,499 @@
   </nav>
 
   <div class="grid grid-cols-1 gap-6 lg:grid-cols-[13rem_minmax(0,1fr)]">
-    <aside class="hidden text-sm lg:block">
-      <nav class="space-y-4 text-gray-400">
-        <a href="#overview" class="flex items-center gap-2 font-semibold text-cyan-300">
-          <span class="h-2 w-2 rotate-45 bg-cyan-300"></span>
-          Project overview
-        </a>
-        <a href="#commits" class="block pl-6 hover:text-gray-100">Commits</a>
-        <a href="#pull-requests" class="block pl-6 hover:text-gray-100">Pull requests</a>
-        <a href="#configuration" class="block pl-6 hover:text-gray-100">Project configuration</a>
-        <a href="#cron-jobs" class="block pl-6 hover:text-gray-100">Cron jobs</a>
-        <a href="#deploys" class="block pl-6 hover:text-gray-100">Deploys</a>
-        <a href="#healthcheck" class="block pl-6 hover:text-gray-100">Healthcheck</a>
-      </nav>
-    </aside>
+<aside class="hidden text-sm lg:block">
+  <nav class="sticky top-24 max-h-[calc(100vh-7rem)] space-y-4 overflow-y-auto pr-2 text-gray-400">
+    <a href="#overview" class="flex items-center gap-2 font-semibold text-cyan-300">
+      <span class="h-2 w-2 rotate-45 bg-cyan-300"></span>
+      Project overview
+    </a>
+    <a href="#configuration" class="block pl-6 hover:text-gray-100">Project configuration</a>
+    <a href="#cron-jobs" class="block pl-6 hover:text-gray-100">Jobs</a>
+    <a href="#deploys" class="block pl-6 hover:text-gray-100">Deploys</a>
+    <a href="#healthcheck" class="block pl-6 hover:text-gray-100">Healthcheck</a>
+    <a href="#commits" class="block pl-6 hover:text-gray-100">Commits</a>
+    <a href="#pull-requests" class="block pl-6 hover:text-gray-100">Pull requests</a>
+  </nav>
+</aside>
 
     <div class="min-w-0 space-y-6">
-  <div id="overview" class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(22rem,1fr)]">
-    <article class="rounded-lg border border-gray-800 bg-gray-900 p-6 shadow">
-      <div class="flex flex-col gap-5 md:flex-row md:items-start">
-        <div class="relative overflow-hidden rounded border border-gray-800 bg-gray-950 md:w-56 md:shrink-0 md:self-start">
-          <% if @project.screenshot.attached? %>
-            <img src="<%= url_for(@project.screenshot) %>"
-                 alt="Aperçu de <%= @project.name %>"
-                 class="aspect-video w-full object-cover"
-                 loading="lazy">
-          <% else %>
-            <div class="flex aspect-video w-full items-center justify-center text-xs text-gray-500">No preview</div>
-          <% end %>
-          <span class="absolute right-2 top-2 rounded-md bg-gray-800 p-2 text-gray-300"><%= fa_icon(:gear, class_name: "h-4 w-4") %></span>
+<div id="overview" class="space-y-6">
+  <% latest_deployment = @deployments.first %>
+  <% latest_ping = @latest_ping %>
+  <% cron_status = @project.cron_summary_status %>
+  <% behind_count = @project.commits_behind.to_i %>
+
+<section class="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow">
+  <div class="grid grid-cols-1 gap-5 xl:grid-cols-[19rem_minmax(0,1fr)] xl:items-start">
+    <div class="overflow-hidden rounded-xl border border-gray-800 bg-gray-950">
+      <% if @project.screenshot.attached? %>
+        <img src="<%= url_for(@project.screenshot) %>"
+             alt="Aperçu de <%= @project.name %>"
+             class="h-full min-h-56 w-full object-cover"
+             loading="lazy">
+      <% else %>
+        <div class="flex min-h-56 w-full items-center justify-center text-sm text-gray-500">
+          No preview
         </div>
-
-        <div class="min-w-0 flex-1">
-          <h1 class="break-words text-2xl font-bold text-gray-100"><%= @project.name %></h1>
-          <p class="mt-2 flex items-center gap-2 text-sm font-semibold <%= @project.online? ? 'text-green-400' : @project.offline? ? 'text-red-400' : 'text-gray-400' %>">
-            <span class="h-2 w-2 rounded-full <%= @project.online? ? 'bg-green-400' : @project.offline? ? 'bg-red-400' : 'bg-gray-500' %>"></span>
-            <%= @project.production_url %>
-          </p>
-          <p class="mt-4 text-gray-300">Deploys from GitHub with <%= @project.branch %>.</p>
-          <% if @deployments.first %>
-            <p class="mt-3 text-gray-300">Published <%= time_ago_in_words(@deployments.first.created_at) %> ago.</p>
-          <% else %>
-            <p class="mt-3 text-gray-400">No production deploy has completed yet.</p>
-          <% end %>
-          <% if @running_deployment %>
-            <p class="mt-3 rounded-md border border-yellow-900/60 bg-yellow-950/40 px-3 py-2 text-sm font-semibold text-yellow-200">
-              Deployment running since <%= time_ago_in_words(@running_deployment.created_at) %> ago.
-            </p>
-          <% end %>
-
-<div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-  <% if @running_deployment %>
-    <span class="inline-flex w-full items-center justify-center gap-2 rounded-md border border-yellow-900/60 bg-yellow-950/40 px-4 py-2 text-sm font-semibold text-yellow-300 sm:w-auto"
-          title="Un déploiement est déjà en cours">
-      <%= fa_icon(:rotate, class_name: "h-4 w-4") %>
-      Deploy running
-    </span>
-  <% else %>
-    <%= button_to deploy_project_path(@project),
-          method: :post,
-          class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-cyan-300 px-4 py-2 text-sm font-bold text-gray-950 hover:bg-cyan-200 sm:w-auto",
-          title: "Déploie le dernier commit disponible pour ce projet",
-          aria: { label: "Déployer le dernier commit" } do %>
-      <%= fa_icon(:play, class_name: "h-4 w-4") %>
-      Deploy latest
-    <% end %>
-  <% end %>
-
-  <%= link_to @project.production_url,
-        target: "_blank",
-        rel: "noopener",
-        class: "inline-flex w-full items-center justify-center gap-2 rounded-md border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-200 hover:border-gray-500 hover:bg-gray-800 sm:w-auto",
-        title: "Ouvre le site en production" do %>
-    <%= fa_icon(:arrow_up_right_from_square, class_name: "h-4 w-4") %>
-    Open site
-  <% end %>
-
-  <%= button_to toggle_maintenance_project_path(@project),
-        method: :patch,
-        class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-yellow-900/60 px-4 py-2 text-sm font-semibold text-yellow-300 hover:bg-yellow-950/40 sm:w-auto",
-        title: "Active ou désactive le mode maintenance côté VPS",
-        aria: { label: "Basculer le mode maintenance" } do %>
-    <%= fa_icon(:wrench, class_name: "h-4 w-4") %>
-    <%= @project.maintenance_mode? ? "Disable maintenance" : "Enable maintenance" %>
-  <% end %>
-
-  <details class="group relative w-full sm:w-auto">
-    <summary class="flex w-full cursor-pointer list-none items-center justify-center gap-2 rounded-md border border-gray-800 px-4 py-2 text-sm font-semibold text-gray-400 hover:border-gray-600 hover:bg-gray-800 hover:text-gray-100 sm:w-auto">
-      <%= fa_icon(:ellipsis, class_name: "h-4 w-4") %>
-      More
-    </summary>
-
-    <div class="absolute left-0 z-20 mt-2 w-60 overflow-hidden rounded-lg border border-gray-800 bg-gray-950 shadow-xl sm:left-auto sm:right-0">
-      <%= button_to refresh_github_commits_project_path(@project),
-            method: :post,
-            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100",
-            title: "Synchronise les commits et pull requests GitHub",
-            aria: { label: "Synchroniser GitHub" } do %>
-        <%= fa_icon(:rotate, class_name: "h-4 w-4 text-gray-500") %>
-        Sync GitHub
-      <% end %>
-
-      <%= button_to refresh_runtime_project_path(@project),
-            method: :post,
-            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100",
-            title: "Lance un healthcheck HTTP immédiat",
-            aria: { label: "Vérifier le runtime" } do %>
-        <%= fa_icon(:heart_pulse, class_name: "h-4 w-4 text-gray-500") %>
-        Check runtime
-      <% end %>
-
-      <%= button_to refresh_cron_status_project_path(@project),
-            method: :post,
-            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100",
-            title: "Synchronise les statuts cron publiés par le projet",
-            aria: { label: "Synchroniser les statuts cron" } do %>
-        <%= fa_icon(:clock, class_name: "h-4 w-4 text-gray-500") %>
-        Sync cron
-      <% end %>
-
-      <%= button_to refresh_screenshot_project_path(@project),
-            method: :post,
-            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100",
-            title: "Régénère l’aperçu visuel du site",
-            aria: { label: "Rafraîchir l’aperçu" } do %>
-        <%= fa_icon(:image, class_name: "h-4 w-4 text-gray-500") %>
-        Refresh preview
       <% end %>
     </div>
-  </details>
-</div>
+
+    <div class="min-w-0">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 class="break-words text-2xl font-bold text-gray-100">
+              <%= @project.name %>
+            </h1>
+
+            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold <%= @project.online? ? 'bg-green-900/40 text-green-300' : @project.offline? ? 'bg-red-900/40 text-red-300' : 'bg-gray-800 text-gray-300' %>">
+              <span class="h-1.5 w-1.5 rounded-full <%= @project.online? ? 'bg-green-300' : @project.offline? ? 'bg-red-300' : 'bg-gray-400' %>"></span>
+              <%= @project.status %>
+            </span>
+
+            <% if @project.maintenance_mode? %>
+              <span class="inline-flex items-center gap-1 rounded-full bg-yellow-900/40 px-2.5 py-1 text-xs font-semibold text-yellow-300">
+                <%= fa_icon(:wrench, class_name: "text-xs") %>
+                Maintenance
+              </span>
+            <% end %>
+          </div>
+
+          <p class="mt-2 break-all text-sm font-semibold text-green-300">
+            <%= @project.production_url %>
+          </p>
+
+          <p class="mt-3 text-sm text-gray-400">
+            Deploys from GitHub with
+            <span class="font-mono text-gray-200"><%= @project.branch %></span>.
+            <% if @running_deployment %>
+              <span class="ml-2 font-semibold text-yellow-300">Deploy running</span>
+            <% end %>
+          </p>
+        </div>
+
+        <div class="flex flex-wrap gap-2 lg:justify-end">
+          <% if @running_deployment %>
+            <span class="inline-flex items-center justify-center gap-2 rounded-md border border-yellow-900/60 bg-yellow-950/40 px-4 py-2 text-sm font-semibold text-yellow-300">
+              <%= fa_icon(:rotate, class_name: "text-sm") %>
+              Running
+            </span>
+          <% else %>
+            <%= button_to deploy_project_path(@project),
+                  method: :post,
+                  class: "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md bg-cyan-300 px-4 py-2 text-sm font-bold text-gray-950 hover:bg-cyan-200",
+                  title: "Déploie le dernier commit disponible pour ce projet",
+                  aria: { label: "Déployer le dernier commit" } do %>
+              <%= fa_icon(:play, class_name: "text-sm") %>
+              Deploy latest
+            <% end %>
+          <% end %>
+
+          <%= link_to @project.production_url,
+                target: "_blank",
+                rel: "noopener",
+                class: "inline-flex items-center justify-center gap-2 rounded-md border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-200 hover:border-gray-500 hover:bg-gray-800",
+                title: "Ouvre le site en production" do %>
+            <%= fa_icon(:arrow_up_right_from_square, class_name: "text-sm") %>
+            Open site
+          <% end %>
+
+          <%= button_to refresh_runtime_project_path(@project),
+                method: :post,
+                class: "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-200 hover:border-gray-500 hover:bg-gray-800",
+                title: "Lance un healthcheck HTTP immédiat",
+                aria: { label: "Vérifier le runtime" } do %>
+            <%= fa_icon(:heart_pulse, class_name: "text-sm") %>
+            Check runtime
+          <% end %>
+
+          <details class="group/menu relative">
+            <summary class="flex cursor-pointer list-none items-center justify-center gap-2 rounded-md border border-gray-800 px-4 py-2 text-sm font-semibold text-gray-400 hover:border-gray-600 hover:bg-gray-800 hover:text-gray-100">
+              <%= fa_icon(:ellipsis, class_name: "text-base") %>
+              More
+            </summary>
+
+            <div class="absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-lg border border-gray-800 bg-gray-950 shadow-xl">
+              <%= button_to refresh_github_commits_project_path(@project),
+                    method: :post,
+                    class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100" do %>
+                <%= fa_icon(:rotate, class_name: "text-sm text-gray-500") %>
+                Sync GitHub
+              <% end %>
+
+              <%= button_to refresh_cron_status_project_path(@project),
+                    method: :post,
+                    class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100" do %>
+                <%= fa_icon(:clock, class_name: "text-sm text-gray-500") %>
+                Sync jobs
+              <% end %>
+
+              <%= button_to refresh_screenshot_project_path(@project),
+                    method: :post,
+                    class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100" do %>
+                <%= fa_icon(:image, class_name: "text-sm text-gray-500") %>
+                Refresh preview
+              <% end %>
+
+              <div class="border-t border-gray-800"></div>
+
+              <%= button_to toggle_maintenance_project_path(@project),
+                    method: :patch,
+                    class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-yellow-300 hover:bg-yellow-950/40" do %>
+                <%= fa_icon(:wrench, class_name: "text-sm text-yellow-500") %>
+                <%= @project.maintenance_mode? ? "Disable maintenance" : "Enable maintenance" %>
+              <% end %>
+            </div>
+          </details>
         </div>
       </div>
-    </article>
 
-    <aside class="overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow">
-      <div class="h-1.5 bg-indigo-600"></div>
-      <div class="grid min-h-56 grid-cols-[1fr_8rem] gap-4 p-6">
-        <div>
-          <h2 class="text-xl font-bold text-gray-100">Release readiness</h2>
-          <p class="mt-3 text-sm leading-6 text-gray-400">
-            Review deployment health before shipping: maintenance mode, commit drift, latest production status, and SSH configuration.
+      <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="rounded-lg border border-gray-800 bg-gray-950/70 px-4 py-3">
+          <div class="flex items-center gap-2 text-xs text-gray-500">
+            <%= fa_icon(:code_branch, class_name: "text-xs") %>
+            <span>Version</span>
+          </div>
+          <p class="mt-2 font-semibold <%= behind_count.positive? ? 'text-yellow-300' : 'text-green-300' %>">
+            <%= behind_count.positive? ? "#{behind_count} update(s)" : "Up to date" %>
           </p>
-          <dl class="mt-5 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-            <div>
-              <dt class="text-gray-500">Maintenance</dt>
-              <dd class="mt-1 font-semibold text-gray-100"><%= @project.maintenance_mode? ? "Enabled" : "Disabled" %></dd>
-            </div>
-            <div>
-              <dt class="text-gray-500">Commit drift</dt>
-              <dd class="mt-1 font-semibold text-gray-100"><%= @project.commits_behind.to_i %> commit(s)</dd>
-            </div>
-            <div class="sm:col-span-2">
-              <dt class="text-gray-500">Deployment state</dt>
-              <dd class="mt-1 font-semibold <%= @running_deployment ? 'text-yellow-300' : 'text-gray-100' %>">
-                <%= @running_deployment ? "Running" : "Idle" %>
-              </dd>
-            </div>
-          </dl>
         </div>
-        <div class="hidden items-end justify-center sm:flex">
-          <div class="relative h-28 w-24 rounded-t-3xl bg-gray-700">
-            <div class="absolute -top-12 left-1/2 h-16 w-16 -translate-x-1/2 rounded-t-full border-8 border-gray-700 border-b-0"></div>
+
+        <div class="rounded-lg border border-gray-800 bg-gray-950/70 px-4 py-3">
+          <div class="flex items-center gap-2 text-xs text-gray-500">
+            <%= fa_icon(:clock, class_name: "text-xs") %>
+            <span>Jobs</span>
+          </div>
+          <p class="mt-2 font-semibold <%= cron_status == 'ok' ? 'text-green-300' : cron_status == 'failed' ? 'text-red-300' : 'text-gray-300' %>">
+            <%= cron_status %>
+          </p>
+        </div>
+
+        <div class="rounded-lg border border-gray-800 bg-gray-950/70 px-4 py-3">
+          <div class="flex items-center gap-2 text-xs text-gray-500">
+            <%= fa_icon(:rocket, class_name: "text-xs") %>
+            <span>Last deploy</span>
+          </div>
+          <p class="mt-2 font-semibold text-gray-100">
+            <% if latest_deployment %>
+              <%= time_ago_in_words(latest_deployment.created_at) %> ago
+            <% else %>
+              Never
+            <% end %>
+          </p>
+        </div>
+
+        <div class="rounded-lg border border-gray-800 bg-gray-950/70 px-4 py-3">
+          <div class="flex items-center gap-2 text-xs text-gray-500">
+            <%= fa_icon(:globe, class_name: "text-xs") %>
+            <span>HTTP</span>
+          </div>
+          <p class="mt-2 font-semibold text-gray-100">
+            <%= latest_ping&.http_status || "unknown" %>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+  <div class="space-y-6">
+    <section class="overflow-hidden rounded-xl border border-gray-800 bg-gray-900 shadow">
+      <div class="border-b border-gray-800 px-5 py-4">
+        <h2 class="text-lg font-bold text-gray-100">Release status</h2>
+        <p class="mt-1 text-sm text-gray-400">État court de la production.</p>
+      </div>
+
+      <dl class="grid grid-cols-1 text-sm sm:grid-cols-2">
+        <div class="border-b border-gray-800 px-5 py-4 sm:border-r">
+          <dt class="text-gray-500">Production</dt>
+          <dd class="mt-1 font-mono font-semibold text-gray-100">
+            <%= @project.last_commit_deployed.present? ? @project.last_commit_deployed.first(7) : "unknown" %>
+          </dd>
+        </div>
+
+        <div class="border-b border-gray-800 px-5 py-4">
+          <dt class="text-gray-500"><%= @project.branch %></dt>
+          <dd class="mt-1 font-mono font-semibold text-gray-100">
+            <%= @project.latest_commit_available.present? ? @project.latest_commit_available.first(7) : "unknown" %>
+          </dd>
+        </div>
+
+        <div class="border-b border-gray-800 px-5 py-4 sm:border-r">
+          <dt class="text-gray-500">Version</dt>
+          <dd class="mt-1 font-semibold <%= behind_count.positive? ? 'text-yellow-300' : 'text-green-300' %>">
+            <%= behind_count.positive? ? "#{behind_count} update(s)" : "Up to date" %>
+          </dd>
+        </div>
+
+        <div class="border-b border-gray-800 px-5 py-4">
+          <dt class="text-gray-500">Deploy state</dt>
+          <dd class="mt-1 font-semibold <%= @running_deployment ? 'text-yellow-300' : 'text-gray-100' %>">
+            <%= @running_deployment ? "Running" : "Idle" %>
+          </dd>
+        </div>
+
+        <div class="border-b border-gray-800 px-5 py-4 sm:border-r sm:border-b-0">
+          <dt class="text-gray-500">GitHub sync</dt>
+          <dd class="mt-1 font-semibold text-gray-100">
+            <% if @project.github_synced_at %>
+              <%= time_ago_in_words(@project.github_synced_at) %> ago
+            <% else %>
+              Never
+            <% end %>
+          </dd>
+        </div>
+
+        <div class="px-5 py-4">
+          <dt class="text-gray-500">Jobs sync</dt>
+          <dd class="mt-1 font-semibold text-gray-100">
+            <% if @project.cron_synced_at %>
+              <%= time_ago_in_words(@project.cron_synced_at) %> ago
+            <% else %>
+              Never
+            <% end %>
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="overflow-hidden rounded-xl border border-gray-800 bg-gray-900 shadow">
+      <div class="border-b border-gray-800 px-5 py-4">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-gray-100">Quick commands</h2>
+            <p class="mt-1 text-sm text-gray-400">Future console sécurisée pour ce projet.</p>
+          </div>
+
+          <span class="rounded-full bg-gray-800 px-2.5 py-1 text-xs font-semibold text-gray-400">V2</span>
+        </div>
+      </div>
+
+      <div class="space-y-4 p-5">
+        <div class="rounded-lg border border-gray-800 bg-gray-950 px-4 py-3">
+          <p class="text-xs font-medium text-gray-500">Connected directory</p>
+          <p class="mt-1 truncate font-mono text-sm text-gray-200">
+            <%= @project.vps_path %>
+          </p>
+        </div>
+
+        <div class="rounded-lg border border-dashed border-gray-700 bg-gray-950/60 p-4">
+          <p class="font-semibold text-gray-200">Safe commands only</p>
+          <p class="mt-1 text-sm leading-6 text-gray-400">
+            Prévu pour lancer uniquement des commandes prédéfinies : status, logs, docker ps, latest deploy log.
+          </p>
+
+          <div class="mt-4 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+            <span class="rounded-md border border-gray-800 bg-gray-950 px-2 py-1.5 text-center font-mono text-gray-500">status.sh</span>
+            <span class="rounded-md border border-gray-800 bg-gray-950 px-2 py-1.5 text-center font-mono text-gray-500">git status</span>
+            <span class="rounded-md border border-gray-800 bg-gray-950 px-2 py-1.5 text-center font-mono text-gray-500">compose ps</span>
+            <span class="rounded-md border border-gray-800 bg-gray-950 px-2 py-1.5 text-center font-mono text-gray-500">tail logs</span>
           </div>
         </div>
       </div>
-    </aside>
+    </section>
   </div>
 
-  <section id="commits" class="overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow">
-    <div class="border-b border-gray-800 px-5 py-4">
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 class="text-xl font-bold text-gray-100">Recent commits</h2>
-          <p class="mt-1 text-sm text-gray-400">
-            Latest commits synchronized from the tracked GitHub branch.
-            <% if @project.github_synced_at %>
-              GitHub synced <%= time_ago_in_words(@project.github_synced_at) %> ago.
-            <% else %>
-              GitHub never synced.
-            <% end %>
-          </p>
+  <div class="space-y-6">
+    <section class="overflow-hidden rounded-xl border border-gray-800 bg-gray-900 shadow">
+      <div class="border-b border-gray-800 px-5 py-4">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-gray-100">Observability</h2>
+            <p class="mt-1 text-sm text-gray-400">Place prévue pour Grafana.</p>
+          </div>
+
+          <span class="rounded-full bg-gray-800 px-2.5 py-1 text-xs font-semibold text-gray-400">Soon</span>
         </div>
-        <span class="inline-flex w-fit items-center rounded-full bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-300">
-          <%= @github_commits.size %> commit<%= "s" unless @github_commits.size == 1 %>
-        </span>
       </div>
+
+      <div class="p-5">
+        <div class="grid grid-cols-3 gap-3 text-sm">
+          <div class="rounded-lg border border-gray-800 bg-gray-950 px-3 py-3">
+            <p class="text-xs text-gray-500">Status</p>
+            <p class="mt-1 font-semibold <%= @project.online? ? 'text-green-300' : @project.offline? ? 'text-red-300' : 'text-gray-300' %>">
+              <%= @project.status %>
+            </p>
+          </div>
+
+          <div class="rounded-lg border border-gray-800 bg-gray-950 px-3 py-3">
+            <p class="text-xs text-gray-500">HTTP</p>
+            <p class="mt-1 font-semibold text-gray-100">
+              <%= latest_ping&.http_status || "unknown" %>
+            </p>
+          </div>
+
+          <div class="rounded-lg border border-gray-800 bg-gray-950 px-3 py-3">
+            <p class="text-xs text-gray-500">Latency</p>
+            <p class="mt-1 font-semibold text-gray-100">
+              <%= latest_ping&.response_time_ms ? "#{latest_ping.response_time_ms}ms" : "unknown" %>
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-4 flex h-28 items-center justify-center rounded-lg border border-dashed border-gray-700 bg-gray-950/60 text-center">
+          <div>
+            <p class="text-sm font-semibold text-gray-300">Grafana embed placeholder</p>
+            <p class="mt-1 text-xs text-gray-500">Uptime, latency, requests, errors.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="overflow-hidden rounded-xl border border-gray-800 bg-gray-900 shadow">
+      <div class="border-b border-gray-800 px-5 py-4">
+        <h2 class="text-lg font-bold text-gray-100">Security</h2>
+        <p class="mt-1 text-sm text-gray-400">Points de contrôle simples pour ce projet.</p>
+      </div>
+
+      <div class="divide-y divide-gray-800 text-sm">
+        <div class="flex items-center justify-between gap-4 px-5 py-3">
+          <span class="text-gray-400">HTTPS URL</span>
+          <span class="font-semibold <%= @project.production_url.start_with?('https://') ? 'text-green-300' : 'text-yellow-300' %>">
+            <%= @project.production_url.start_with?('https://') ? "Enabled" : "Check" %>
+          </span>
+        </div>
+
+        <div class="flex items-center justify-between gap-4 px-5 py-3">
+          <span class="text-gray-400">Maintenance</span>
+          <span class="font-semibold <%= @project.maintenance_mode? ? 'text-yellow-300' : 'text-green-300' %>">
+            <%= @project.maintenance_mode? ? "Enabled" : "Disabled" %>
+          </span>
+        </div>
+
+        <div class="flex items-center justify-between gap-4 px-5 py-3">
+          <span class="text-gray-400">VPS path</span>
+          <span class="font-semibold text-green-300">Restricted</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<details id="commits" class="group overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow">
+  <summary class="flex cursor-pointer list-none items-center justify-between gap-4 border-b border-gray-800 px-5 py-4 hover:bg-gray-800/40">
+    <div>
+      <h2 class="text-xl font-bold text-gray-100">Recent commits</h2>
+      <p class="mt-1 text-sm text-gray-400">
+        Latest commits synchronized from the tracked GitHub branch.
+        <% if @project.github_synced_at %>
+          GitHub synced <%= time_ago_in_words(@project.github_synced_at) %> ago.
+        <% else %>
+          GitHub never synced.
+        <% end %>
+      </p>
     </div>
 
-    <% if @github_commits.any? %>
-      <div class="divide-y divide-gray-800">
-        <% @github_commits.each do |commit| %>
-          <% short_sha = commit.sha.first(7) %>
-          <article class="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:justify-between">
-            <div class="min-w-0">
-              <p class="truncate font-semibold text-gray-100">
-                <%= commit.message %>
-              </p>
-              <p class="mt-1 text-sm text-gray-400">
-                <code class="rounded bg-gray-950 px-1.5 py-0.5 text-xs text-gray-200"><%= short_sha %></code>
-                <% if commit.author_login.present? || commit.author_name.present? %>
-                  <span class="mx-1 text-gray-600">·</span>
-                  <%= commit.author_login.presence || commit.author_name %>
-                <% end %>
-              </p>
-            </div>
-            <p class="shrink-0 text-sm text-gray-400">
-              <% if commit.committed_at %>
-                <%= l(commit.committed_at, format: :short) %>
+    <div class="flex items-center gap-3">
+      <span class="inline-flex w-fit items-center rounded-full bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-300">
+        <%= @github_commits.size %> commit<%= "s" unless @github_commits.size == 1 %>
+      </span>
+      <span class="text-sm text-gray-500 group-open:rotate-180">
+        <%= fa_icon(:chevron_down, class_name: "text-sm") %>
+      </span>
+    </div>
+  </summary>
+
+  <% if @github_commits.any? %>
+    <div class="divide-y divide-gray-800">
+      <% @github_commits.each do |commit| %>
+        <% short_sha = commit.sha.first(7) %>
+        <article class="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:justify-between">
+          <div class="min-w-0">
+            <p class="truncate font-semibold text-gray-100">
+              <%= commit.message %>
+            </p>
+            <p class="mt-1 text-sm text-gray-400">
+              <code class="rounded bg-gray-950 px-1.5 py-0.5 text-xs text-gray-200"><%= short_sha %></code>
+              <% if commit.author_login.present? || commit.author_name.present? %>
+                <span class="mx-1 text-gray-600">·</span>
+                <%= commit.author_login.presence || commit.author_name %>
+              <% end %>
+            </p>
+          </div>
+          <p class="shrink-0 text-sm text-gray-400">
+            <% if commit.committed_at %>
+              <%= l(commit.committed_at, format: :short) %>
+            <% else %>
+              unknown
+            <% end %>
+          </p>
+        </article>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="px-5 py-6 text-sm text-gray-400">
+      No GitHub commit history has been synchronized yet.
+    </div>
+  <% end %>
+</details>
+
+<details id="pull-requests" class="group overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow">
+  <summary class="flex cursor-pointer list-none items-center justify-between gap-4 border-b border-gray-800 px-5 py-4 hover:bg-gray-800/40">
+    <div>
+      <h2 class="text-xl font-bold text-gray-100">Pull requests</h2>
+      <p class="mt-1 text-sm text-gray-400">
+        Open and recently updated GitHub pull requests for this repository.
+        <% if @project.github_synced_at %>
+          GitHub synced <%= time_ago_in_words(@project.github_synced_at) %> ago.
+        <% else %>
+          GitHub never synced.
+        <% end %>
+      </p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <span class="inline-flex w-fit items-center rounded-full bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-300">
+        <%= @github_pull_requests.size %> PR<%= "s" unless @github_pull_requests.size == 1 %>
+      </span>
+      <span class="text-sm text-gray-500 group-open:rotate-180">
+        <%= fa_icon(:chevron_down, class_name: "text-sm") %>
+      </span>
+    </div>
+  </summary>
+
+  <% if @github_pull_requests.any? %>
+    <div class="divide-y divide-gray-800">
+      <% @github_pull_requests.each do |pull_request| %>
+        <article class="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:justify-between">
+          <div class="min-w-0">
+            <p class="truncate font-semibold text-gray-100">
+              #<%= pull_request.number %> <%= pull_request.title %>
+            </p>
+            <p class="mt-1 text-sm text-gray-400">
+              <% if pull_request.author_login.present? %>
+                <%= pull_request.author_login %>
+                <span class="mx-1 text-gray-600">·</span>
+              <% end %>
+              <span class="font-mono text-xs">
+                <%= pull_request.head_ref.presence || "unknown" %> -> <%= pull_request.base_ref.presence || @project.branch %>
+              </span>
+            </p>
+          </div>
+
+          <div class="flex shrink-0 items-center gap-3 text-sm">
+            <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold <%= pull_request.state == 'open' ? 'bg-green-900/40 text-green-300' : pull_request.state == 'merged' ? 'bg-purple-900/40 text-purple-300' : 'bg-gray-800 text-gray-300' %>">
+              <span class="h-1.5 w-1.5 rounded-full <%= pull_request.state == 'open' ? 'bg-green-300' : pull_request.state == 'merged' ? 'bg-purple-300' : 'bg-gray-400' %>"></span>
+              <%= pull_request.state %><%= pull_request.draft? ? " draft" : "" %>
+            </span>
+            <span class="text-gray-400">
+              <% if pull_request.github_updated_at %>
+                <%= l(pull_request.github_updated_at, format: :short) %>
               <% else %>
                 unknown
               <% end %>
-            </p>
-          </article>
-        <% end %>
-      </div>
-    <% else %>
-      <div class="px-5 py-6 text-sm text-gray-400">
-        No GitHub commit history has been synchronized yet.
-      </div>
-    <% end %>
-  </section>
-
-  <section id="pull-requests" class="overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow">
-    <div class="border-b border-gray-800 px-5 py-4">
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 class="text-xl font-bold text-gray-100">Pull requests</h2>
-          <p class="mt-1 text-sm text-gray-400">
-            Open and recently updated GitHub pull requests for this repository.
-            <% if @project.github_synced_at %>
-              GitHub synced <%= time_ago_in_words(@project.github_synced_at) %> ago.
-            <% else %>
-              GitHub never synced.
-            <% end %>
-          </p>
-        </div>
-        <span class="inline-flex w-fit items-center rounded-full bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-300">
-          <%= @github_pull_requests.size %> PR<%= "s" unless @github_pull_requests.size == 1 %>
-        </span>
-      </div>
+            </span>
+          </div>
+        </article>
+      <% end %>
     </div>
-
-    <% if @github_pull_requests.any? %>
-      <div class="divide-y divide-gray-800">
-        <% @github_pull_requests.each do |pull_request| %>
-          <article class="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:justify-between">
-            <div class="min-w-0">
-              <p class="truncate font-semibold text-gray-100">
-                #<%= pull_request.number %> <%= pull_request.title %>
-              </p>
-              <p class="mt-1 text-sm text-gray-400">
-                <% if pull_request.author_login.present? %>
-                  <%= pull_request.author_login %>
-                  <span class="mx-1 text-gray-600">·</span>
-                <% end %>
-                <span class="font-mono text-xs"><%= pull_request.head_ref.presence || "unknown" %> -> <%= pull_request.base_ref.presence || @project.branch %></span>
-              </p>
-            </div>
-            <div class="flex shrink-0 items-center gap-3 text-sm">
-              <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold <%= pull_request.state == 'open' ? 'bg-green-900/40 text-green-300' : pull_request.state == 'merged' ? 'bg-purple-900/40 text-purple-300' : 'bg-gray-800 text-gray-300' %>">
-                <span class="h-1.5 w-1.5 rounded-full <%= pull_request.state == 'open' ? 'bg-green-300' : pull_request.state == 'merged' ? 'bg-purple-300' : 'bg-gray-400' %>"></span>
-                <%= pull_request.state %><%= pull_request.draft? ? " draft" : "" %>
-              </span>
-              <span class="text-gray-400">
-                <% if pull_request.github_updated_at %>
-                  <%= l(pull_request.github_updated_at, format: :short) %>
-                <% else %>
-                  unknown
-                <% end %>
-              </span>
-            </div>
-          </article>
-        <% end %>
-      </div>
-    <% else %>
-      <div class="px-5 py-6 text-sm text-gray-400">
-        No GitHub pull requests have been synchronized yet.
-      </div>
-    <% end %>
-  </section>
-
+  <% else %>
+    <div class="px-5 py-6 text-sm text-gray-400">
+      No GitHub pull requests have been synchronized yet.
+    </div>
+  <% end %>
+</details>
   <section id="configuration" class="overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow">
     <div class="border-b border-gray-800 bg-gradient-to-r from-indigo-950 via-purple-950 to-gray-900 px-5 py-4">
       <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -513,4 +725,4 @@
   </div>
     </div>
   </div>
-</section>
+</details>
