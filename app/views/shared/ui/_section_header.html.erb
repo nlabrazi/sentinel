@@ -1,0 +1,22 @@
+<% eyebrow ||= nil %>
+<% title ||= "" %>
+<% description ||= nil %>
+<% icon ||= nil %>
+<% title_class ||= "text-xl" %>
+
+<div class="min-w-0">
+  <% if eyebrow.present? %>
+    <p class="text-sm font-semibold text-cyan-300"><%= eyebrow %></p>
+  <% end %>
+
+  <div class="flex items-center gap-2 <%= eyebrow.present? ? 'mt-1' : '' %>">
+    <%= fa_icon(icon, class_name: "h-5 w-5 text-gray-500") if icon.present? %>
+    <h2 class="<%= title_class %> font-bold text-gray-100"><%= title %></h2>
+  </div>
+
+  <% if description.present? %>
+    <p class="mt-2 max-w-2xl text-sm leading-6 text-gray-400">
+      <%= description %>
+    </p>
+  <% end %>
+</div>

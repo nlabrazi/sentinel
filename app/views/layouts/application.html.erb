@@ -6,6 +6,9 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= favicon_link_tag "/favicon.ico" %>
+    <% if ENV["FONT_AWESOME_KIT_URL"].present? %>
+      <script src="<%= ENV["FONT_AWESOME_KIT_URL"] %>" crossorigin="anonymous"></script>
+    <% end %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
@@ -83,15 +86,15 @@
         </nav>
 
         <div class="space-y-3 border-t border-gray-800 px-4 py-4" data-sidebar-target="full">
-          <button id="dark-mode-toggle"
-                  data-controller="dark-mode"
-                  data-action="click->dark-mode#toggle"
-                  class="flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-gray-100">
-            <svg data-dark-mode-target="icon" class="mr-2 h-4 w-4" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true">
-              <path d="<%= ApplicationHelper::FONT_AWESOME_PATHS.fetch(:moon).last %>" />
-            </svg>
-            <span data-dark-mode-target="text">Mode sombre</span>
-          </button>
+   <button id="dark-mode-toggle"
+        data-controller="dark-mode"
+        data-action="click->dark-mode#toggle"
+        class="flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-gray-100">
+  <i data-dark-mode-target="icon"
+     class="fa-solid fa-moon mr-2 text-sm"
+     aria-hidden="true"></i>
+  <span data-dark-mode-target="text">Activer Mode sombre</span>
+</button>
           <% if user_signed_in? %>
             <div class="flex items-center gap-3 px-1">
               <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-700 text-xs font-bold text-gray-100"><%= current_user.email.first.upcase %></div>

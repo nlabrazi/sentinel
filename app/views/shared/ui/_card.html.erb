@@ -1,0 +1,14 @@
+<% padding ||= true %>
+<% html_class ||= "" %>
+
+<%
+  classes = [
+    "rounded-xl border border-gray-800 bg-gray-900 shadow",
+    padding ? "p-4 sm:p-5" : nil,
+    html_class
+  ].compact.join(" ")
+%>
+
+<section class="<%= classes %>">
+  <%= yield %>
+</section>
