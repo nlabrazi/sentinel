@@ -44,16 +44,17 @@
           html_class: "bg-gray-950" %>
 
         <%= render "shared/ui/status_metric",
-          label: "Cron issues",
-          value: @projects.count { |project| project.cron_summary_status == "failed" },
-          tone: :danger,
-          html_class: "bg-gray-950" %>
+  label: "Jobs issues",
+  value: @projects.count(&:cron_needs_attention?),
+  tone: :warning,
+  html_class: "bg-gray-950" %>
 
         <%= render "shared/ui/status_metric",
           label: "Maintenance",
           value: @projects.count(&:maintenance_mode?),
           tone: :warning,
           html_class: "bg-gray-950" %>
+      </div>
       </div>
 
     <div class="divide-y divide-gray-800">
@@ -62,9 +63,8 @@
           <% latest_deployment = @latest_deployments_by_project_id[project.id] %>
           <% running_deployment = @running_deployments_by_project_id[project.id] %>
           <% latest_ping = @latest_pings_by_project_id[project.id] %>
-          <% cron_status = project.cron_summary_status %>
           <% behind_count = project.commits_behind.to_i %>
-          <% needs_attention = project.offline? || behind_count.positive? || cron_status == "failed" || project.maintenance_mode? %>
+          <% needs_attention = project.offline? || behind_count.positive? || project.cron_needs_attention? || project.maintenance_mode? %>
 
           <article class="group px-4 py-5 transition hover:bg-gray-800/30 sm:px-6">
             <div class="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(28rem,1fr)_12rem] xl:items-center">
@@ -159,17 +159,18 @@
                 </div>
 
                 <div class="rounded-lg border border-gray-800 bg-gray-950/70 px-3 py-3">
-                  <p class="text-xs font-medium text-gray-500">Jobs</p>
-                  <p class="mt-1 font-semibold <%= cron_status == 'ok' ? 'text-green-300' : cron_status == 'failed' ? 'text-red-300' : 'text-gray-300' %>">
-                    <%= cron_status %>
-                  </p>
+  <p class="text-xs font-medium text-gray-500">Jobs</p>
 
-                  <% if project.cron_synced_at %>
-                    <p class="mt-1 text-xs text-gray-500"><%= time_ago_in_words(project.cron_synced_at) %> ago</p>
-                  <% else %>
-                    <p class="mt-1 text-xs text-gray-600">Never synced</p>
-                  <% end %>
-                </div>
+  <p class="mt-1 font-semibold <%= project.cron_summary_tone == :success ? 'text-green-300' : project.cron_summary_tone == :danger ? 'text-red-300' : 'text-yellow-300' %>">
+    <%= project.cron_summary_label %>
+  </p>
+
+  <% if project.cron_synced_at %>
+    <p class="mt-1 text-xs text-gray-500"><%= time_ago_in_words(project.cron_synced_at) %> ago</p>
+  <% else %>
+    <p class="mt-1 text-xs text-gray-600">Never synced</p>
+  <% end %>
+</div>
 
                 <div class="rounded-lg border border-gray-800 bg-gray-950/70 px-3 py-3">
                   <p class="text-xs font-medium text-gray-500">GitHub</p>

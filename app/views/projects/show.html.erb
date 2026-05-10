@@ -28,7 +28,6 @@
 <div id="overview" class="space-y-6">
   <% latest_deployment = @deployments.first %>
   <% latest_ping = @latest_ping %>
-  <% cron_status = @project.cron_summary_status %>
   <% behind_count = @project.commits_behind.to_i %>
 
 <%= render layout: "shared/ui/card" do %>
@@ -158,10 +157,10 @@
     tone: behind_count.positive? ? :warning : :success %>
 
   <%= render "shared/ui/status_metric",
-    label: "Jobs",
-    value: cron_status,
-    icon: :clock,
-    tone: cron_status == "ok" ? :success : cron_status == "failed" ? :danger : :muted %>
+  label: "Jobs",
+  value: @project.cron_summary_label,
+  icon: @project.cron_summary_icon,
+  tone: @project.cron_summary_tone %>
 
   <%= render "shared/ui/status_metric",
     label: "Last deploy",
@@ -549,8 +548,7 @@
           </thead>
           <tbody class="divide-y divide-gray-800">
             <% @cron_jobs.each do |cron_job| %>
-              <% latest_execution = cron_job.job_executions.max_by { |execution| execution.executed_at || execution.created_at } %>
-              <% last_log = latest_execution&.log.to_s.squish %>
+              <% last_log = cron_job.last_log_excerpt %>
               <tr class="align-top">
                 <td class="px-5 py-4">
                   <p class="font-semibold text-gray-100"><%= cron_job.name %></p>
@@ -566,19 +564,19 @@
                 </td>
                 <td class="whitespace-nowrap px-5 py-4">
                   <%= render "shared/ui/badge",
-                    label: cron_job.last_status.presence || "unknown",
-                    variant: cron_job.last_status == "success" ? :success : cron_job.last_status == "failed" ? :danger : :neutral,
-                    icon: cron_job.last_status == "success" ? :circle_check : cron_job.last_status == "failed" ? :circle_xmark : :circle_question %>
+                    label: cron_job.display_status,
+                    variant: cron_job.success? ? :success : cron_job.failed? ? :danger : :warning,
+                    icon: cron_job.success? ? :circle_check : cron_job.failed? ? :circle_xmark : :triangle_exclamation %>
                 </td>
                 <td class="whitespace-nowrap px-5 py-4 text-gray-300">
-                  <%= cron_job.last_duration.present? ? "#{cron_job.last_duration}s" : "unknown" %>
+                  <%= cron_job.display_duration %>
                 </td>
                 <td class="px-5 py-4 text-gray-300">
                   <% if last_log.present? %>
-                    <p class="max-w-xl truncate"><%= truncate(last_log, length: 140) %></p>
-                  <% else %>
-                    <span class="text-gray-500">No log reported</span>
-                  <% end %>
+  <p class="max-w-xl truncate"><%= last_log %></p>
+<% else %>
+  <span class="text-gray-500">No log reported</span>
+<% end %>
                 </td>
               </tr>
             <% end %>

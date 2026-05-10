@@ -71,6 +71,34 @@ class Project < ApplicationRecord
     end
   end
 
+  def cron_summary_tone
+    case cron_summary_status
+    when "ok"
+      :success
+    when "failed"
+      :danger
+    when "never_run", "not_reported", "unknown"
+      :warning
+    else
+      :muted
+    end
+  end
+
+  def cron_summary_icon
+    case cron_summary_status
+    when "ok"
+      :circle_check
+    when "failed"
+      :circle_xmark
+    when "never_run"
+      :circle_play
+    when "not_reported"
+      :circle_question
+    else
+      :triangle_exclamation
+    end
+  end
+
   def latest_ping
     if pings.loaded?
       pings.max_by { |ping| ping.checked_at || ping.created_at }
