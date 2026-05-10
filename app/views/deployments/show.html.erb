@@ -12,28 +12,45 @@
       <div class="min-w-0">
         <p class="text-sm font-semibold text-gray-400"><%= @project.name %></p>
         <h1 class="mt-2 break-words text-2xl font-bold text-gray-100">
-          Deployment <%= @deployment.commit_sha.first(7) %>
+          Deployment
+          <%= @deployment.commit_sha.first(7) %>
         </h1>
         <p class="mt-3 text-sm text-gray-400">
-          Triggered by <span class="font-semibold text-gray-200"><%= @deployment.triggered_by.presence || "unknown" %></span>
-          on <%= l(@deployment.created_at, format: :long) %>.
+          Triggered by
+          <span class="font-semibold text-gray-200"><%= @deployment.triggered_by.presence || "unknown" %></span>
+          on
+          <%= l(@deployment.created_at, format: :long) %>.
         </p>
       </div>
 
-      <span class="inline-flex w-fit rounded-md px-3 py-1 text-sm font-semibold <%= @deployment.success? ? 'bg-green-900/40 text-green-300' : @deployment.failed? ? 'bg-red-900/40 text-red-300' : 'bg-yellow-900/40 text-yellow-300' %>">
+      <span
+        class="
+          inline-flex w-fit rounded-md px-3 py-1 text-sm font-semibold
+          <%= @deployment.success? ? 'bg-green-900/40 text-green-300' : @deployment.failed? ? 'bg-red-900/40 text-red-300' : 'bg-yellow-900/40 text-yellow-300' %>
+        "
+      >
         <%= @deployment.status %>
       </span>
     </div>
   </header>
 
   <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-    <section class="overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow">
+    <section
+      class="
+        overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow
+      "
+    >
       <div class="border-b border-gray-800 px-5 py-4">
         <h2 class="text-xl font-bold text-gray-100">Logs</h2>
       </div>
 
       <% if @deployment.log.present? %>
-        <pre class="max-h-[42rem] overflow-auto whitespace-pre-wrap break-words bg-gray-950 p-5 text-xs leading-6 text-gray-200"><%= @deployment.log %></pre>
+        <pre
+          class="
+            max-h-[42rem] overflow-auto whitespace-pre-wrap break-words bg-gray-950 p-5
+            text-xs leading-6 text-gray-200
+          "
+        ><%= @deployment.log %></pre>
       <% else %>
         <p class="px-5 py-10 text-sm text-gray-400">No logs recorded for this deployment.</p>
       <% end %>

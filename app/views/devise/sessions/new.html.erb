@@ -8,32 +8,57 @@
     <h2 class="mb-6 text-xl font-semibold text-white">Connexion</h2>
 
     <% if alert.present? %>
-      <p class="mb-4 rounded-md border border-red-900/60 bg-red-950/60 px-3 py-2 text-sm text-red-200"><%= alert %></p>
+      <p
+        class="
+          mb-4 rounded-md border border-red-900/60 bg-red-950/60 px-3 py-2 text-sm
+          text-red-200
+        "
+      ><%= alert %></p>
     <% end %>
 
     <% if notice.present? %>
-      <p class="mb-4 rounded-md border border-green-900/60 bg-green-950/60 px-3 py-2 text-sm text-green-200"><%= notice %></p>
+      <p
+        class="
+          mb-4 rounded-md border border-green-900/60 bg-green-950/60 px-3 py-2 text-sm
+          text-green-200
+        "
+      ><%= notice %></p>
     <% end %>
 
     <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "space-y-5" }) do |f| %>
       <div>
         <%= f.label :email, "Email", class: "mb-2 block text-sm font-medium text-gray-200" %>
-        <%= f.email_field :email, autofocus: true, autocomplete: "email", required: true, class: "w-full rounded-md border border-gray-700 bg-gray-950 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" %>
+        <%= f.email_field :email,
+                      autofocus: true,
+                      autocomplete: "email",
+                      required: true,
+                      class:
+                        "w-full rounded-md border border-gray-700 bg-gray-950 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" %>
       </div>
 
       <div>
-        <%= f.label :password, "Mot de passe", class: "mb-2 block text-sm font-medium text-gray-200" %>
-        <%= f.password_field :password, autocomplete: "current-password", required: true, class: "w-full rounded-md border border-gray-700 bg-gray-950 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" %>
+        <%= f.label :password,
+                "Mot de passe",
+                class: "mb-2 block text-sm font-medium text-gray-200" %>
+        <%= f.password_field :password,
+                         autocomplete: "current-password",
+                         required: true,
+                         class:
+                           "w-full rounded-md border border-gray-700 bg-gray-950 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" %>
       </div>
 
       <% if devise_mapping.rememberable? %>
         <label class="flex items-center gap-2 text-sm text-gray-300">
-          <%= f.check_box :remember_me, class: "h-4 w-4 rounded border-gray-700 bg-gray-950 text-indigo-600 focus:ring-indigo-500" %>
+          <%= f.check_box :remember_me,
+                      class:
+                        "h-4 w-4 rounded border-gray-700 bg-gray-950 text-indigo-600 focus:ring-indigo-500" %>
           Se souvenir de moi
         </label>
       <% end %>
 
-      <%= f.submit "Se connecter", class: "w-full cursor-pointer rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900" %>
+      <%= f.submit "Se connecter",
+               class:
+                 "w-full cursor-pointer rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900" %>
     <% end %>
   </div>
 </section>

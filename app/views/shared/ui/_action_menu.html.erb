@@ -4,22 +4,29 @@
 <% align ||= :right %>
 <% html_class ||= "" %>
 
-<%
-  menu_position_classes = align.to_sym == :left ? "left-0" : "right-0"
+<% menu_position_classes = align.to_sym == :left ? "left-0" : "right-0"
 
-  wrapper_classes = [
-    "group/menu relative",
-    html_class
-  ].join(" ")
-%>
+wrapper_classes = ["group/menu relative", html_class].join(" ") %>
 
 <details class="<%= wrapper_classes %>">
-  <summary class="flex cursor-pointer list-none items-center justify-center gap-2 rounded-md border border-gray-800 px-4 py-2 text-sm font-semibold text-gray-400 hover:border-gray-600 hover:bg-gray-800 hover:text-gray-100">
+  <summary
+    class="
+      flex cursor-pointer list-none items-center justify-center gap-2 rounded-md
+      border border-gray-800 px-4 py-2 text-sm font-semibold text-gray-400
+      hover:border-gray-600 hover:bg-gray-800 hover:text-gray-100
+    "
+  >
     <%= fa_icon(icon, class_name: "text-base") if icon.present? %>
     <%= label %>
   </summary>
 
-  <div class="absolute <%= menu_position_classes %> z-20 mt-2 <%= width %> overflow-hidden rounded-lg border border-gray-800 bg-gray-950 shadow-xl">
+  <div
+    class="
+      absolute <%= menu_position_classes %> z-20 mt-2
+      <%= width %> overflow-hidden rounded-lg border
+      border-gray-800 bg-gray-950 shadow-xl
+    "
+  >
     <%= yield %>
   </div>
 </details>

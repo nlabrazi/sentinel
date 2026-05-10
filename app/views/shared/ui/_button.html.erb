@@ -10,29 +10,31 @@
 <% title ||= nil %>
 <% aria ||= {} %>
 
-<%
-  base_classes = "inline-flex items-center justify-center gap-2 rounded-md font-semibold transition focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-60"
+<% base_classes =
+  "inline-flex items-center justify-center gap-2 rounded-md font-semibold transition focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-60"
 
-  variant_classes = {
-    primary: "bg-cyan-300 text-gray-950 hover:bg-cyan-200 focus:ring-cyan-300",
-    secondary: "border border-gray-700 text-gray-200 hover:border-gray-500 hover:bg-gray-800 focus:ring-gray-600",
-    ghost: "text-gray-400 hover:bg-gray-800 hover:text-gray-100 focus:ring-gray-600",
-    danger: "border border-red-900/60 bg-red-950/40 text-red-200 hover:bg-red-900/50 focus:ring-red-700"
-  }
+variant_classes = {
+  primary: "bg-cyan-300 text-gray-950 hover:bg-cyan-200 focus:ring-cyan-300",
+  secondary:
+    "border border-gray-700 text-gray-200 hover:border-gray-500 hover:bg-gray-800 focus:ring-gray-600",
+  ghost:
+    "text-gray-400 hover:bg-gray-800 hover:text-gray-100 focus:ring-gray-600",
+  danger:
+    "border border-red-900/60 bg-red-950/40 text-red-200 hover:bg-red-900/50 focus:ring-red-700",
+}
 
-  size_classes = {
-    sm: "px-2.5 py-1.5 text-xs",
-    md: "px-4 py-2 text-sm",
-    lg: "px-4 py-2.5 text-sm"
-  }
+size_classes = {
+  sm: "px-2.5 py-1.5 text-xs",
+  md: "px-4 py-2 text-sm",
+  lg: "px-4 py-2.5 text-sm",
+}
 
-  classes = [
-    base_classes,
-    variant_classes.fetch(variant.to_sym),
-    size_classes.fetch(size.to_sym),
-    html_class
-  ].join(" ")
-%>
+classes = [
+  base_classes,
+  variant_classes.fetch(variant.to_sym),
+  size_classes.fetch(size.to_sym),
+  html_class,
+].join(" ") %>
 
 <% if href.present? %>
   <%= link_to href, class: classes, data: data, target: target, rel: rel, title: title, aria: aria do %>

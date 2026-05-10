@@ -5,23 +5,21 @@
 <% tone ||= :neutral %>
 <% html_class ||= "" %>
 
-<%
-  tone_classes = {
-    success: "text-green-300",
-    warning: "text-yellow-300",
-    danger: "text-red-300",
-    info: "text-cyan-300",
-    neutral: "text-gray-100",
-    muted: "text-gray-300"
-  }
+<% tone_classes = {
+  success: "text-green-300",
+  warning: "text-yellow-300",
+  danger: "text-red-300",
+  info: "text-cyan-300",
+  neutral: "text-gray-100",
+  muted: "text-gray-300",
+}
 
-  value_classes = tone_classes.fetch(tone.to_sym)
+value_classes = tone_classes.fetch(tone.to_sym)
 
-  classes = [
-    "rounded-lg border border-gray-800 bg-gray-950/70 px-4 py-3",
-    html_class
-  ].join(" ")
-%>
+classes = [
+  "rounded-lg border border-gray-800 bg-gray-950/70 px-4 py-3",
+  html_class,
+].join(" ") %>
 
 <div class="<%= classes %>">
   <div class="flex items-center gap-2 text-xs font-medium text-gray-500">

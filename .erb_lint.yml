@@ -1,0 +1,21 @@
+---
+EnableDefaultLinters: true
+
+linters:
+  FinalNewline:
+    enabled: true
+
+  RightTrim:
+    enabled: true
+
+  TrailingWhitespace:
+    enabled: true
+
+  SpaceAroundErbTag:
+    enabled: true
+
+  SpaceIndentation:
+    enabled: true
+
+  Rubocop:
+    enabled: false
