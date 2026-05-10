@@ -3,16 +3,16 @@
 <% icon ||= :circle_info %>
 <% html_class ||= "" %>
 
-<%
-  classes = [
-    "px-5 py-8 text-center",
-    html_class
-  ].join(" ")
-%>
+<% classes = ["px-5 py-8 text-center", html_class].join(" ") %>
 
 <div class="<%= classes %>">
   <% if icon.present? %>
-    <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-gray-800 text-gray-500">
+    <div
+      class="
+        mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-gray-800
+        text-gray-500
+      "
+    >
       <%= fa_icon(icon, class_name: "h-4 w-4") %>
     </div>
   <% end %>

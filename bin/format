@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+
+bundle exec rubocop -a
+bundle exec erb-format app/views/**/*.html.erb
+bundle exec erb_lint --lint-all
