@@ -18,6 +18,21 @@ RSpec.describe Project, type: :model do
     it { is_expected.to validate_presence_of(:production_url) }
     it { is_expected.to validate_presence_of(:vps_path) }
     it { is_expected.to define_enum_for(:status).with_values(online: 0, offline: 1, unknown: 2).backed_by_column_of_type(:integer) }
+    it { is_expected.to define_enum_for(:kind).with_values(app: 'app', service: 'service').backed_by_column_of_type(:string) }
+
+    it 'requires a repository URL and branch for apps' do
+      project = build(:project, kind: :app, repo_url: nil, branch: nil)
+
+      expect(project).not_to be_valid
+      expect(project.errors[:repo_url]).to be_present
+      expect(project.errors[:branch]).to be_present
+    end
+
+    it 'allows services without a repository URL or branch' do
+      project = build(:project, kind: :service, repo_url: nil, branch: nil)
+
+      expect(project).to be_valid
+    end
   end
 
   describe 'associations' do
@@ -34,6 +49,12 @@ RSpec.describe Project, type: :model do
     it 'works without .git suffix' do
       project = build(:project, repo_url: 'https://github.com/nlabrazi/argandici')
       expect(project.github_repo).to eq('nlabrazi/argandici')
+    end
+
+    it 'returns a fallback label when no repository is configured' do
+      project = build(:project, kind: :service, repo_url: nil, branch: nil)
+
+      expect(project.github_repo).to eq('No GitHub repository')
     end
   end
 
@@ -53,6 +74,13 @@ RSpec.describe Project, type: :model do
 
     it 'rejects SSH repository URLs' do
       project = build(:project, repo_url: 'git@github.com:nlabrazi/argandici.git')
+
+      expect(project).not_to be_valid
+      expect(project.errors[:repo_url]).to be_present
+    end
+
+    it 'validates service repository URLs when one is configured' do
+      project = build(:project, kind: :service, repo_url: 'https://gitlab.com/nlabrazi/umami.git', branch: nil)
 
       expect(project).not_to be_valid
       expect(project.errors[:repo_url]).to be_present
@@ -106,10 +134,10 @@ RSpec.describe Project, type: :model do
   end
 
   describe '#cron_summary_status' do
-    it 'returns unknown when no cron job is configured' do
+    it 'returns not_reported when no cron job is configured' do
       project = create(:project)
 
-      expect(project.cron_summary_status).to eq('unknown')
+      expect(project.cron_summary_status).to eq('not_reported')
     end
 
     it 'returns ok when all cron jobs succeeded' do

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_07_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_13_214110) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -138,6 +138,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_07_150000) do
     t.datetime "created_at", null: false
     t.datetime "cron_synced_at"
     t.datetime "github_synced_at"
+    t.string "kind", default: "app", null: false
     t.string "last_commit_deployed"
     t.string "latest_commit_available"
     t.boolean "maintenance_mode"
@@ -148,6 +149,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_07_150000) do
     t.integer "status"
     t.datetime "updated_at", null: false
     t.string "vps_path"
+    t.index ["kind"], name: "index_projects_on_kind"
     t.index ["slug"], name: "index_projects_on_slug", unique: true
   end
 
