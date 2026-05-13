@@ -7,8 +7,7 @@
       class="
         inline-flex h-8 w-8 items-center justify-center rounded-md bg-gray-900
         text-gray-400
-      "
-    >
+      ">
       <%= fa_icon(:rotate, class_name: "h-4 w-4") %>
     </span>
   </nav>
@@ -19,8 +18,7 @@
         class="
           sticky top-24 max-h-[calc(100vh-7rem)] space-y-4 overflow-y-auto pr-2
           text-gray-400
-        "
-      >
+        ">
         <a href="#overview" class="flex items-center gap-2 font-semibold text-cyan-300">
           <span class="h-2 w-2 rotate-45 bg-cyan-300"></span>
           Project overview
@@ -44,22 +42,19 @@
           <div
             class="
               grid grid-cols-1 gap-5 xl:grid-cols-[19rem_minmax(0,1fr)] xl:items-start
-            "
-          >
+            ">
             <div class="overflow-hidden rounded-xl border border-gray-800 bg-gray-950">
               <% if @project.screenshot.attached? %>
                 <img
                   src="<%= url_for(@project.screenshot) %>"
                   alt="Aperçu de <%= @project.name %>"
                   class="h-full min-h-56 w-full object-cover"
-                  loading="lazy"
-                >
+                  loading="lazy">
               <% else %>
                 <div
                   class="
                     flex min-h-56 w-full items-center justify-center text-sm text-gray-500
-                  "
-                >
+                  ">
                   No preview
                 </div>
               <% end %>
@@ -106,8 +101,7 @@
                         inline-flex items-center justify-center gap-2 rounded-md border
                         border-yellow-900/60 bg-yellow-950/40 px-4 py-2 text-sm font-semibold
                         text-yellow-300
-                      "
-                    >
+                      ">
                       <%= fa_icon(:rotate, class_name: "text-sm") %>
                       Running
                     </span>
@@ -216,8 +210,7 @@
             <section
               class="
                 overflow-hidden rounded-xl border border-gray-800 bg-gray-900 shadow
-              "
-            >
+              ">
               <div class="border-b border-gray-800 px-5 py-4">
                 <%= render "shared/ui/section_header",
                 title: "Release status",
@@ -254,8 +247,7 @@
                   <dd
                     class="
                       mt-1 font-semibold <%= behind_count.positive? ? 'text-yellow-300' : 'text-green-300' %>
-                    "
-                  >
+                    ">
                     <%= behind_count.positive? ? "#{behind_count} update(s)" : "Up to date" %>
                   </dd>
                 </div>
@@ -265,8 +257,7 @@
                   <dd
                     class="
                       mt-1 font-semibold <%= @running_deployment ? 'text-yellow-300' : 'text-gray-100' %>
-                    "
-                  >
+                    ">
                     <%= @running_deployment ? "Running" : "Idle" %>
                   </dd>
                 </div>
@@ -300,8 +291,7 @@
             <section
               class="
                 overflow-hidden rounded-xl border border-gray-800 bg-gray-900 shadow
-              "
-            >
+              ">
               <div class="border-b border-gray-800 px-5 py-4">
                 <div class="flex items-center justify-between gap-4">
                   <div>
@@ -312,8 +302,7 @@
                   <span
                     class="
                       rounded-full bg-gray-800 px-2.5 py-1 text-xs font-semibold text-gray-400
-                    "
-                  >V2</span>
+                    ">V2</span>
                 </div>
               </div>
 
@@ -337,26 +326,22 @@
                       class="
                         rounded-md border border-gray-800 bg-gray-950 px-2 py-1.5 text-center font-mono
                         text-gray-500
-                      "
-                    >status.sh</span>
+                      ">status.sh</span>
                     <span
                       class="
                         rounded-md border border-gray-800 bg-gray-950 px-2 py-1.5 text-center font-mono
                         text-gray-500
-                      "
-                    >git status</span>
+                      ">git status</span>
                     <span
                       class="
                         rounded-md border border-gray-800 bg-gray-950 px-2 py-1.5 text-center font-mono
                         text-gray-500
-                      "
-                    >compose ps</span>
+                      ">compose ps</span>
                     <span
                       class="
                         rounded-md border border-gray-800 bg-gray-950 px-2 py-1.5 text-center font-mono
                         text-gray-500
-                      "
-                    >tail logs</span>
+                      ">tail logs</span>
                   </div>
                 </div>
               </div>
@@ -367,8 +352,7 @@
             <section
               class="
                 overflow-hidden rounded-xl border border-gray-800 bg-gray-900 shadow
-              "
-            >
+              ">
               <div class="border-b border-gray-800 px-5 py-4">
                 <div class="flex items-center justify-between gap-4">
                   <div>
@@ -379,8 +363,7 @@
                   <span
                     class="
                       rounded-full bg-gray-800 px-2.5 py-1 text-xs font-semibold text-gray-400
-                    "
-                  >Soon</span>
+                    ">Soon</span>
                 </div>
               </div>
 
@@ -391,8 +374,7 @@
                     <p
                       class="
                         mt-1 font-semibold <%= @project.online? ? 'text-green-300' : @project.offline? ? 'text-red-300' : 'text-gray-300' %>
-                      "
-                    >
+                      ">
                       <%= @project.status %>
                     </p>
                   </div>
@@ -416,8 +398,7 @@
                   class="
                     mt-4 flex h-28 items-center justify-center rounded-lg border border-dashed
                     border-gray-700 bg-gray-950/60 text-center
-                  "
-                >
+                  ">
                   <div>
                     <p class="text-sm font-semibold text-gray-300">Grafana embed placeholder</p>
                     <p class="mt-1 text-xs text-gray-500">Uptime, latency, requests, errors.</p>
@@ -429,8 +410,7 @@
             <section
               class="
                 overflow-hidden rounded-xl border border-gray-800 bg-gray-900 shadow
-              "
-            >
+              ">
               <div class="border-b border-gray-800 px-5 py-4">
                 <h2 class="text-lg font-bold text-gray-100">Security</h2>
                 <p class="mt-1 text-sm text-gray-400">Points de contrôle simples pour ce projet.</p>
@@ -442,8 +422,7 @@
                   <span
                     class="
                       font-semibold <%= @project.production_url.start_with?('https://') ? 'text-green-300' : 'text-yellow-300' %>
-                    "
-                  >
+                    ">
                     <%= @project.production_url.start_with?("https://") ? "Enabled" : "Check" %>
                   </span>
                 </div>
@@ -453,8 +432,7 @@
                   <span
                     class="
                       font-semibold <%= @project.maintenance_mode? ? 'text-yellow-300' : 'text-green-300' %>
-                    "
-                  >
+                    ">
                     <%= @project.maintenance_mode? ? "Enabled" : "Disabled" %>
                   </span>
                 </div>
@@ -472,14 +450,12 @@
           id="commits"
           class="
             group overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow
-          "
-        >
+          ">
           <summary
             class="
               flex cursor-pointer list-none items-center justify-between gap-4 border-b
               border-gray-800 px-5 py-4 hover:bg-gray-800/40
-            "
-          >
+            ">
             <div>
               <h2 class="text-xl font-bold text-gray-100">Recent commits</h2>
               <p class="mt-1 text-sm text-gray-400">
@@ -499,8 +475,7 @@
                 class="
                   inline-flex w-fit items-center rounded-full bg-gray-800 px-3 py-1 text-xs
                   font-semibold text-gray-300
-                "
-              >
+                ">
                 <%= @github_commits.size %>
                 commit<%= "s" unless @github_commits.size == 1 %>
               </span>
@@ -517,8 +492,7 @@
                 <article
                   class="
                     flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:justify-between
-                  "
-                >
+                  ">
                   <div class="min-w-0">
                     <p class="truncate font-semibold text-gray-100">
                       <%= commit.message %>
@@ -554,14 +528,12 @@
           id="pull-requests"
           class="
             group overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow
-          "
-        >
+          ">
           <summary
             class="
               flex cursor-pointer list-none items-center justify-between gap-4 border-b
               border-gray-800 px-5 py-4 hover:bg-gray-800/40
-            "
-          >
+            ">
             <div>
               <h2 class="text-xl font-bold text-gray-100">Pull requests</h2>
               <p class="mt-1 text-sm text-gray-400">
@@ -582,8 +554,7 @@
                 class="
                   inline-flex w-fit items-center rounded-full bg-gray-800 px-3 py-1 text-xs
                   font-semibold text-gray-300
-                "
-              >
+                ">
                 <%= @github_pull_requests.size %>
                 PR<%= "s" unless @github_pull_requests.size == 1 %>
               </span>
@@ -599,8 +570,7 @@
                 <article
                   class="
                     flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:justify-between
-                  "
-                >
+                  ">
                   <div class="min-w-0">
                     <p class="truncate font-semibold text-gray-100">
                       #<%= pull_request.number %>
@@ -649,14 +619,12 @@
           id="configuration"
           class="
             overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow
-          "
-        >
+          ">
           <div
             class="
               border-b border-gray-800 bg-gradient-to-r from-indigo-950 via-purple-950
               to-gray-900 px-5 py-4
-            "
-          >
+            ">
             <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <h2 class="text-xl font-bold text-gray-100">Deployment command</h2>
@@ -674,8 +642,7 @@
               <code
                 class="
                   mt-3 block overflow-x-auto whitespace-nowrap text-sm text-gray-100
-                "
-              ><%= @project.deploy_command %></code>
+                "><%= @project.deploy_command %></code>
             </div>
             <p class="mt-4 text-sm text-gray-400">
               The command is generated from the validated VPS path and remains
@@ -688,8 +655,7 @@
           id="cron-jobs"
           class="
             overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow
-          "
-        >
+          ">
           <div class="border-b border-gray-800 px-5 py-4">
             <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -710,8 +676,7 @@
                   class="
                     inline-flex w-fit items-center rounded-full bg-gray-800 px-3 py-1 text-xs
                     font-semibold text-gray-300
-                  "
-                >
+                  ">
                   <%= @cron_jobs.size %>
                   job<%= "s" unless @cron_jobs.size == 1 %>
                 </span>
@@ -792,8 +757,7 @@
         <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
           <section
             id="deploys"
-            class="rounded-lg border border-gray-800 bg-gray-900 p-6 shadow"
-          >
+            class="rounded-lg border border-gray-800 bg-gray-900 p-6 shadow">
             <div class="flex items-center justify-between border-b border-gray-800 pb-4">
               <h2 class="text-xl font-bold text-gray-100">Production deploys</h2>
               <span class="text-2xl text-gray-600">&rsaquo;</span>
@@ -843,14 +807,12 @@
 
           <section
             id="healthcheck"
-            class="rounded-lg border border-gray-800 bg-gray-900 p-6 shadow"
-          >
+            class="rounded-lg border border-gray-800 bg-gray-900 p-6 shadow">
             <div
               class="
                 flex flex-col gap-3 border-b border-gray-800 pb-4 sm:flex-row sm:items-center
                 sm:justify-between
-              "
-            >
+              ">
               <h2 class="text-xl font-bold text-gray-100">Healthcheck</h2>
               <%= button_to refresh_runtime_project_path(@project),
               method: :post,
@@ -869,13 +831,11 @@
                   class="
                     mt-2 inline-flex items-center gap-2 font-semibold
                     <%= @project.online? ? 'text-green-400' : @project.offline? ? 'text-red-400' : 'text-gray-300' %>
-                  "
-                >
+                  ">
                   <span
                     class="
                       h-2 w-2 rounded-full <%= @project.online? ? 'bg-green-400' : @project.offline? ? 'bg-red-400' : 'bg-gray-500' %>
-                    "
-                  ></span>
+                    "></span>
                   <%= @project.status %>
                 </dd>
               </div>
@@ -902,8 +862,7 @@
                 <dd
                   class="
                     mt-2 font-semibold <%= @latest_ping&.status == 'online' ? 'text-green-400' : @latest_ping&.status == 'offline' ? 'text-red-400' : 'text-gray-100' %>
-                  "
-                >
+                  ">
                   <%= @latest_ping&.status.presence || "unknown" %>
                 </dd>
               </div>
@@ -924,8 +883,7 @@
                 <dd
                   class="
                     mt-2 break-words font-semibold <%= @latest_ping&.error.present? ? 'text-red-300' : 'text-gray-100' %>
-                  "
-                >
+                  ">
                   <%= @latest_ping&.error.presence || "none" %>
                 </dd>
               </div>
@@ -935,7 +893,7 @@
                   <% if @deployments.first %>
                     <%= @deployments.first.status %>
                     ·
-                    <%= time_ago_in_words(@deployments.first.created_at) %>go
+                    <%= time_ago_in_words(@deployments.first.created_at) %>
                   <% else %>
                     No deployment yet
                   <% end %>

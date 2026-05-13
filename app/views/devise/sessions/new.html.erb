@@ -12,8 +12,7 @@
         class="
           mb-4 rounded-md border border-red-900/60 bg-red-950/60 px-3 py-2 text-sm
           text-red-200
-        "
-      ><%= alert %></p>
+        "><%= alert %></p>
     <% end %>
 
     <% if notice.present? %>
@@ -21,8 +20,7 @@
         class="
           mb-4 rounded-md border border-green-900/60 bg-green-950/60 px-3 py-2 text-sm
           text-green-200
-        "
-      ><%= notice %></p>
+        "><%= notice %></p>
     <% end %>
 
     <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "space-y-5" }) do |f| %>

@@ -27,8 +27,7 @@
         class="
           inline-flex w-fit rounded-md px-3 py-1 text-sm font-semibold
           <%= @deployment.success? ? 'bg-green-900/40 text-green-300' : @deployment.failed? ? 'bg-red-900/40 text-red-300' : 'bg-yellow-900/40 text-yellow-300' %>
-        "
-      >
+        ">
         <%= @deployment.status %>
       </span>
     </div>
@@ -38,8 +37,7 @@
     <section
       class="
         overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow
-      "
-    >
+      ">
       <div class="border-b border-gray-800 px-5 py-4">
         <h2 class="text-xl font-bold text-gray-100">Logs</h2>
       </div>
@@ -49,8 +47,7 @@
           class="
             max-h-[42rem] overflow-auto whitespace-pre-wrap break-words bg-gray-950 p-5
             text-xs leading-6 text-gray-200
-          "
-        ><%= @deployment.log %></pre>
+          "><%= @deployment.log %></pre>
       <% else %>
         <p class="px-5 py-10 text-sm text-gray-400">No logs recorded for this deployment.</p>
       <% end %>

@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-bundle exec rubocop -a
-bundle exec erb-format app/views/**/*.html.erb
-bundle exec erb_lint --lint-all
+echo "Format: Ruby"
+bin/rubocop -A
+
+echo
+echo "Format: ERB"
+mapfile -d '' erb_files < <(find app/views -name "*.html.erb" -print0)
+
+if ((${#erb_files[@]})); then
+  bundle exec erb-format "${erb_files[@]}" --write
+fi
+
+echo
+echo "Autocorrect: ERB lint"
+bundle exec erb_lint --lint-all -a

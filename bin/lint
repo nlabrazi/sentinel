@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Style: Ruby"
+bin/rubocop
+
+echo
+echo "Style: ERB"
+bundle exec erb_lint --lint-all
