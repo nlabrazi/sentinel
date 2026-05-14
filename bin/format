@@ -6,12 +6,11 @@ bin/rubocop -A
 
 echo
 echo "Format: ERB"
-mapfile -d '' erb_files < <(find app/views -name "*.html.erb" -print0)
-
-if ((${#erb_files[@]})); then
-  bundle exec erb-format "${erb_files[@]}" --write
-fi
+bundle exec erb-format app/views/**/*.html.erb --write
 
 echo
 echo "Autocorrect: ERB lint"
 bundle exec erb_lint --lint-all -a
+
+echo
+echo "✅ Format passed"

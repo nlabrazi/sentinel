@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Style: Ruby"
+echo "Lint: Ruby"
 bin/rubocop
 
 echo
-echo "Style: ERB"
+echo "Lint: ERB"
 bundle exec erb_lint --lint-all
+
+echo
+echo "✅ Lint passed"
