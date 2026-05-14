@@ -1,15 +1,15 @@
 <section
   id="healthcheck"
-  class="rounded-lg border border-gray-800 bg-gray-900 p-6 shadow">
+  class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow">
   <div
     class="
-      flex flex-col gap-3 border-b border-gray-800 pb-4 sm:flex-row sm:items-center
+      flex flex-col gap-3 border-b border-gray-200 dark:border-gray-800 pb-4 sm:flex-row sm:items-center
       sm:justify-between
     ">
-    <h2 class="text-xl font-bold text-gray-100">Healthcheck</h2>
+    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Healthcheck</h2>
     <%= button_to refresh_runtime_project_path(project),
     method: :post,
-    class: "inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded border border-gray-700 px-3 py-1.5 text-xs font-semibold text-gray-200 hover:border-gray-500 hover:bg-gray-800",
+    class: "inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:border-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800",
     title: "Lance un healthcheck HTTP immédiat",
     aria: { label: "Vérifier le runtime" } do %>
       <%= fa_icon(:rotate, class_name: "h-3.5 w-3.5") %>
@@ -19,11 +19,11 @@
 
   <dl class="mt-6 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
     <div>
-      <dt class="text-gray-400">Current status</dt>
+      <dt class="text-gray-500 dark:text-gray-400">Current status</dt>
       <dd
         class="
           mt-2 inline-flex items-center gap-2 font-semibold
-          <%= project.online? ? 'text-green-400' : project.offline? ? 'text-red-400' : 'text-gray-300' %>
+          <%= project.online? ? 'text-green-700 dark:text-green-400' : project.offline? ? 'text-red-700 dark:text-red-400' : 'text-gray-600 dark:text-gray-300' %>
         ">
         <span
           class="h-2 w-2 rounded-full <%= project.online? ? 'bg-green-400' : project.offline? ? 'bg-red-400' : 'bg-gray-500' %>"></span>
@@ -31,16 +31,16 @@
       </dd>
     </div>
     <div>
-      <dt class="text-gray-400">Maintenance</dt>
-      <dd class="mt-2 font-semibold text-gray-100"><%= project.maintenance_mode? ? "Enabled" : "Disabled" %></dd>
+      <dt class="text-gray-500 dark:text-gray-400">Maintenance</dt>
+      <dd class="mt-2 font-semibold text-gray-900 dark:text-gray-100"><%= project.maintenance_mode? ? "Enabled" : "Disabled" %></dd>
     </div>
     <div class="sm:col-span-2">
-      <dt class="text-gray-400">Production URL</dt>
-      <dd class="mt-2 break-all font-semibold text-gray-100"><%= project.production_url %></dd>
+      <dt class="text-gray-500 dark:text-gray-400">Production URL</dt>
+      <dd class="mt-2 break-all font-semibold text-gray-900 dark:text-gray-100"><%= project.production_url %></dd>
     </div>
     <div>
-      <dt class="text-gray-400">Last check</dt>
-      <dd class="mt-2 font-semibold text-gray-100">
+      <dt class="text-gray-500 dark:text-gray-400">Last check</dt>
+      <dd class="mt-2 font-semibold text-gray-900 dark:text-gray-100">
         <% if latest_ping %>
           <%= l(latest_ping.checked_at || latest_ping.created_at, format: :short) %>
         <% else %>
@@ -49,33 +49,33 @@
       </dd>
     </div>
     <div>
-      <dt class="text-gray-400">Last result</dt>
+      <dt class="text-gray-500 dark:text-gray-400">Last result</dt>
       <dd
-        class="mt-2 font-semibold <%= latest_ping&.status == 'online' ? 'text-green-400' : latest_ping&.status == 'offline' ? 'text-red-400' : 'text-gray-100' %>">
+        class="mt-2 font-semibold <%= latest_ping&.status == 'online' ? 'text-green-700 dark:text-green-400' : latest_ping&.status == 'offline' ? 'text-red-700 dark:text-red-400' : 'text-gray-900 dark:text-gray-100' %>">
         <%= latest_ping&.status.presence || "unknown" %>
       </dd>
     </div>
     <div>
-      <dt class="text-gray-400">HTTP code</dt>
-      <dd class="mt-2 font-semibold text-gray-100"><%= latest_ping&.http_status || "unknown" %></dd>
+      <dt class="text-gray-500 dark:text-gray-400">HTTP code</dt>
+      <dd class="mt-2 font-semibold text-gray-900 dark:text-gray-100"><%= latest_ping&.http_status || "unknown" %></dd>
     </div>
     <div>
-      <dt class="text-gray-400">Response time</dt>
-      <dd class="mt-2 font-semibold text-gray-100"><%= latest_ping&.response_time_ms ? "#{latest_ping.response_time_ms} ms" : "unknown" %></dd>
+      <dt class="text-gray-500 dark:text-gray-400">Response time</dt>
+      <dd class="mt-2 font-semibold text-gray-900 dark:text-gray-100"><%= latest_ping&.response_time_ms ? "#{latest_ping.response_time_ms} ms" : "unknown" %></dd>
     </div>
     <div class="sm:col-span-2">
-      <dt class="text-gray-400">Last error</dt>
+      <dt class="text-gray-500 dark:text-gray-400">Last error</dt>
       <dd
         class="
-          mt-2 break-words font-semibold <%= latest_ping&.error.present? ? 'text-red-300' : 'text-gray-100' %>
+          mt-2 break-words font-semibold <%= latest_ping&.error.present? ? 'text-red-700 dark:text-red-300' : 'text-gray-900 dark:text-gray-100' %>
         ">
         <%= latest_ping&.error.presence || "none" %>
       </dd>
     </div>
     <% if project.app? %>
       <div class="sm:col-span-2">
-        <dt class="text-gray-400">Latest deployment</dt>
-        <dd class="mt-2 font-semibold text-gray-100">
+        <dt class="text-gray-500 dark:text-gray-400">Latest deployment</dt>
+        <dd class="mt-2 font-semibold text-gray-900 dark:text-gray-100">
           <% if deployments.first %>
             <%= deployments.first.status %>
             ·

@@ -1,11 +1,11 @@
-<nav class="flex flex-wrap items-center gap-3 text-sm text-gray-400">
-  <%= link_to "Projects", root_path, class: "hover:text-gray-100" %>
+<nav class="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+  <%= link_to "Projects", root_path, class: "hover:text-gray-900 dark:hover:text-gray-100" %>
   <span>/</span>
-  <span class="font-semibold text-gray-200"><%= project.name %></span>
+  <span class="font-semibold text-gray-700 dark:text-gray-200"><%= project.name %></span>
   <span
     class="
-      inline-flex h-8 w-8 items-center justify-center rounded-md bg-gray-900
-      text-gray-400
+      inline-flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 dark:bg-gray-900
+      text-gray-500 dark:text-gray-400
     ">
     <%= fa_icon(:rotate, class_name: "h-4 w-4") %>
   </span>

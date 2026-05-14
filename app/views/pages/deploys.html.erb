@@ -1,23 +1,23 @@
 <section class="mx-auto max-w-7xl space-y-6">
-  <div class="rounded-lg border border-gray-800 bg-gray-900 p-5 shadow sm:p-6">
+  <div class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow sm:p-6">
     <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-gray-100">Deployments</h1>
-        <p class="mt-2 text-sm text-gray-400">Latest deployment activity across managed projects.</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Deployments</h1>
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Latest deployment activity across managed projects.</p>
       </div>
 
       <dl class="grid grid-cols-3 gap-3 text-sm lg:min-w-[28rem]">
-        <div class="rounded-md border border-gray-800 bg-gray-950 px-3 py-2">
+        <div class="rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-3 py-2">
           <dt class="text-xs text-gray-500">Total</dt>
-          <dd class="mt-1 font-semibold text-gray-100"><%= @deployments.size %></dd>
+          <dd class="mt-1 font-semibold text-gray-900 dark:text-gray-100"><%= @deployments.size %></dd>
         </div>
-        <div class="rounded-md border border-gray-800 bg-gray-950 px-3 py-2">
+        <div class="rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-3 py-2">
           <dt class="text-xs text-gray-500">Success</dt>
-          <dd class="mt-1 font-semibold text-green-300"><%= @deployments.count(&:success?) %></dd>
+          <dd class="mt-1 font-semibold text-green-700 dark:text-green-300"><%= @deployments.count(&:success?) %></dd>
         </div>
-        <div class="rounded-md border border-gray-800 bg-gray-950 px-3 py-2">
+        <div class="rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-3 py-2">
           <dt class="text-xs text-gray-500">Failed</dt>
-          <dd class="mt-1 font-semibold text-red-300"><%= @deployments.count(&:failed?) %></dd>
+          <dd class="mt-1 font-semibold text-red-700 dark:text-red-300"><%= @deployments.count(&:failed?) %></dd>
         </div>
       </dl>
     </div>
@@ -25,12 +25,12 @@
 
   <section
     class="
-      overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow
+      overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow
     ">
     <% if @deployments.any? %>
       <div class="hidden overflow-x-auto md:block">
-        <table class="min-w-full divide-y divide-gray-800">
-          <thead class="bg-gray-950">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+          <thead class="bg-gray-50 dark:bg-gray-950">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-semibold uppercase text-gray-500">Project</th>
               <th class="px-6 py-3 text-left text-xs font-semibold uppercase text-gray-500">Commit</th>
@@ -39,57 +39,57 @@
               <th class="px-6 py-3 text-left text-xs font-semibold uppercase text-gray-500">Date</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-800">
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
             <% @deployments.each do |deploy| %>
-              <tr class="hover:bg-gray-800/60">
-                <td class="px-6 py-4 text-sm font-semibold text-gray-100"><%= link_to deploy.project.name, deploy.project, class: "hover:underline" %></td>
-                <td class="px-6 py-4"><%= link_to deployment_path(deploy), class: "hover:underline" do %><code class="rounded bg-gray-950 px-1.5 py-0.5 text-xs text-gray-200"><%= deploy.commit_sha.first(7) %></code><% end %></td>
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/60">
+                <td class="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-gray-100"><%= link_to deploy.project.name, deploy.project, class: "hover:underline" %></td>
+                <td class="px-6 py-4"><%= link_to deployment_path(deploy), class: "hover:underline" do %><code class="rounded bg-gray-50 dark:bg-gray-950 px-1.5 py-0.5 text-xs text-gray-700 dark:text-gray-200"><%= deploy.commit_sha.first(7) %></code><% end %></td>
                 <td class="px-6 py-4">
                   <span
                     class="
-                      text-sm font-semibold <%= deploy.success? ? 'text-green-400' : deploy.failed? ? 'text-red-400' : 'text-yellow-300' %>
+                      text-sm font-semibold <%= deploy.success? ? 'text-green-700 dark:text-green-400' : deploy.failed? ? 'text-red-700 dark:text-red-400' : 'text-yellow-700 dark:text-yellow-300' %>
                     "><%= deploy.status %></span>
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-300"><%= deploy.duration ? "#{deploy.duration}s" : "-" %></td>
-                <td class="px-6 py-4 text-sm text-gray-400"><%= l(deploy.created_at, format: :short) %></td>
+                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300"><%= deploy.duration ? "#{deploy.duration}s" : "-" %></td>
+                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><%= l(deploy.created_at, format: :short) %></td>
               </tr>
             <% end %>
           </tbody>
         </table>
       </div>
 
-      <div class="divide-y divide-gray-800 md:hidden">
+      <div class="divide-y divide-gray-200 dark:divide-gray-800 md:hidden">
         <% @deployments.each do |deploy| %>
           <article class="space-y-3 p-4">
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
-                <h2 class="text-sm font-semibold text-gray-100">
+                <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                   <%= link_to deploy.project.name, deploy.project, class: "hover:underline" %>
                 </h2>
                 <%= link_to deployment_path(deploy), class: "mt-1 inline-flex hover:underline" do %>
-                  <code class="rounded bg-gray-950 px-1.5 py-0.5 text-xs text-gray-200"><%= deploy.commit_sha.first(7) %></code>
+                  <code class="rounded bg-gray-50 dark:bg-gray-950 px-1.5 py-0.5 text-xs text-gray-700 dark:text-gray-200"><%= deploy.commit_sha.first(7) %></code>
                 <% end %>
               </div>
               <span
                 class="
-                  text-sm font-semibold <%= deploy.success? ? 'text-green-400' : deploy.failed? ? 'text-red-400' : 'text-yellow-300' %>
+                  text-sm font-semibold <%= deploy.success? ? 'text-green-700 dark:text-green-400' : deploy.failed? ? 'text-red-700 dark:text-red-400' : 'text-yellow-700 dark:text-yellow-300' %>
                 "><%= deploy.status %></span>
             </div>
             <dl class="grid grid-cols-2 gap-3 text-sm">
               <div>
                 <dt class="text-xs font-semibold uppercase text-gray-500">Duration</dt>
-                <dd class="mt-1 text-gray-200"><%= deploy.duration ? "#{deploy.duration}s" : "-" %></dd>
+                <dd class="mt-1 text-gray-700 dark:text-gray-200"><%= deploy.duration ? "#{deploy.duration}s" : "-" %></dd>
               </div>
               <div>
                 <dt class="text-xs font-semibold uppercase text-gray-500">Date</dt>
-                <dd class="mt-1 text-gray-200"><%= l(deploy.created_at, format: :short) %></dd>
+                <dd class="mt-1 text-gray-700 dark:text-gray-200"><%= l(deploy.created_at, format: :short) %></dd>
               </div>
             </dl>
           </article>
         <% end %>
       </div>
     <% else %>
-      <p class="px-6 py-10 text-center text-sm text-gray-400">No deployment history yet.</p>
+      <p class="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">No deployment history yet.</p>
     <% end %>
   </section>
 </section>

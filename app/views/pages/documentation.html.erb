@@ -1,18 +1,18 @@
 <section class="mx-auto max-w-7xl space-y-10">
   <section
     class="
-      overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow
+      overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow
     ">
     <div
       class="
         grid grid-cols-1 gap-8 p-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:p-8
       ">
       <div class="max-w-3xl">
-        <p class="text-sm font-semibold uppercase tracking-wider text-cyan-300">Sentinel product overview</p>
-        <h1 class="mt-4 text-3xl font-bold leading-tight text-gray-100 sm:text-4xl">
+        <p class="text-sm font-semibold uppercase tracking-wider text-cyan-700 dark:text-cyan-300">Sentinel product overview</p>
+        <h1 class="mt-4 text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100 sm:text-4xl">
           Une console simple pour suivre, vérifier et déployer vos projets.
         </h1>
-        <p class="mt-5 text-base leading-7 text-gray-400">
+        <p class="mt-5 text-base leading-7 text-gray-500 dark:text-gray-400">
           Sentinel centralise les signaux utiles avant une mise en production :
           état du projet, dernier commit connu, disponibilité HTTP, mode
           maintenance, historique des déploiements et exécution contrôlée sur
@@ -27,24 +27,24 @@
           <%= link_to "Ouvrir les settings",
           settings_path,
           class:
-            "inline-flex items-center justify-center rounded-md bg-gray-800 px-4 py-2 text-sm font-bold text-gray-100 hover:bg-gray-700" %>
+            "inline-flex items-center justify-center rounded-md bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-bold text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700" %>
         </div>
       </div>
 
-      <aside class="rounded-lg border border-gray-800 bg-gray-950 p-5">
-        <h2 class="text-lg font-bold text-gray-100">Pourquoi Sentinel ?</h2>
+      <aside class="rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 p-5">
+        <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">Pourquoi Sentinel ?</h2>
         <dl class="mt-5 space-y-4 text-sm">
           <div>
             <dt class="text-gray-500">Objectif</dt>
-            <dd class="mt-1 font-semibold text-gray-100">Réduire les déploiements à l’aveugle.</dd>
+            <dd class="mt-1 font-semibold text-gray-900 dark:text-gray-100">Réduire les déploiements à l’aveugle.</dd>
           </div>
           <div>
             <dt class="text-gray-500">Cible</dt>
-            <dd class="mt-1 font-semibold text-gray-100">Projets web hébergés sur VPS.</dd>
+            <dd class="mt-1 font-semibold text-gray-900 dark:text-gray-100">Projets web hébergés sur VPS.</dd>
           </div>
           <div>
             <dt class="text-gray-500">Approche</dt>
-            <dd class="mt-1 font-semibold text-gray-100">Peu d’automagie, beaucoup de visibilité.</dd>
+            <dd class="mt-1 font-semibold text-gray-900 dark:text-gray-100">Peu d’automagie, beaucoup de visibilité.</dd>
           </div>
         </dl>
       </aside>
@@ -52,35 +52,35 @@
   </section>
 
   <section class="grid grid-cols-1 gap-4 md:grid-cols-3">
-    <div class="rounded-lg border border-gray-800 bg-gray-900 p-5">
+    <div class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5">
       <div
         class="
           flex h-10 w-10 items-center justify-center rounded-md bg-cyan-300 text-gray-950
         ">
         <%= fa_icon(:rotate, class_name: "h-5 w-5") %>
       </div>
-      <h2 class="mt-4 text-lg font-bold text-gray-100">Surveiller</h2>
-      <p class="mt-2 text-sm leading-6 text-gray-400">
+      <h2 class="mt-4 text-lg font-bold text-gray-900 dark:text-gray-100">Surveiller</h2>
+      <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">
         Contrôlez l’état HTTP, la maintenance, les screenshots et les signaux
         de santé sans ouvrir chaque projet à la main.
       </p>
     </div>
 
-    <div class="rounded-lg border border-gray-800 bg-gray-900 p-5">
+    <div class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5">
       <div
         class="
           flex h-10 w-10 items-center justify-center rounded-md bg-indigo-500 text-white
         ">
         <%= fa_icon(:magnifying_glass, class_name: "h-5 w-5") %>
       </div>
-      <h2 class="mt-4 text-lg font-bold text-gray-100">Comparer</h2>
-      <p class="mt-2 text-sm leading-6 text-gray-400">
+      <h2 class="mt-4 text-lg font-bold text-gray-900 dark:text-gray-100">Comparer</h2>
+      <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">
         Repérez rapidement un écart entre le commit GitHub attendu et le commit
         réellement déployé.
       </p>
     </div>
 
-    <div class="rounded-lg border border-gray-800 bg-gray-900 p-5">
+    <div class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5">
       <div
         class="
           flex h-10 w-10 items-center justify-center rounded-md bg-emerald-400
@@ -88,8 +88,8 @@
         ">
         <%= fa_icon(:rocket, class_name: "h-5 w-5") %>
       </div>
-      <h2 class="mt-4 text-lg font-bold text-gray-100">Déployer</h2>
-      <p class="mt-2 text-sm leading-6 text-gray-400">
+      <h2 class="mt-4 text-lg font-bold text-gray-900 dark:text-gray-100">Déployer</h2>
+      <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">
         Lancez une commande de déploiement validée, avec historique, logs
         plafonnés et protection contre les exécutions concurrentes.
       </p>
@@ -97,62 +97,62 @@
   </section>
 
   <section class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_24rem]">
-    <div class="rounded-lg border border-gray-800 bg-gray-900 p-6">
-      <h2 class="text-2xl font-bold text-gray-100">Comment ça fonctionne</h2>
+    <div class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Comment ça fonctionne</h2>
       <div class="mt-6 space-y-4">
         <div
           class="
-            grid gap-3 rounded-lg bg-gray-950 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)]
+            grid gap-3 rounded-lg bg-gray-50 dark:bg-gray-950 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)]
           ">
           <span
             class="
-              flex h-10 w-10 items-center justify-center rounded-md bg-gray-800 font-bold
-              text-cyan-300
+              flex h-10 w-10 items-center justify-center rounded-md bg-gray-100 dark:bg-gray-800 font-bold
+              text-cyan-700 dark:text-cyan-300
             ">1</span>
           <div>
-            <h3 class="font-semibold text-gray-100">Vous déclarez un projet</h3>
-            <p class="mt-1 text-sm leading-6 text-gray-400">Nom, URL publique, repository GitHub, branche, chemin VPS et
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100">Vous déclarez un projet</h3>
+            <p class="mt-1 text-sm leading-6 text-gray-500 dark:text-gray-400">Nom, URL publique, repository GitHub, branche, chemin VPS et
               commande de déploiement.</p>
           </div>
         </div>
 
         <div
           class="
-            grid gap-3 rounded-lg bg-gray-950 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)]
+            grid gap-3 rounded-lg bg-gray-50 dark:bg-gray-950 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)]
           ">
           <span
             class="
-              flex h-10 w-10 items-center justify-center rounded-md bg-gray-800 font-bold
-              text-cyan-300
+              flex h-10 w-10 items-center justify-center rounded-md bg-gray-100 dark:bg-gray-800 font-bold
+              text-cyan-700 dark:text-cyan-300
             ">2</span>
           <div>
-            <h3 class="font-semibold text-gray-100">Sentinel vérifie les signaux critiques</h3>
-            <p class="mt-1 text-sm leading-6 text-gray-400">Healthcheck, dernier commit, disponibilité, maintenance et
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100">Sentinel vérifie les signaux critiques</h3>
+            <p class="mt-1 text-sm leading-6 text-gray-500 dark:text-gray-400">Healthcheck, dernier commit, disponibilité, maintenance et
               résultat des derniers déploiements.</p>
           </div>
         </div>
 
         <div
           class="
-            grid gap-3 rounded-lg bg-gray-950 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)]
+            grid gap-3 rounded-lg bg-gray-50 dark:bg-gray-950 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)]
           ">
           <span
             class="
-              flex h-10 w-10 items-center justify-center rounded-md bg-gray-800 font-bold
-              text-cyan-300
+              flex h-10 w-10 items-center justify-center rounded-md bg-gray-100 dark:bg-gray-800 font-bold
+              text-cyan-700 dark:text-cyan-300
             ">3</span>
           <div>
-            <h3 class="font-semibold text-gray-100">Vous décidez avec du contexte</h3>
-            <p class="mt-1 text-sm leading-6 text-gray-400">La page projet vous donne assez d’information pour déployer,
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100">Vous décidez avec du contexte</h3>
+            <p class="mt-1 text-sm leading-6 text-gray-500 dark:text-gray-400">La page projet vous donne assez d’information pour déployer,
               enquêter ou patienter sans multiplier les outils.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <aside class="rounded-lg border border-gray-800 bg-gray-900 p-6">
-      <h2 class="text-xl font-bold text-gray-100">Ce que Sentinel garde volontairement simple</h2>
-      <ul class="mt-5 space-y-3 text-sm text-gray-400">
+    <aside class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Ce que Sentinel garde volontairement simple</h2>
+      <ul class="mt-5 space-y-3 text-sm text-gray-500 dark:text-gray-400">
         <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 rounded-full bg-cyan-300"></span><span>Pas de pipeline complexe à maintenir.</span></li>
         <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 rounded-full bg-cyan-300"></span><span>Pas de magie cachée autour de vos commandes SSH.</span></li>
         <li class="flex gap-3"><span class="mt-2 h-1.5 w-1.5 rounded-full bg-cyan-300"></span><span>Pas de secrets affichés dans l’interface.</span></li>
@@ -161,11 +161,11 @@
     </aside>
   </section>
 
-  <section class="rounded-lg border border-gray-800 bg-gray-900 p-6">
+  <section class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
     <div class="max-w-3xl">
-      <p class="text-sm font-semibold uppercase tracking-wider text-cyan-300">Use cases</p>
-      <h2 class="mt-3 text-2xl font-bold text-gray-100">Pensé pour les petits projets de production</h2>
-      <p class="mt-3 text-sm leading-6 text-gray-400">
+      <p class="text-sm font-semibold uppercase tracking-wider text-cyan-700 dark:text-cyan-300">Use cases</p>
+      <h2 class="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">Pensé pour les petits projets de production</h2>
+      <p class="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">
         Sentinel est utile quand vous avez plusieurs sites ou APIs sur VPS, que
         vos déploiements restent volontairement simples, mais que vous voulez
         une interface fiable pour suivre ce qui est en ligne.
@@ -173,67 +173,67 @@
     </div>
 
     <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <div class="rounded-lg bg-gray-950 p-4">
-        <h3 class="font-semibold text-gray-100">Sites clients</h3>
-        <p class="mt-2 text-sm text-gray-400">Visualiser rapidement ce qui est publié et ce qui nécessite une
+      <div class="rounded-lg bg-gray-50 dark:bg-gray-950 p-4">
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100">Sites clients</h3>
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Visualiser rapidement ce qui est publié et ce qui nécessite une
           action.</p>
       </div>
-      <div class="rounded-lg bg-gray-950 p-4">
-        <h3 class="font-semibold text-gray-100">Side projects</h3>
-        <p class="mt-2 text-sm text-gray-400">Garder une trace propre des déploiements sans grosse plateforme
+      <div class="rounded-lg bg-gray-50 dark:bg-gray-950 p-4">
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100">Side projects</h3>
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Garder une trace propre des déploiements sans grosse plateforme
           CI/CD.</p>
       </div>
-      <div class="rounded-lg bg-gray-950 p-4">
-        <h3 class="font-semibold text-gray-100">APIs internes</h3>
-        <p class="mt-2 text-sm text-gray-400">Surveiller la disponibilité et historiser les mises en production.</p>
+      <div class="rounded-lg bg-gray-50 dark:bg-gray-950 p-4">
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100">APIs internes</h3>
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Surveiller la disponibilité et historiser les mises en production.</p>
       </div>
-      <div class="rounded-lg bg-gray-950 p-4">
-        <h3 class="font-semibold text-gray-100">Maintenance</h3>
-        <p class="mt-2 text-sm text-gray-400">Basculer le mode maintenance et éviter les interventions sans
+      <div class="rounded-lg bg-gray-50 dark:bg-gray-950 p-4">
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100">Maintenance</h3>
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Basculer le mode maintenance et éviter les interventions sans
           contexte.</p>
       </div>
     </div>
   </section>
 
-  <section class="rounded-lg border border-gray-800 bg-gray-900 p-6">
+  <section class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
     <div class="max-w-3xl">
-      <p class="text-sm font-semibold uppercase tracking-wider text-cyan-300">Cron visibility</p>
-      <h2 class="mt-3 text-2xl font-bold text-gray-100">Contrat standard pour remonter les tâches planifiées</h2>
-      <p class="mt-3 text-sm leading-6 text-gray-400">
+      <p class="text-sm font-semibold uppercase tracking-wider text-cyan-700 dark:text-cyan-300">Cron visibility</p>
+      <h2 class="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">Contrat standard pour remonter les tâches planifiées</h2>
+      <p class="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">
         Sentinel ne lance pas vos cron jobs. Chaque projet publie simplement un
         fichier JSON lu par
-        <code class="rounded bg-gray-950 px-1.5 py-0.5 text-gray-100">status.sh</code>, puis l’interface synchronise cet état avec l’action
-        <span class="font-semibold text-gray-200">Sync cron</span>.
+        <code class="rounded bg-gray-50 dark:bg-gray-950 px-1.5 py-0.5 text-gray-900 dark:text-gray-100">status.sh</code>, puis l’interface synchronise cet état avec l’action
+        <span class="font-semibold text-gray-700 dark:text-gray-200">Sync cron</span>.
       </p>
     </div>
 
     <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-      <div class="rounded-lg bg-gray-950 p-4">
-        <h3 class="font-semibold text-gray-100">Emplacement attendu</h3>
-        <p class="mt-2 text-sm leading-6 text-gray-400">
+      <div class="rounded-lg bg-gray-50 dark:bg-gray-950 p-4">
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100">Emplacement attendu</h3>
+        <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">
           Chaque projet expose son état dans
-          <code class="rounded bg-gray-900 px-1.5 py-0.5 text-gray-100">/srv/apps/&lt;project&gt;/sentinel/cron-status.json</code>.
+          <code class="rounded bg-white dark:bg-gray-900 px-1.5 py-0.5 text-gray-900 dark:text-gray-100">/srv/apps/&lt;project&gt;/sentinel/cron-status.json</code>.
         </p>
         <pre
           class="
-            mt-4 overflow-x-auto rounded-md border border-gray-800 bg-gray-900 p-4 text-xs
-            leading-5 text-gray-200
+            mt-4 overflow-x-auto rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 text-xs
+            leading-5 text-gray-700 dark:text-gray-200
           "><code>{ "cron_jobs": [ { "name": "daily-import", "command":
             "./bin/daily-import", "schedule": "0 2 * * *", "last_execution_at":
             "2026-05-06T02:00:12Z", "last_status": "success", "last_duration":
             42, "last_log": "Import completed" } ] }</code></pre>
       </div>
 
-      <div class="rounded-lg bg-gray-950 p-4">
-        <h3 class="font-semibold text-gray-100">Wrapper conseillé</h3>
-        <p class="mt-2 text-sm leading-6 text-gray-400">
+      <div class="rounded-lg bg-gray-50 dark:bg-gray-950 p-4">
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100">Wrapper conseillé</h3>
+        <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">
           Un wrapper par tâche cron exécute le job réel, capture le résultat,
           puis réécrit le JSON de statut de façon atomique.
         </p>
         <pre
           class="
-            mt-4 overflow-x-auto rounded-md border border-gray-800 bg-gray-900 p-4 text-xs
-            leading-5 text-gray-200
+            mt-4 overflow-x-auto rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 text-xs
+            leading-5 text-gray-700 dark:text-gray-200
           "><code>#!/usr/bin/env bash set -u started_at="$(date -u
             +%Y-%m-%dT%H:%M:%SZ)" started_seconds="$(date +%s)"
             log_file="$(mktemp)" if ./bin/daily-import > "$log_file" 2>&1; then
@@ -245,26 +245,26 @@
       </div>
     </div>
 
-    <div class="mt-4 rounded-lg border border-yellow-900/60 bg-yellow-950/30 p-4">
-      <h3 class="font-semibold text-yellow-200">Règles de sécurité</h3>
-      <ul class="mt-3 space-y-2 text-sm leading-6 text-yellow-100/80">
+    <div class="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900/60 dark:bg-yellow-950/30">
+      <h3 class="font-semibold text-yellow-800 dark:text-yellow-200">Règles de sécurité</h3>
+      <ul class="mt-3 space-y-2 text-sm leading-6 text-yellow-800 dark:text-yellow-100/80">
         <li>Le user SSH
-          <code class="rounded bg-yellow-950 px-1.5 py-0.5 text-yellow-100">sentinel</code>
+          <code class="rounded bg-yellow-100 px-1.5 py-0.5 text-yellow-900 dark:bg-yellow-950 dark:text-yellow-100">sentinel</code>
           lit seulement l’état existant.</li>
-        <li><code class="rounded bg-yellow-950 px-1.5 py-0.5 text-yellow-100">status.sh</code>
+        <li><code class="rounded bg-yellow-100 px-1.5 py-0.5 text-yellow-900 dark:bg-yellow-950 dark:text-yellow-100">status.sh</code>
           retourne uniquement du JSON et ne lance jamais les cron jobs.</li>
         <li>Aucun sudo n’est nécessaire pour cette sonde.</li>
         <li>Le chemin projet doit rester validé sous
-          <code class="rounded bg-yellow-950 px-1.5 py-0.5 text-yellow-100">/srv/apps</code>.</li>
+          <code class="rounded bg-yellow-100 px-1.5 py-0.5 text-yellow-900 dark:bg-yellow-950 dark:text-yellow-100">/srv/apps</code>.</li>
       </ul>
     </div>
   </section>
 
-  <section class="rounded-lg border border-gray-800 bg-gray-900 p-6">
+  <section class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
     <div class="max-w-3xl">
-      <p class="text-sm font-semibold uppercase tracking-wider text-cyan-300">FAQ</p>
-      <h2 class="mt-3 text-2xl font-bold text-gray-100">Questions fréquentes</h2>
-      <p class="mt-3 text-sm leading-6 text-gray-400">
+      <p class="text-sm font-semibold uppercase tracking-wider text-cyan-700 dark:text-cyan-300">FAQ</p>
+      <h2 class="mt-3 text-2xl font-bold text-gray-900 dark:text-gray-100">Questions fréquentes</h2>
+      <p class="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">
         Les réponses sont repliables pour garder la page légère et rapide à
         scanner.
       </p>
@@ -272,18 +272,18 @@
 
     <div
       class="
-        mt-6 divide-y divide-gray-800 rounded-lg border border-gray-800 bg-gray-950
+        mt-6 divide-y divide-gray-200 dark:divide-gray-800 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950
       ">
       <details class="group p-4">
         <summary
           class="
             flex cursor-pointer list-none items-center justify-between gap-4 font-semibold
-            text-gray-100
+            text-gray-900 dark:text-gray-100
           ">
           Est-ce que Sentinel remplace une CI/CD complète ?
           <span class="text-xl leading-none text-gray-500 group-open:rotate-45">+</span>
         </summary>
-        <p class="mt-3 text-sm leading-6 text-gray-400">
+        <p class="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">
           Non. Sentinel sert surtout à piloter et observer des déploiements
           simples sur VPS. Une CI/CD reste préférable pour les pipelines
           complexes, les matrices de tests ou les environnements multiples.
@@ -294,12 +294,12 @@
         <summary
           class="
             flex cursor-pointer list-none items-center justify-between gap-4 font-semibold
-            text-gray-100
+            text-gray-900 dark:text-gray-100
           ">
           Pourquoi passer par SSH ?
           <span class="text-xl leading-none text-gray-500 group-open:rotate-45">+</span>
         </summary>
-        <p class="mt-3 text-sm leading-6 text-gray-400">
+        <p class="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">
           Parce que beaucoup de petits projets sont déjà déployés avec un
           script fiable sur un VPS. Sentinel encadre cette commande avec
           validations, timeouts, historique et visibilité.
@@ -310,12 +310,12 @@
         <summary
           class="
             flex cursor-pointer list-none items-center justify-between gap-4 font-semibold
-            text-gray-100
+            text-gray-900 dark:text-gray-100
           ">
           Quels secrets sont visibles dans l’interface ?
           <span class="text-xl leading-none text-gray-500 group-open:rotate-45">+</span>
         </summary>
-        <p class="mt-3 text-sm leading-6 text-gray-400">
+        <p class="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">
           Aucun secret ne doit être affiché. Les pages de configuration
           indiquent seulement si les intégrations sensibles sont configurées ou
           manquantes.
@@ -326,15 +326,15 @@
         <summary
           class="
             flex cursor-pointer list-none items-center justify-between gap-4 font-semibold
-            text-gray-100
+            text-gray-900 dark:text-gray-100
           ">
           Quelle commande lancer pour valider le projet ?
           <span class="text-xl leading-none text-gray-500 group-open:rotate-45">+</span>
         </summary>
-        <p class="mt-3 text-sm leading-6 text-gray-400">
+        <p class="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">
           La commande de test courante est
-          <code class="rounded bg-gray-900 px-1.5 py-0.5 text-gray-100">docker compose exec sentinel-api bundle exec rspec</code>. Pour tout valider avant commit, utilisez
-          <code class="rounded bg-gray-900 px-1.5 py-0.5 text-gray-100">docker compose exec sentinel-api bin/ci</code>.
+          <code class="rounded bg-white dark:bg-gray-900 px-1.5 py-0.5 text-gray-900 dark:text-gray-100">docker compose exec sentinel-api bundle exec rspec</code>. Pour tout valider avant commit, utilisez
+          <code class="rounded bg-white dark:bg-gray-900 px-1.5 py-0.5 text-gray-900 dark:text-gray-100">docker compose exec sentinel-api bin/ci</code>.
         </p>
       </details>
     </div>

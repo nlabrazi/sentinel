@@ -2,21 +2,21 @@
   <nav
     class="
       sticky top-24 max-h-[calc(100vh-7rem)] space-y-4 overflow-y-auto pr-2
-      text-gray-400
+      text-gray-500 dark:text-gray-400
     ">
-    <a href="#overview" class="flex items-center gap-2 font-semibold text-cyan-300">
+    <a href="#overview" class="flex items-center gap-2 font-semibold text-cyan-700 dark:text-cyan-300">
       <span class="h-2 w-2 rotate-45 bg-cyan-300"></span>
       Project overview
     </a>
     <% if project.app? %>
-      <a href="#deploys" class="block pl-6 hover:text-gray-100">Deploys</a>
+      <a href="#deploys" class="block pl-6 hover:text-gray-900 dark:hover:text-gray-100">Deploys</a>
     <% end %>
 
-    <a href="#healthcheck" class="block pl-6 hover:text-gray-100">Healthcheck</a>
+    <a href="#healthcheck" class="block pl-6 hover:text-gray-900 dark:hover:text-gray-100">Healthcheck</a>
 
     <% if project.app? %>
-      <a href="#commits" class="block pl-6 hover:text-gray-100">Commits</a>
-      <a href="#pull-requests" class="block pl-6 hover:text-gray-100">Pull requests</a>
+      <a href="#commits" class="block pl-6 hover:text-gray-900 dark:hover:text-gray-100">Commits</a>
+      <a href="#pull-requests" class="block pl-6 hover:text-gray-900 dark:hover:text-gray-100">Pull requests</a>
     <% end %>
   </nav>
 </aside>
