@@ -7,7 +7,7 @@
     <%= csp_meta_tag %>
     <%= favicon_link_tag "/favicon.ico" %>
     <% if ENV["FONT_AWESOME_KIT_URL"].present? %>
-      <script src="<%= ENV["FONT_AWESOME_KIT_URL"] %>" crossorigin="anonymous"></script>
+      <script src="<%= ENV["FONT_AWESOME_KIT_URL"] %>" nonce="<%= request.content_security_policy_nonce %>" crossorigin="anonymous"></script>
     <% end %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>

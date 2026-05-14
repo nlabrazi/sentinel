@@ -236,7 +236,7 @@
             leading-5 text-gray-700 dark:text-gray-200
           "><code>#!/usr/bin/env bash set -u started_at="$(date -u
             +%Y-%m-%dT%H:%M:%SZ)" started_seconds="$(date +%s)"
-            log_file="$(mktemp)" if ./bin/daily-import > "$log_file" 2>&1; then
+            log_file="$(mktemp)" if ./bin/daily-import &gt; "$log_file" 2&gt;&amp;1; then
             status="success" else status="failed" fi duration="$(($(date +%s) -
             started_seconds))" last_log="$(tail -c 4000 "$log_file" | jq -Rs
             .)" mkdir -p sentinel cat &gt; sentinel/cron-status.json.tmp

@@ -86,13 +86,10 @@
                     dark:border-gray-800 dark:bg-gray-950 sm:block sm:w-36 sm:shrink-0
                   ">
                   <% if @screenshots_enabled && project.screenshot.attached? %>
-                    <img
-                      src="<%= url_for(project.screenshot) %>"
-                      alt="Aperçu de <%= project.name %>"
-                      class="
-                        aspect-video w-full object-cover opacity-90 transition group-hover:opacity-100
-                      "
-                      loading="lazy">
+                    <%= image_tag url_for(project.screenshot),
+                      alt: "Aperçu de #{project.name}",
+                      class: "aspect-video w-full object-cover opacity-90 transition group-hover:opacity-100",
+                      loading: "lazy" %>
                   <% else %>
                     <div
                       class="
