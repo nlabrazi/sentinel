@@ -8,7 +8,8 @@ RSpec.describe 'Pages', type: :request do
       get settings_path
 
       expect(response).to have_http_status(:success)
-      expect(response.body).to include('Settings for Sentinel')
+      expect(response.body).to include('Settings for')
+      expect(response.body).to include('Sentinel')
       expect(response.body).to include('General app settings')
       expect(response.body).to include('Application details')
       expect(response.body).to include('Application information')

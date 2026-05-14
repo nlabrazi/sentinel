@@ -1,0 +1,33 @@
+<section
+  id="configuration"
+  class="overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow">
+  <div
+    class="
+      border-b border-gray-800 bg-gradient-to-r from-indigo-950 via-purple-950
+      to-gray-900 px-5 py-4
+    ">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <h2 class="text-xl font-bold text-gray-100">Deployment command</h2>
+        <p class="mt-1 text-sm text-gray-400">The command Sentinel runs on the VPS for this project.</p>
+      </div>
+      <div class="flex flex-wrap gap-3 text-sm text-gray-400">
+        <span>VPS path</span>
+        <span>SSH execution</span>
+      </div>
+    </div>
+  </div>
+  <div class="p-5">
+    <div class="rounded-lg border border-gray-600 bg-gray-950 p-4">
+      <p class="text-sm text-gray-400">Start with</p>
+      <code
+        class="
+          mt-3 block overflow-x-auto whitespace-nowrap text-sm text-gray-100
+        "><%= project.deploy_command %></code>
+    </div>
+    <p class="mt-4 text-sm text-gray-400">
+      The command is generated from the validated VPS path and remains
+      read-only from this screen.
+    </p>
+  </div>
+</section>

@@ -2,13 +2,11 @@
   <section
     class="
       overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow
-    "
-  >
+    ">
     <div
       class="
         grid grid-cols-1 gap-8 p-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:p-8
-      "
-    >
+      ">
       <div class="max-w-3xl">
         <p class="text-sm font-semibold uppercase tracking-wider text-cyan-300">Sentinel product overview</p>
         <h1 class="mt-4 text-3xl font-bold leading-tight text-gray-100 sm:text-4xl">
@@ -58,8 +56,7 @@
       <div
         class="
           flex h-10 w-10 items-center justify-center rounded-md bg-cyan-300 text-gray-950
-        "
-      >
+        ">
         <%= fa_icon(:rotate, class_name: "h-5 w-5") %>
       </div>
       <h2 class="mt-4 text-lg font-bold text-gray-100">Surveiller</h2>
@@ -73,8 +70,7 @@
       <div
         class="
           flex h-10 w-10 items-center justify-center rounded-md bg-indigo-500 text-white
-        "
-      >
+        ">
         <%= fa_icon(:magnifying_glass, class_name: "h-5 w-5") %>
       </div>
       <h2 class="mt-4 text-lg font-bold text-gray-100">Comparer</h2>
@@ -89,8 +85,7 @@
         class="
           flex h-10 w-10 items-center justify-center rounded-md bg-emerald-400
           text-gray-950
-        "
-      >
+        ">
         <%= fa_icon(:rocket, class_name: "h-5 w-5") %>
       </div>
       <h2 class="mt-4 text-lg font-bold text-gray-100">Déployer</h2>
@@ -108,14 +103,12 @@
         <div
           class="
             grid gap-3 rounded-lg bg-gray-950 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)]
-          "
-        >
+          ">
           <span
             class="
               flex h-10 w-10 items-center justify-center rounded-md bg-gray-800 font-bold
               text-cyan-300
-            "
-          >1</span>
+            ">1</span>
           <div>
             <h3 class="font-semibold text-gray-100">Vous déclarez un projet</h3>
             <p class="mt-1 text-sm leading-6 text-gray-400">Nom, URL publique, repository GitHub, branche, chemin VPS et
@@ -126,14 +119,12 @@
         <div
           class="
             grid gap-3 rounded-lg bg-gray-950 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)]
-          "
-        >
+          ">
           <span
             class="
               flex h-10 w-10 items-center justify-center rounded-md bg-gray-800 font-bold
               text-cyan-300
-            "
-          >2</span>
+            ">2</span>
           <div>
             <h3 class="font-semibold text-gray-100">Sentinel vérifie les signaux critiques</h3>
             <p class="mt-1 text-sm leading-6 text-gray-400">Healthcheck, dernier commit, disponibilité, maintenance et
@@ -144,14 +135,12 @@
         <div
           class="
             grid gap-3 rounded-lg bg-gray-950 p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)]
-          "
-        >
+          ">
           <span
             class="
               flex h-10 w-10 items-center justify-center rounded-md bg-gray-800 font-bold
               text-cyan-300
-            "
-          >3</span>
+            ">3</span>
           <div>
             <h3 class="font-semibold text-gray-100">Vous décidez avec du contexte</h3>
             <p class="mt-1 text-sm leading-6 text-gray-400">La page projet vous donne assez d’information pour déployer,
@@ -229,8 +218,7 @@
           class="
             mt-4 overflow-x-auto rounded-md border border-gray-800 bg-gray-900 p-4 text-xs
             leading-5 text-gray-200
-          "
-        ><code>{ "cron_jobs": [ { "name": "daily-import", "command":
+          "><code>{ "cron_jobs": [ { "name": "daily-import", "command":
             "./bin/daily-import", "schedule": "0 2 * * *", "last_execution_at":
             "2026-05-06T02:00:12Z", "last_status": "success", "last_duration":
             42, "last_log": "Import completed" } ] }</code></pre>
@@ -246,8 +234,7 @@
           class="
             mt-4 overflow-x-auto rounded-md border border-gray-800 bg-gray-900 p-4 text-xs
             leading-5 text-gray-200
-          "
-        ><code>#!/usr/bin/env bash set -u started_at="$(date -u
+          "><code>#!/usr/bin/env bash set -u started_at="$(date -u
             +%Y-%m-%dT%H:%M:%SZ)" started_seconds="$(date +%s)"
             log_file="$(mktemp)" if ./bin/daily-import > "$log_file" 2>&1; then
             status="success" else status="failed" fi duration="$(($(date +%s) -
@@ -286,15 +273,13 @@
     <div
       class="
         mt-6 divide-y divide-gray-800 rounded-lg border border-gray-800 bg-gray-950
-      "
-    >
+      ">
       <details class="group p-4">
         <summary
           class="
             flex cursor-pointer list-none items-center justify-between gap-4 font-semibold
             text-gray-100
-          "
-        >
+          ">
           Est-ce que Sentinel remplace une CI/CD complète ?
           <span class="text-xl leading-none text-gray-500 group-open:rotate-45">+</span>
         </summary>
@@ -310,8 +295,7 @@
           class="
             flex cursor-pointer list-none items-center justify-between gap-4 font-semibold
             text-gray-100
-          "
-        >
+          ">
           Pourquoi passer par SSH ?
           <span class="text-xl leading-none text-gray-500 group-open:rotate-45">+</span>
         </summary>
@@ -327,8 +311,7 @@
           class="
             flex cursor-pointer list-none items-center justify-between gap-4 font-semibold
             text-gray-100
-          "
-        >
+          ">
           Quels secrets sont visibles dans l’interface ?
           <span class="text-xl leading-none text-gray-500 group-open:rotate-45">+</span>
         </summary>
@@ -344,8 +327,7 @@
           class="
             flex cursor-pointer list-none items-center justify-between gap-4 font-semibold
             text-gray-100
-          "
-        >
+          ">
           Quelle commande lancer pour valider le projet ?
           <span class="text-xl leading-none text-gray-500 group-open:rotate-45">+</span>
         </summary>

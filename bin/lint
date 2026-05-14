@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Lint: Ruby"
+bin/rubocop
+
+echo
+echo "Lint: ERB"
+bundle exec erb_lint --lint-all
+
+echo
+echo "✅ Lint passed"

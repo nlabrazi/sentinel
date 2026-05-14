@@ -16,15 +16,13 @@
     <div
       class="min-h-screen lg:flex"
       data-controller="mobile-nav sidebar"
-      data-sidebar-collapsed-value="<%= @compact_sidebar ? 'true' : 'false' %>"
-    >
+      data-sidebar-collapsed-value="<%= @compact_sidebar ? 'true' : 'false' %>">
       <button
         type="button"
         class="fixed inset-0 z-30 hidden bg-gray-950/70 lg:hidden"
         data-mobile-nav-target="overlay"
         data-action="mobile-nav#close"
-        aria-label="Fermer le menu"
-      ></button>
+        aria-label="Fermer le menu"></button>
 
       <aside
         class="
@@ -34,8 +32,7 @@
           lg:shadow-none
         "
         data-mobile-nav-target="panel"
-        data-sidebar-target="sidebar"
-      >
+        data-sidebar-target="sidebar">
         <div class="flex flex-col gap-3 px-5 py-4">
           <div class="flex items-center justify-between">
             <%= link_to root_path, class: "inline-flex h-10 w-10 items-center justify-center rounded-md text-cyan-300", title: "Dashboard projects" do %>
@@ -52,8 +49,7 @@
                 "
                 data-action="sidebar#toggle"
                 aria-label="Réduire ou étendre le menu"
-                title="Réduire ou étendre le menu"
-              >
+                title="Réduire ou étendre le menu">
                 <%= fa_icon(:bars, class_name: "h-4 w-4") %>
               </button>
               <button
@@ -63,8 +59,7 @@
                   hover:bg-gray-800 hover:text-white lg:hidden
                 "
                 data-action="mobile-nav#close"
-                aria-label="Fermer le menu"
-              >
+                aria-label="Fermer le menu">
                 <%= fa_icon(:xmark, class_name: "h-5 w-5") %>
               </button>
             </div>
@@ -85,21 +80,18 @@
             <span
               class="
                 absolute right-3 top-1/2 hidden -translate-y-1/2 text-xs text-gray-500 sm:inline
-              "
-            >CtrlK</span>
+              ">CtrlK</span>
           <% end %>
         </div>
 
         <div
           class="mx-4 mt-5 flex items-center gap-3 rounded-md px-2 py-2"
-          data-sidebar-target="full"
-        >
+          data-sidebar-target="full">
           <div
             class="
               flex h-7 w-7 items-center justify-center rounded bg-cyan-400 text-xs font-bold
               text-gray-950
-            "
-          >S</div>
+            ">S</div>
           <div class="min-w-0 flex-1">
             <p class="truncate text-sm font-semibold text-gray-100">Sentinel</p>
             <p class="truncate text-xs text-gray-500"><%= current_user.email if user_signed_in? %></p>
@@ -109,8 +101,7 @@
         <nav
           class="
             mt-4 min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-2 text-sm font-semibold
-          "
-        >
+          ">
           <%= link_to root_path, data: { action: "mobile-nav#close", sidebar_target: "navItem" }, class: "flex items-center gap-3 rounded-md px-3 py-2 #{current_page?(root_path) ? 'border-l-4 border-cyan-300 bg-gray-800 text-cyan-300' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-100'}" do %>
             <%= fa_icon(:rocket, class_name: "h-4 w-4") %>
             <span data-sidebar-target="full">Projects</span>
@@ -131,8 +122,7 @@
 
         <div
           class="space-y-3 border-t border-gray-800 px-4 py-4"
-          data-sidebar-target="full"
-        >
+          data-sidebar-target="full">
           <button
             id="dark-mode-toggle"
             data-controller="dark-mode"
@@ -140,13 +130,11 @@
             class="
               flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-sm
               text-gray-400 hover:bg-gray-800 hover:text-gray-100
-            "
-          >
+            ">
             <i
               data-dark-mode-target="icon"
               class="fa-solid fa-moon mr-2 text-sm"
-              aria-hidden="true"
-            ></i>
+              aria-hidden="true"></i>
             <span data-dark-mode-target="text">Activer Mode sombre</span>
           </button>
           <% if user_signed_in? %>
@@ -155,8 +143,7 @@
                 class="
                   flex h-8 w-8 items-center justify-center rounded-full bg-gray-700 text-xs
                   font-bold text-gray-100
-                "
-              ><%= current_user.email.first.upcase %></div>
+                "><%= current_user.email.first.upcase %></div>
               <div class="min-w-0 flex-1">
                 <p class="truncate text-sm font-semibold text-gray-100"><%= current_user.email.split("@").first %></p>
                 <p class="truncate text-xs text-gray-500"><%= current_user.email %></p>
@@ -175,8 +162,7 @@
           class="
             sticky top-0 z-20 border-b border-gray-900 bg-gray-950 px-4 py-4 sm:px-8
             lg:static
-          "
-        >
+          ">
           <div class="flex items-center justify-between gap-4">
             <div class="flex items-center gap-3">
               <button
@@ -186,8 +172,7 @@
                   border-gray-800 text-gray-300 hover:bg-gray-900 lg:hidden
                 "
                 data-action="mobile-nav#open"
-                aria-label="Ouvrir le menu"
-              >
+                aria-label="Ouvrir le menu">
                 <%= fa_icon(:bars, class_name: "h-5 w-5") %>
               </button>
               <h1 class="text-xl font-semibold text-gray-300"><%= @page_title || "Projects" %></h1>
@@ -207,16 +192,14 @@
               class="
                 mb-4 rounded-md border border-green-900/60 bg-green-950/60 px-4 py-3 text-sm
                 text-green-200
-              "
-            ><%= notice %></p>
+              "><%= notice %></p>
           <% end %>
           <% if alert.present? %>
             <p
               class="
                 mb-4 rounded-md border border-red-900/60 bg-red-950/60 px-4 py-3 text-sm
                 text-red-200
-              "
-            ><%= alert %></p>
+              "><%= alert %></p>
           <% end %>
           <%= yield %>
         </div>
@@ -228,18 +211,15 @@
               <span><a
                   href="https://nabster.dev"
                   target="_blank"
-                  class="text-gray-400 hover:text-gray-300"
-                >Blog</a></span>
+                  class="text-gray-400 hover:text-gray-300">Blog</a></span>
               <span><a
                   href="https://github.com/nlabrazi/sentinel"
                   target="_blank"
-                  class="text-gray-400 hover:text-gray-300"
-                >Github</a></span>
+                  class="text-gray-400 hover:text-gray-300">Github</a></span>
               <span><a
                   href="mailto:na.labrazi@gmail.com"
                   target="_blank"
-                  class="text-gray-400 hover:text-gray-300"
-                >Contact</a></span>
+                  class="text-gray-400 hover:text-gray-300">Contact</a></span>
             </div>
             <p>&copy;
               <%= Time.current.year %>

@@ -14,16 +14,22 @@ class Project < ApplicationRecord
   has_many :github_pull_requests, dependent: :destroy
   has_one_attached :screenshot
 
-  validates :name, :slug, :repo_url, :branch, :production_url, :vps_path, presence: true
+  enum :status, { online: 0, offline: 1, unknown: 2 }, default: :unknown
+  enum :kind, { app: "app", service: "service" }, default: :app
+
+  validates :name, :slug, :production_url, :vps_path, presence: true
+  validates :repo_url, :branch, presence: true, if: :app?
+
   validates :slug, uniqueness: true
   validates :status, inclusion: { in: %w[online offline unknown] }
-  validate :repo_url_must_be_github_https
+
+  validate :repo_url_must_be_github_https, if: :repo_url_required?
   validate :production_url_must_be_http_url
   validate :vps_path_must_be_allowed
 
-  enum :status, { online: 0, offline: 1, unknown: 2 }, default: :unknown
-
   def github_repo
+    return "No GitHub repository" if repo_url.blank?
+
     URI.parse(repo_url).path.sub(/^\//, "").sub(/\.git$/, "")
   end
 
@@ -139,6 +145,10 @@ class Project < ApplicationRecord
   end
 
   private
+
+  def repo_url_required?
+    app? || repo_url.present?
+  end
 
   def maintenance_flag_path
     File.join(vps_path, "maintenance.on")

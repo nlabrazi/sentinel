@@ -26,8 +26,7 @@
   <section
     class="
       overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow
-    "
-  >
+    ">
     <% if @deployments.any? %>
       <div class="hidden overflow-x-auto md:block">
         <table class="min-w-full divide-y divide-gray-800">
@@ -49,8 +48,7 @@
                   <span
                     class="
                       text-sm font-semibold <%= deploy.success? ? 'text-green-400' : deploy.failed? ? 'text-red-400' : 'text-yellow-300' %>
-                    "
-                  ><%= deploy.status %></span>
+                    "><%= deploy.status %></span>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-300"><%= deploy.duration ? "#{deploy.duration}s" : "-" %></td>
                 <td class="px-6 py-4 text-sm text-gray-400"><%= l(deploy.created_at, format: :short) %></td>
@@ -75,8 +73,7 @@
               <span
                 class="
                   text-sm font-semibold <%= deploy.success? ? 'text-green-400' : deploy.failed? ? 'text-red-400' : 'text-yellow-300' %>
-                "
-              ><%= deploy.status %></span>
+                "><%= deploy.status %></span>
             </div>
             <dl class="grid grid-cols-2 gap-3 text-sm">
               <div>

@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-bundle exec rubocop -a
-bundle exec erb-format app/views/**/*.html.erb
-bundle exec erb_lint --lint-all
+echo "Format: Ruby"
+bin/rubocop -A
+
+echo
+echo "Format: ERB"
+bundle exec erb-format app/views/**/*.html.erb --write
+
+echo
+echo "Autocorrect: ERB lint"
+bundle exec erb_lint --lint-all -a
+
+echo
+echo "✅ Format passed"

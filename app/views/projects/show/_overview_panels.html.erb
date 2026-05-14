@@ -1,0 +1,230 @@
+<div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+  <div class="space-y-6">
+    <section
+      class="
+        overflow-hidden rounded-xl border border-gray-800 bg-gray-900 shadow
+      ">
+      <div class="border-b border-gray-800 px-5 py-4">
+        <%= render "shared/ui/section_header",
+        title: "Release status",
+        description: "État court de la production.",
+        icon: :code_branch,
+        title_class: "text-lg" %>
+      </div>
+
+      <dl class="grid grid-cols-1 text-sm sm:grid-cols-2">
+        <div class="border-b border-gray-800 px-5 py-4 sm:border-r">
+          <dt class="text-gray-500">Production</dt>
+          <dd class="mt-1 font-mono font-semibold text-gray-100">
+            <%= if project.last_commit_deployed.present?
+              project.last_commit_deployed.first(7)
+            else
+              "unknown"
+            end %>
+          </dd>
+        </div>
+
+        <div class="border-b border-gray-800 px-5 py-4">
+          <dt class="text-gray-500"><%= project.branch %></dt>
+          <dd class="mt-1 font-mono font-semibold text-gray-100">
+            <%= if project.latest_commit_available.present?
+              project.latest_commit_available.first(7)
+            else
+              "unknown"
+            end %>
+          </dd>
+        </div>
+
+        <div class="border-b border-gray-800 px-5 py-4 sm:border-r">
+          <dt class="text-gray-500">Version</dt>
+          <dd
+            class="mt-1 font-semibold <%= behind_count.positive? ? 'text-yellow-300' : 'text-green-300' %>">
+            <%= behind_count.positive? ? "#{behind_count} update(s)" : "Up to date" %>
+          </dd>
+        </div>
+
+        <div class="border-b border-gray-800 px-5 py-4">
+          <dt class="text-gray-500">Deploy state</dt>
+          <dd
+            class="mt-1 font-semibold <%= running_deployment ? 'text-yellow-300' : 'text-gray-100' %>">
+            <%= running_deployment ? "Running" : "Idle" %>
+          </dd>
+        </div>
+
+        <div class="border-b border-gray-800 px-5 py-4 sm:border-r sm:border-b-0">
+          <dt class="text-gray-500">GitHub sync</dt>
+          <dd class="mt-1 font-semibold text-gray-100">
+            <% if project.github_synced_at %>
+              <%= time_ago_in_words(project.github_synced_at) %>
+              ago
+            <% else %>
+              Never
+            <% end %>
+          </dd>
+        </div>
+
+        <div class="px-5 py-4">
+          <dt class="text-gray-500">Jobs sync</dt>
+          <dd class="mt-1 font-semibold text-gray-100">
+            <% if project.cron_synced_at %>
+              <%= time_ago_in_words(project.cron_synced_at) %>
+              ago
+            <% else %>
+              Never
+            <% end %>
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    <section
+      class="
+        overflow-hidden rounded-xl border border-gray-800 bg-gray-900 shadow
+      ">
+      <div class="border-b border-gray-800 px-5 py-4">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-gray-100">Quick commands</h2>
+            <p class="mt-1 text-sm text-gray-400">Future console sécurisée pour ce projet.</p>
+          </div>
+
+          <span
+            class="
+              rounded-full bg-gray-800 px-2.5 py-1 text-xs font-semibold text-gray-400
+            ">V2</span>
+        </div>
+      </div>
+
+      <div class="space-y-4 p-5">
+        <div class="rounded-lg border border-gray-800 bg-gray-950 px-4 py-3">
+          <p class="text-xs font-medium text-gray-500">Connected directory</p>
+          <p class="mt-1 truncate font-mono text-sm text-gray-200">
+            <%= project.vps_path %>
+          </p>
+        </div>
+
+        <div class="rounded-lg border border-dashed border-gray-700 bg-gray-950/60 p-4">
+          <p class="font-semibold text-gray-200">Safe commands only</p>
+          <p class="mt-1 text-sm leading-6 text-gray-400">
+            Prévu pour lancer uniquement des commandes prédéfinies : status,
+            logs, docker ps, latest deploy log.
+          </p>
+
+          <div class="mt-4 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+            <span
+              class="
+                rounded-md border border-gray-800 bg-gray-950 px-2 py-1.5 text-center font-mono
+                text-gray-500
+              ">status.sh</span>
+            <span
+              class="
+                rounded-md border border-gray-800 bg-gray-950 px-2 py-1.5 text-center font-mono
+                text-gray-500
+              ">git status</span>
+            <span
+              class="
+                rounded-md border border-gray-800 bg-gray-950 px-2 py-1.5 text-center font-mono
+                text-gray-500
+              ">compose ps</span>
+            <span
+              class="
+                rounded-md border border-gray-800 bg-gray-950 px-2 py-1.5 text-center font-mono
+                text-gray-500
+              ">tail logs</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="space-y-6">
+    <section
+      class="
+        overflow-hidden rounded-xl border border-gray-800 bg-gray-900 shadow
+      ">
+      <div class="border-b border-gray-800 px-5 py-4">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-gray-100">Observability</h2>
+            <p class="mt-1 text-sm text-gray-400">Place prévue pour Grafana.</p>
+          </div>
+
+          <span
+            class="
+              rounded-full bg-gray-800 px-2.5 py-1 text-xs font-semibold text-gray-400
+            ">Soon</span>
+        </div>
+      </div>
+
+      <div class="p-5">
+        <div class="grid grid-cols-3 gap-3 text-sm">
+          <div class="rounded-lg border border-gray-800 bg-gray-950 px-3 py-3">
+            <p class="text-xs text-gray-500">Status</p>
+            <p
+              class="mt-1 font-semibold <%= project.online? ? 'text-green-300' : project.offline? ? 'text-red-300' : 'text-gray-300' %>">
+              <%= project.status %>
+            </p>
+          </div>
+
+          <div class="rounded-lg border border-gray-800 bg-gray-950 px-3 py-3">
+            <p class="text-xs text-gray-500">HTTP</p>
+            <p class="mt-1 font-semibold text-gray-100">
+              <%= latest_ping&.http_status || "unknown" %>
+            </p>
+          </div>
+
+          <div class="rounded-lg border border-gray-800 bg-gray-950 px-3 py-3">
+            <p class="text-xs text-gray-500">Latency</p>
+            <p class="mt-1 font-semibold text-gray-100">
+              <%= latest_ping&.response_time_ms ? "#{latest_ping.response_time_ms}ms" : "unknown" %>
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="
+            mt-4 flex h-28 items-center justify-center rounded-lg border border-dashed
+            border-gray-700 bg-gray-950/60 text-center
+          ">
+          <div>
+            <p class="text-sm font-semibold text-gray-300">Grafana embed placeholder</p>
+            <p class="mt-1 text-xs text-gray-500">Uptime, latency, requests, errors.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="
+        overflow-hidden rounded-xl border border-gray-800 bg-gray-900 shadow
+      ">
+      <div class="border-b border-gray-800 px-5 py-4">
+        <h2 class="text-lg font-bold text-gray-100">Security</h2>
+        <p class="mt-1 text-sm text-gray-400">Points de contrôle simples pour ce projet.</p>
+      </div>
+
+      <div class="divide-y divide-gray-800 text-sm">
+        <div class="flex items-center justify-between gap-4 px-5 py-3">
+          <span class="text-gray-400">HTTPS URL</span>
+          <span
+            class="font-semibold <%= project.production_url.start_with?('https://') ? 'text-green-300' : 'text-yellow-300' %>">
+            <%= project.production_url.start_with?("https://") ? "Enabled" : "Check" %>
+          </span>
+        </div>
+
+        <div class="flex items-center justify-between gap-4 px-5 py-3">
+          <span class="text-gray-400">Maintenance</span>
+          <span
+            class="font-semibold <%= project.maintenance_mode? ? 'text-yellow-300' : 'text-green-300' %>">
+            <%= project.maintenance_mode? ? "Enabled" : "Disabled" %>
+          </span>
+        </div>
+
+        <div class="flex items-center justify-between gap-4 px-5 py-3">
+          <span class="text-gray-400">VPS path</span>
+          <span class="font-semibold text-green-300">Restricted</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

@@ -1,0 +1,77 @@
+<details
+  id="commits"
+  class="
+    group overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow
+  ">
+  <summary
+    class="
+      flex cursor-pointer list-none items-center justify-between gap-4 border-b
+      border-gray-800 px-5 py-4 hover:bg-gray-800/40
+    ">
+    <div>
+      <h2 class="text-xl font-bold text-gray-100">Recent commits</h2>
+      <p class="mt-1 text-sm text-gray-400">
+        Latest commits synchronized from the tracked GitHub branch.
+        <% if project.github_synced_at %>
+          GitHub synced
+          <%= time_ago_in_words(project.github_synced_at) %>
+          ago.
+        <% else %>
+          GitHub never synced.
+        <% end %>
+      </p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <span
+        class="
+          inline-flex w-fit items-center rounded-full bg-gray-800 px-3 py-1 text-xs
+          font-semibold text-gray-300
+        ">
+        <%= github_commits.size %>
+        commit<%= "s" unless github_commits.size == 1 %>
+      </span>
+      <span class="text-sm text-gray-500 group-open:rotate-180">
+        <%= fa_icon(:chevron_down, class_name: "text-sm") %>
+      </span>
+    </div>
+  </summary>
+
+  <% if github_commits.any? %>
+    <div class="divide-y divide-gray-800">
+      <% github_commits.each do |commit| %>
+        <% short_sha = commit.sha.first(7) %>
+        <article
+          class="
+            flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:justify-between
+          ">
+          <div class="min-w-0">
+            <p class="truncate font-semibold text-gray-100">
+              <%= commit.message %>
+            </p>
+            <p class="mt-1 text-sm text-gray-400">
+              <code class="rounded bg-gray-950 px-1.5 py-0.5 text-xs text-gray-200"><%= short_sha %></code>
+              <% if commit.author_login.present? || commit.author_name.present? %>
+                <span class="mx-1 text-gray-600">·</span>
+                <%= commit.author_login.presence || commit.author_name %>
+              <% end %>
+            </p>
+          </div>
+          <p class="shrink-0 text-sm text-gray-400">
+            <% if commit.committed_at %>
+              <%= l(commit.committed_at, format: :short) %>
+            <% else %>
+              unknown
+            <% end %>
+          </p>
+        </article>
+      <% end %>
+    </div>
+  <% else %>
+    <%= render "shared/ui/empty_state",
+    title: "No GitHub commit history yet.",
+    description:
+      "Synchronisez GitHub pour récupérer les derniers commits de la branche suivie.",
+    icon: :code_commit %>
+  <% end %>
+</details>
