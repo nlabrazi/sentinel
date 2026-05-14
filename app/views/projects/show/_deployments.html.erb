@@ -1,0 +1,49 @@
+<section
+  id="deploys"
+  class="rounded-lg border border-gray-800 bg-gray-900 p-6 shadow">
+  <div class="flex items-center justify-between border-b border-gray-800 pb-4">
+    <h2 class="text-xl font-bold text-gray-100">Production deploys</h2>
+    <span class="text-2xl text-gray-600">&rsaquo;</span>
+  </div>
+
+  <div class="divide-y divide-gray-800">
+    <% if deployments.any? %>
+      <% deployments.each do |deploy| %>
+        <article class="flex items-center justify-between gap-4 py-5">
+          <div class="min-w-0">
+            <p class="truncate font-semibold text-gray-100">
+              <%= link_to deployment_path(deploy), class: "hover:underline" do %>
+                Production:
+                <%= project.branch %>@<%= deploy.commit_sha.first(7) %>
+              <% end %>
+              <% if deploy.success? %>
+                <%= render "shared/ui/badge",
+                label: "Published",
+                variant: :success,
+                html_class: "ml-2" %>
+              <% elsif deploy.failed? %>
+                <%= render "shared/ui/badge", label: "Failed", variant: :danger, html_class: "ml-2" %>
+              <% else %>
+                <%= render "shared/ui/badge",
+                label: deploy.status,
+                variant: :warning,
+                html_class: "ml-2" %>
+              <% end %>
+            </p>
+            <p class="mt-1 text-sm text-gray-400"><%= l(deploy.created_at, format: :short) %><%= deploy.duration ? " · #{deploy.duration}s" : "" %></p>
+          </div>
+          <%= link_to deployment_path(deploy), class: "text-2xl text-gray-600 hover:text-gray-300", aria: { label: "View deployment #{deploy.commit_sha.first(7)}" } do %>
+            &rsaquo;
+          <% end %>
+        </article>
+      <% end %>
+    <% else %>
+      <%= render "shared/ui/empty_state",
+      title: "No deployment history yet.",
+      description:
+        "Les prochains déploiements apparaîtront ici avec leur statut, leur durée et leur commit.",
+      icon: :rocket,
+      html_class: "py-8" %>
+    <% end %>
+  </div>
+</section>

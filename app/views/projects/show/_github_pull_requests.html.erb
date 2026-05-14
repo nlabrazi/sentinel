@@ -1,0 +1,90 @@
+<details
+  id="pull-requests"
+  class="
+    group overflow-hidden rounded-lg border border-gray-800 bg-gray-900 shadow
+  ">
+  <summary
+    class="
+      flex cursor-pointer list-none items-center justify-between gap-4 border-b
+      border-gray-800 px-5 py-4 hover:bg-gray-800/40
+    ">
+    <div>
+      <h2 class="text-xl font-bold text-gray-100">Pull requests</h2>
+      <p class="mt-1 text-sm text-gray-400">
+        Open and recently updated GitHub pull requests for this repository.
+        <% if project.github_synced_at %>
+          GitHub synced
+          <%= time_ago_in_words(project.github_synced_at) %>
+          ago.
+        <% else %>
+          GitHub never synced.
+        <% end %>
+      </p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <span
+        class="
+          inline-flex w-fit items-center rounded-full bg-gray-800 px-3 py-1 text-xs
+          font-semibold text-gray-300
+        ">
+        <%= github_pull_requests.size %>
+        PR<%= "s" unless github_pull_requests.size == 1 %>
+      </span>
+      <span class="text-sm text-gray-500 group-open:rotate-180">
+        <%= fa_icon(:chevron_down, class_name: "text-sm") %>
+      </span>
+    </div>
+  </summary>
+
+  <% if github_pull_requests.any? %>
+    <div class="divide-y divide-gray-800">
+      <% github_pull_requests.each do |pull_request| %>
+        <article
+          class="
+            flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:justify-between
+          ">
+          <div class="min-w-0">
+            <p class="truncate font-semibold text-gray-100">
+              #<%= pull_request.number %>
+              <%= pull_request.title %>
+            </p>
+            <p class="mt-1 text-sm text-gray-400">
+              <% if pull_request.author_login.present? %>
+                <%= pull_request.author_login %>
+                <span class="mx-1 text-gray-600">·</span>
+              <% end %>
+              <span class="font-mono text-xs">
+                <%= pull_request.head_ref.presence || "unknown" %>
+                ->
+                <%= pull_request.base_ref.presence || project.branch %>
+              </span>
+            </p>
+          </div>
+
+          <div class="flex shrink-0 items-center gap-3 text-sm">
+            <%= render "shared/ui/badge",
+            label: "#{pull_request.state}#{pull_request.draft? ? " draft" : ""}",
+            variant:
+              pull_request.state == "open" ?
+                :success :
+                pull_request.state == "merged" ? :info : :neutral %>
+            <span class="text-gray-400">
+              <% if pull_request.github_updated_at %>
+                <%= l(pull_request.github_updated_at, format: :short) %>
+              <% else %>
+                unknown
+              <% end %>
+            </span>
+          </div>
+        </article>
+      <% end %>
+    </div>
+  <% else %>
+    <%= render "shared/ui/empty_state",
+    title: "No pull requests synchronized yet.",
+    description:
+      "Synchronisez GitHub pour afficher les pull requests ouvertes ou récemment mises à jour.",
+    icon: :code_pull_request %>
+  <% end %>
+</details>

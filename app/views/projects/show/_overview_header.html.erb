@@ -1,0 +1,191 @@
+<%= render layout: "shared/ui/card" do %>
+  <div
+    class="
+      grid grid-cols-1 gap-5 xl:grid-cols-[19rem_minmax(0,1fr)] xl:items-start
+    ">
+    <div class="overflow-hidden rounded-xl border border-gray-800 bg-gray-950">
+      <% if project.screenshot.attached? %>
+        <img
+          src="<%= url_for(project.screenshot) %>"
+          alt="Aperçu de <%= project.name %>"
+          class="h-full min-h-56 w-full object-cover"
+          loading="lazy">
+      <% else %>
+        <div
+          class="
+            flex min-h-56 w-full items-center justify-center text-sm text-gray-500
+          ">
+          No preview
+        </div>
+      <% end %>
+    </div>
+
+    <div class="min-w-0">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 class="break-words text-2xl font-bold text-gray-100">
+              <%= project.name %>
+            </h1>
+
+            <%= render "shared/ui/badge",
+            label: project.status,
+            variant: project.online? ? :success : project.offline? ? :danger : :neutral,
+            icon:
+              project.online? ?
+                :circle_check :
+                project.offline? ? :circle_xmark : :circle_question %>
+
+            <% if project.maintenance_mode? %>
+              <%= render "shared/ui/badge", label: "Maintenance", variant: :warning, icon: :wrench %>
+            <% end %>
+          </div>
+
+          <p class="mt-2 break-all text-sm font-semibold text-green-300">
+            <%= project.production_url %>
+          </p>
+
+          <p class="mt-3 text-sm text-gray-400">
+            <% if project.app? %>
+              Deploys from GitHub with
+              <span class="font-mono text-gray-200"><%= project.branch %></span>.
+              <% if running_deployment %>
+                <span class="ml-2 font-semibold text-yellow-300">Deploy running</span>
+              <% end %>
+            <% else %>
+              Service infra monitored from
+              <span class="font-mono text-gray-200"><%= project.vps_path %></span>.
+            <% end %>
+          </p>
+        </div>
+
+        <div class="flex flex-wrap gap-2 lg:justify-end">
+          <% if project.app? %>
+            <% if running_deployment %>
+              <span
+                class="
+                  inline-flex items-center justify-center gap-2 rounded-md border
+                  border-yellow-900/60 bg-yellow-950/40 px-4 py-2 text-sm font-semibold
+                  text-yellow-300
+                ">
+                <%= fa_icon(:rotate, class_name: "text-sm") %>
+                Running
+              </span>
+            <% else %>
+              <%= button_to deploy_project_path(project),
+              method: :post,
+              class: "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md bg-cyan-300 px-4 py-2 text-sm font-bold text-gray-950 hover:bg-cyan-200",
+              title: "Déploie le dernier commit disponible pour ce projet",
+              aria: { label: "Déployer le dernier commit" } do %>
+                <%= fa_icon(:play, class_name: "text-sm") %>
+                Deploy latest
+              <% end %>
+            <% end %>
+          <% end %>
+
+          <%= render "shared/ui/button",
+          label: "Open site",
+          href: project.production_url,
+          icon: :arrow_up_right_from_square,
+          variant: :secondary,
+          size: :md,
+          target: "_blank",
+          rel: "noopener",
+          title: "Ouvre le site en production" %>
+
+          <%= button_to refresh_runtime_project_path(project),
+          method: :post,
+          class: "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-200 hover:border-gray-500 hover:bg-gray-800",
+          title: "Lance un healthcheck HTTP immédiat",
+          aria: { label: "Vérifier le runtime" } do %>
+            <%= fa_icon(:heart_pulse, class_name: "text-sm") %>
+            Check runtime
+          <% end %>
+
+          <%= render layout: "shared/ui/action_menu", locals: { width: "w-64" } do %>
+            <% if project.app? %>
+              <%= button_to refresh_github_commits_project_path(project),
+              method: :post,
+              class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100" do %>
+                <%= fa_icon(:rotate, class_name: "text-sm text-gray-500") %>
+                Sync GitHub
+              <% end %>
+            <% end %>
+
+            <%= button_to refresh_cron_status_project_path(project),
+            method: :post,
+            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100" do %>
+              <%= fa_icon(:clock, class_name: "text-sm text-gray-500") %>
+              Sync jobs
+            <% end %>
+
+            <%= button_to refresh_screenshot_project_path(project),
+            method: :post,
+            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100" do %>
+              <%= fa_icon(:image, class_name: "text-sm text-gray-500") %>
+              Refresh preview
+            <% end %>
+
+            <div class="border-t border-gray-800"></div>
+
+            <%= button_to toggle_maintenance_project_path(project),
+            method: :patch,
+            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-yellow-300 hover:bg-yellow-950/40" do %>
+              <%= fa_icon(:wrench, class_name: "text-sm text-yellow-500") %>
+              <%= project.maintenance_mode? ? "Disable maintenance" : "Enable maintenance" %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <% if project.app? %>
+          <%= render "shared/ui/status_metric",
+          label: "Version",
+          value: behind_count.positive? ? "#{behind_count} update(s)" : "Up to date",
+          icon: :code_branch,
+          tone: behind_count.positive? ? :warning : :success %>
+        <% else %>
+          <%= render "shared/ui/status_metric",
+          label: "Type",
+          value: "Service",
+          icon: :server,
+          tone: :info %>
+        <% end %>
+
+        <%= render "shared/ui/status_metric",
+        label: "Jobs",
+        value: project.cron_summary_label,
+        icon: project.cron_summary_icon,
+        tone: project.cron_summary_tone %>
+
+        <% if project.app? %>
+          <%= render "shared/ui/status_metric",
+          label: "Last deploy",
+          value:
+            (
+              if latest_deployment
+                "#{time_ago_in_words(latest_deployment.created_at)} ago"
+              else
+                "Never"
+              end
+            ),
+          icon: :rocket,
+          tone: :neutral %>
+        <% else %>
+          <%= render "shared/ui/status_metric",
+          label: "VPS path",
+          value: project.vps_path,
+          icon: :folder,
+          tone: :neutral %>
+        <% end %>
+
+        <%= render "shared/ui/status_metric",
+        label: "HTTP",
+        value: latest_ping&.http_status || "unknown",
+        icon: :globe,
+        tone: :neutral %>
+      </div>
+    </div>
+  </div>
+<% end %>
