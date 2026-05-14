@@ -73,23 +73,27 @@
             project.offline? || behind_count.positive? || project.cron_needs_attention? ||
               project.maintenance_mode? %>
 
-          <article class="group px-4 py-5 transition hover:bg-gray-50 dark:hover:bg-gray-800/30 sm:px-6">
+          <article
+            class="
+              group px-4 py-5 transition hover:bg-gray-50 dark:hover:bg-gray-800/30 sm:px-6
+            ">
             <div
               class="
-                grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(28rem,1fr)_12rem]
+                grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(24rem,0.85fr)_11rem]
                 xl:items-center
               ">
               <div class="flex min-w-0 gap-4">
                 <div
                   class="
-                    hidden overflow-hidden rounded-lg border border-gray-200 bg-gray-50
-                    dark:border-gray-800 dark:bg-gray-950 sm:block sm:w-36 sm:shrink-0
+                    hidden overflow-hidden rounded-md border border-gray-200 bg-gray-50
+                    dark:border-gray-800 dark:bg-gray-950 sm:block sm:w-32 sm:shrink-0
                   ">
                   <% if @screenshots_enabled && project.screenshot.attached? %>
                     <%= image_tag url_for(project.screenshot),
-                      alt: "Aperçu de #{project.name}",
-                      class: "aspect-video w-full object-cover opacity-90 transition group-hover:opacity-100",
-                      loading: "lazy" %>
+                    alt: "Aperçu de #{project.name}",
+                    class:
+                      "aspect-video w-full object-cover opacity-90 transition group-hover:opacity-100",
+                    loading: "lazy" %>
                   <% else %>
                     <div
                       class="
@@ -102,18 +106,22 @@
                   <div class="flex flex-wrap items-center gap-2">
                     <%= link_to project.name,
                     project_path(project),
-                    class: "break-words text-base font-bold text-gray-900 hover:text-cyan-700 dark:text-gray-100 dark:hover:text-cyan-300" %>
+                    class:
+                      "break-words text-base font-bold text-gray-900 hover:text-cyan-700 dark:text-gray-100 dark:hover:text-cyan-300" %>
+
+                    <%= render "shared/ui/badge",
+                    label: project.status,
+                    variant: project.online? ? :success : project.offline? ? :danger : :neutral,
+                    icon:
+                      project.online? ?
+                        :circle_check :
+                        project.offline? ? :circle_xmark : :circle_question %>
 
                     <% if needs_attention %>
                       <%= render "shared/ui/badge",
-                      label: "Needs review",
+                      label: "À vérifier",
                       variant: :warning,
                       icon: :triangle_exclamation %>
-                    <% else %>
-                      <%= render "shared/ui/badge",
-                      label: "No action needed",
-                      variant: :success,
-                      icon: :circle_check %>
                     <% end %>
 
                     <% if project.maintenance_mode? %>
@@ -121,45 +129,53 @@
                     <% end %>
                   </div>
 
-                  <p class="mt-1 break-all text-sm text-gray-400">
+                  <p class="mt-1 break-all text-sm font-medium text-gray-500 dark:text-gray-400">
                     <%= project.production_url %>
                   </p>
 
                   <div
                     class="
-                      mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500
+                      mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500
                     ">
                     <% if project.app? %>
-                      <span class="font-mono"><%= project.github_repo %></span>
-                      <span>Branch
-                    <span class="font-mono text-gray-600 dark:text-gray-400"><%= project.branch %></span></span>
-
-                      <% if latest_deployment %>
-                        <span>Last deploy
-                          <%= time_ago_in_words(latest_deployment.created_at) %>
-                          ago</span>
-                      <% else %>
-                        <span>No deploy yet</span>
-                      <% end %>
+                      <span class="inline-flex min-w-0 items-center gap-1.5">
+                        <%= fa_icon(:code_branch, class_name: "text-gray-400") %>
+                        <span class="truncate font-mono text-gray-600 dark:text-gray-400"><%= project.github_repo %></span>
+                      </span>
+                      <span class="inline-flex items-center gap-1.5">
+                        <%= fa_icon(:code_branch, class_name: "text-gray-400") %>
+                        <span class="font-mono text-gray-600 dark:text-gray-400"><%= project.branch %></span>
+                      </span>
                     <% else %>
-                      <span>Service infra</span>
-                      <span class="font-mono text-gray-600 dark:text-gray-400"><%= project.vps_path %></span>
+                      <span class="inline-flex items-center gap-1.5">
+                        <%= fa_icon(:server, class_name: "text-gray-400") %>
+                        Service infra
+                      </span>
+                      <span class="truncate font-mono text-gray-600 dark:text-gray-400"><%= project.vps_path %></span>
                     <% end %>
 
-                    <% if latest_ping %>
-                      <span>Runtime
-                        <%= time_ago_in_words(latest_ping.checked_at || latest_ping.created_at) %>
-                        ago</span>
-                    <% else %>
-                      <span>Runtime never checked</span>
+                    <% if latest_deployment && project.app? %>
+                      <span class="inline-flex items-center gap-1.5">
+                        <%= fa_icon(:rocket, class_name: "text-gray-400") %>
+                        Deploy
+                        <%= time_ago_in_words(latest_deployment.created_at) %>
+                        ago
+                      </span>
                     <% end %>
                   </div>
                 </div>
               </div>
 
-              <div class="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-                <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800 dark:bg-gray-950/70">
-                  <p class="text-xs font-medium text-gray-500">Site status</p>
+              <div class="grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
+                <div
+                  class="
+                    rounded-md border border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800
+                    dark:bg-gray-950/70
+                  ">
+                  <p class="flex items-center gap-1.5 text-xs font-medium text-gray-500">
+                    <%= fa_icon(:heart_pulse, class_name: "text-gray-400") %>
+                    Runtime
+                  </p>
                   <p
                     class="
                       mt-1 inline-flex items-center gap-2 font-semibold
@@ -172,17 +188,28 @@
                     <%= project.status %>
                   </p>
 
-                  <% if latest_ping&.http_status %>
-                    <p class="mt-1 text-xs text-gray-500">HTTP
-                      <%= latest_ping.http_status %></p>
+                  <% if latest_ping %>
+                    <p class="mt-1 truncate text-xs text-gray-500">
+                      <%= latest_ping.http_status ? "HTTP #{latest_ping.http_status}" : "No HTTP code" %>
+                      ·
+                      <%= time_ago_in_words(latest_ping.checked_at || latest_ping.created_at) %>
+                      ago
+                    </p>
                   <% else %>
-                    <p class="mt-1 text-xs text-gray-600">No code</p>
+                    <p class="mt-1 text-xs text-gray-600">Never checked</p>
                   <% end %>
                 </div>
 
-                <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800 dark:bg-gray-950/70">
+                <div
+                  class="
+                    rounded-md border border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800
+                    dark:bg-gray-950/70
+                  ">
                   <% if project.app? %>
-                    <p class="text-xs font-medium text-gray-500">Version</p>
+                    <p class="flex items-center gap-1.5 text-xs font-medium text-gray-500">
+                      <%= fa_icon(:code_commit, class_name: "text-gray-400") %>
+                      Version
+                    </p>
                     <p
                       class="
                         mt-1 font-semibold <%= behind_count.positive? ? 'text-yellow-700 dark:text-yellow-300' : 'text-green-700 dark:text-green-300' %>
@@ -201,14 +228,24 @@
                       </span>
                     </p>
                   <% else %>
-                    <p class="text-xs font-medium text-gray-500">Type</p>
+                    <p class="flex items-center gap-1.5 text-xs font-medium text-gray-500">
+                      <%= fa_icon(:server, class_name: "text-gray-400") %>
+                      Type
+                    </p>
                     <p class="mt-1 font-semibold text-cyan-700 dark:text-cyan-300">Service</p>
                     <p class="mt-1 truncate text-xs text-gray-500">Infra monitored</p>
                   <% end %>
                 </div>
 
-                <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800 dark:bg-gray-950/70">
-                  <p class="text-xs font-medium text-gray-500">Jobs</p>
+                <div
+                  class="
+                    rounded-md border border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800
+                    dark:bg-gray-950/70
+                  ">
+                  <p class="flex items-center gap-1.5 text-xs font-medium text-gray-500">
+                    <%= fa_icon(:clock, class_name: "text-gray-400") %>
+                    Jobs
+                  </p>
 
                   <p
                     class="
@@ -224,30 +261,6 @@
                     <p class="mt-1 text-xs text-gray-600">Never synced</p>
                   <% end %>
                 </div>
-
-                <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800 dark:bg-gray-950/70">
-                  <% if project.app? %>
-                    <p class="text-xs font-medium text-gray-500">GitHub</p>
-                    <p
-                      class="
-                        mt-1 font-semibold <%= project.open_pull_requests_count.positive? ? 'text-cyan-700 dark:text-cyan-300' : 'text-gray-600 dark:text-gray-300' %>
-                      ">
-                      <%= project.open_pull_requests_count %>
-                      open PR
-                    </p>
-
-                    <p class="mt-1 text-xs text-gray-500">
-                      <%= project.merged_pull_requests_count %>
-                      merged
-                    </p>
-                  <% else %>
-                    <p class="text-xs font-medium text-gray-500">VPS path</p>
-                    <p class="mt-1 truncate font-mono text-xs font-semibold text-gray-600 dark:text-gray-300">
-                      <%= project.vps_path %>
-                    </p>
-                    <p class="mt-1 text-xs text-gray-500">No GitHub repo</p>
-                  <% end %>
-                </div>
               </div>
 
               <div class="flex flex-col gap-2 xl:items-end">
@@ -255,7 +268,8 @@
                   <span
                     class="
                       inline-flex w-full items-center justify-center gap-2 rounded-md bg-gray-100 px-3
-                      py-2 text-sm font-semibold text-gray-500 dark:bg-gray-800 dark:text-gray-400 xl:w-40
+                      py-2 text-sm font-semibold text-gray-500 dark:bg-gray-800 dark:text-gray-400
+                      xl:w-40
                     "
                     title="Un déploiement est déjà en cours">
                     <%= fa_icon(:rotate, class_name: "text-sm") %>

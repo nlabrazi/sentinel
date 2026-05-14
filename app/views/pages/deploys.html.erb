@@ -1,5 +1,9 @@
 <section class="mx-auto max-w-7xl space-y-6">
-  <div class="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow sm:p-6">
+  <div
+    class="
+      rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900
+      p-5 shadow sm:p-6
+    ">
     <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Deployments</h1>
@@ -7,15 +11,27 @@
       </div>
 
       <dl class="grid grid-cols-3 gap-3 text-sm lg:min-w-[28rem]">
-        <div class="rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-3 py-2">
+        <div
+          class="
+            rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50
+            dark:bg-gray-950 px-3 py-2
+          ">
           <dt class="text-xs text-gray-500">Total</dt>
           <dd class="mt-1 font-semibold text-gray-900 dark:text-gray-100"><%= @deployments.size %></dd>
         </div>
-        <div class="rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-3 py-2">
+        <div
+          class="
+            rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50
+            dark:bg-gray-950 px-3 py-2
+          ">
           <dt class="text-xs text-gray-500">Success</dt>
           <dd class="mt-1 font-semibold text-green-700 dark:text-green-300"><%= @deployments.count(&:success?) %></dd>
         </div>
-        <div class="rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-3 py-2">
+        <div
+          class="
+            rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50
+            dark:bg-gray-950 px-3 py-2
+          ">
           <dt class="text-xs text-gray-500">Failed</dt>
           <dd class="mt-1 font-semibold text-red-700 dark:text-red-300"><%= @deployments.count(&:failed?) %></dd>
         </div>
@@ -25,7 +41,8 @@
 
   <section
     class="
-      overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow
+      overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white
+      dark:bg-gray-900 shadow
     ">
     <% if @deployments.any? %>
       <div class="hidden overflow-x-auto md:block">
@@ -43,7 +60,11 @@
             <% @deployments.each do |deploy| %>
               <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/60">
                 <td class="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-gray-100"><%= link_to deploy.project.name, deploy.project, class: "hover:underline" %></td>
-                <td class="px-6 py-4"><%= link_to deployment_path(deploy), class: "hover:underline" do %><code class="rounded bg-gray-50 dark:bg-gray-950 px-1.5 py-0.5 text-xs text-gray-700 dark:text-gray-200"><%= deploy.commit_sha.first(7) %></code><% end %></td>
+                <td class="px-6 py-4"><%= link_to deployment_path(deploy), class: "hover:underline" do %><code
+                      class="
+                        rounded bg-gray-50 dark:bg-gray-950 px-1.5 py-0.5 text-xs text-gray-700
+                        dark:text-gray-200
+                      "><%= deploy.commit_sha.first(7) %></code><% end %></td>
                 <td class="px-6 py-4">
                   <span
                     class="
@@ -67,7 +88,11 @@
                   <%= link_to deploy.project.name, deploy.project, class: "hover:underline" %>
                 </h2>
                 <%= link_to deployment_path(deploy), class: "mt-1 inline-flex hover:underline" do %>
-                  <code class="rounded bg-gray-50 dark:bg-gray-950 px-1.5 py-0.5 text-xs text-gray-700 dark:text-gray-200"><%= deploy.commit_sha.first(7) %></code>
+                  <code
+                    class="
+                      rounded bg-gray-50 dark:bg-gray-950 px-1.5 py-0.5 text-xs text-gray-700
+                      dark:text-gray-200
+                    "><%= deploy.commit_sha.first(7) %></code>
                 <% end %>
               </div>
               <span

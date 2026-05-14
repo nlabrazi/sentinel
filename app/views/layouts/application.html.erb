@@ -7,12 +7,18 @@
     <%= csp_meta_tag %>
     <%= favicon_link_tag "/favicon.ico" %>
     <% if ENV["FONT_AWESOME_KIT_URL"].present? %>
-      <script src="<%= ENV["FONT_AWESOME_KIT_URL"] %>" nonce="<%= request.content_security_policy_nonce %>" crossorigin="anonymous"></script>
+      <script
+        src="<%= ENV["FONT_AWESOME_KIT_URL"] %>"
+        nonce="<%= request.content_security_policy_nonce %>"
+        crossorigin="anonymous"></script>
     <% end %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body class="bg-gray-50 font-sans text-gray-900 dark:bg-gray-950 dark:text-gray-100">
+  <body
+    class="
+      bg-gray-50 font-sans text-gray-900 dark:bg-gray-950 dark:text-gray-100
+    ">
     <div
       class="min-h-screen lg:flex"
       data-controller="mobile-nav sidebar"
@@ -28,9 +34,8 @@
         class="
           fixed inset-y-0 left-0 z-40 hidden w-72 max-w-[85vw] flex-col rounded-r-xl
           border-r border-gray-200 bg-white text-gray-700 shadow-xl dark:border-gray-800
-          dark:bg-gray-900 dark:text-gray-300 lg:sticky lg:top-0
-          lg:z-auto lg:flex lg:h-screen lg:w-64 lg:max-w-none lg:rounded-r-none
-          lg:shadow-none
+          dark:bg-gray-900 dark:text-gray-300 lg:sticky lg:top-0 lg:z-auto lg:flex
+          lg:h-screen lg:w-64 lg:max-w-none lg:rounded-r-none lg:shadow-none
         "
         data-mobile-nav-target="panel"
         data-sidebar-target="sidebar">
@@ -125,7 +130,9 @@
         </nav>
 
         <div
-          class="space-y-3 border-t border-gray-200 px-4 py-4 dark:border-gray-800"
+          class="
+            space-y-3 border-t border-gray-200 px-4 py-4 dark:border-gray-800
+          "
           data-sidebar-target="full">
           <button
             id="dark-mode-toggle"
@@ -162,7 +169,10 @@
         </div>
       </aside>
 
-      <main class="flex min-h-screen min-w-0 flex-1 flex-col bg-gray-50 dark:bg-gray-950">
+      <main
+        class="
+          flex min-h-screen min-w-0 flex-1 flex-col bg-gray-50 dark:bg-gray-950
+        ">
         <header
           class="
             sticky top-0 z-20 border-b border-gray-200 bg-white px-4 py-4
@@ -183,7 +193,10 @@
               </button>
               <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-300"><%= @page_title || "Projects" %></h1>
             </div>
-            <div class="flex items-center gap-5 text-sm font-semibold text-gray-500 dark:text-gray-400">
+            <div
+              class="
+                flex items-center gap-5 text-sm font-semibold text-gray-500 dark:text-gray-400
+              ">
               <%= link_to documentation_path, class: "hidden items-center gap-2 hover:text-gray-900 dark:hover:text-gray-200 sm:inline-flex" do %>
                 <%= fa_icon(:magnifying_glass, class_name: "h-4 w-4") %>
                 Documentation
@@ -203,8 +216,8 @@
           <% if alert.present? %>
             <p
               class="
-                mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm
-                text-red-800 dark:border-red-900/60 dark:bg-red-950/60 dark:text-red-200
+                mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800
+                dark:border-red-900/60 dark:bg-red-950/60 dark:text-red-200
               "><%= alert %></p>
           <% end %>
           <%= yield %>
@@ -213,19 +226,28 @@
         <footer class="px-4 pb-6 pt-2 text-sm text-gray-500 dark:text-gray-500 sm:px-8">
           <div class="mx-auto flex max-w-7xl flex-col gap-4">
             <div class="flex flex-wrap gap-6 font-semibold">
-              <span><%= link_to "Docs", documentation_path, class: "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300" %></span>
+              <span><%= link_to "Docs",
+                documentation_path,
+                class:
+                  "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300" %></span>
               <span><a
                   href="https://nabster.dev"
                   target="_blank"
-                  class="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300">Blog</a></span>
+                  class="
+                    text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300
+                  ">Blog</a></span>
               <span><a
                   href="https://github.com/nlabrazi/sentinel"
                   target="_blank"
-                  class="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300">Github</a></span>
+                  class="
+                    text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300
+                  ">Github</a></span>
               <span><a
                   href="mailto:na.labrazi@gmail.com"
                   target="_blank"
-                  class="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300">Contact</a></span>
+                  class="
+                    text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300
+                  ">Contact</a></span>
             </div>
             <p>&copy;
               <%= Time.current.year %>
