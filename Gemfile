@@ -74,7 +74,7 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 
   # ---------------- AJOUTS POUR LE PROJET SENTINEL ----------------
-  gem "rspec-rails", "~> 7.0"                    # Compatible Rails 8
+  gem "rspec-rails", "~> 8.0"                    # Compatible Rails 8
   gem "factory_bot_rails", "~> 6.4"
   gem "shoulda-matchers", "~> 6.2"
   gem "webmock", "~> 3.24"                       # Pour stubber les appels HTTP/SSH en test
