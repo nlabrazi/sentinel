@@ -92,7 +92,7 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).to include('HTTP code')
       expect(response.body).to include('Response time')
       expect(response.body).to include('Last error')
-      expect(response.body).to include('Check status')
+      expect(response.body).to include('Check health')
       expect(response.body).to include('Latest deployment')
       expect(response.body).to include('Deploy state')
       expect(response.body).to include('Idle')

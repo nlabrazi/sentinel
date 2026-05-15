@@ -300,10 +300,13 @@
     html_class: "w-full xl:w-40"
   } do %>
 
-                  <%= link_to project_path(project),
-        class: "flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100" do %>
+                  <%= link_to project.production_url,
+        class: "flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100",
+        target: "_blank",
+        rel: "noopener",
+        title: "Ouvre le site en production" do %>
                     <%= fa_icon(:arrow_up_right_from_square, class_name: "text-sm text-gray-500") %>
-                    Open project
+                    Open site
                   <% end %>
                   <% if project.app? %>
                     <%= button_to refresh_github_commits_project_path(project),
@@ -320,18 +323,18 @@
         method: :post,
         class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100",
         title: "Lance un healthcheck HTTP immédiat pour ce projet",
-        aria: { label: "Vérifier le runtime de #{project.name}" } do %>
+        aria: { label: "Vérifier le health status de #{project.name}" } do %>
                     <%= fa_icon(:heart_pulse, class_name: "text-sm text-gray-500") %>
-                    Check status
+                    Check health
                   <% end %>
 
                   <%= button_to refresh_cron_status_project_path(project),
         method: :post,
         class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100",
         title: "Synchronise les statuts cron publiés par le projet",
-        aria: { label: "Synchroniser les statuts cron de #{project.name}" } do %>
+        aria: { label: "Synchroniser les jobs de #{project.name}" } do %>
                     <%= fa_icon(:clock, class_name: "text-sm text-gray-500") %>
-                    Sync cron
+                    Sync jobs
                   <% end %>
                 <% end %>
               </div>

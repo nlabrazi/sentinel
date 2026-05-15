@@ -6,14 +6,14 @@
       flex flex-col gap-3 border-b border-gray-200 dark:border-gray-800 pb-4 sm:flex-row sm:items-center
       sm:justify-between
     ">
-    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Healthcheck</h2>
+    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Health status</h2>
     <%= button_to refresh_runtime_project_path(project),
     method: :post,
     class: "inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:border-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800",
     title: "Lance un healthcheck HTTP immédiat",
-    aria: { label: "Vérifier le runtime" } do %>
-      <%= fa_icon(:rotate, class_name: "h-3.5 w-3.5") %>
-      Check status
+    aria: { label: "Vérifier le health status" } do %>
+      <%= fa_icon(:heart_pulse, class_name: "h-3.5 w-3.5") %>
+      Check health
     <% end %>
   </div>
 
