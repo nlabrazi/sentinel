@@ -6,7 +6,7 @@ projects = [
   { name: "Media Tools",        slug: "media-tools",        kind: "app",      repo_url: "https://github.com/nlabrazi/media-tools.git",        branch: "master", production_url: "https://media-tools.nabster.dev",       vps_path: "/srv/apps/media-tools" },
   { name: "Portfolio",          slug: "portfolio",          kind: "app",      repo_url: "https://github.com/nlabrazi/portfolio-3d.git",       branch: "master", production_url: "https://nabster.dev",                   vps_path: "/srv/apps/portfolio" },
   { name: "Sawt AI",            slug: "sawt-ai",            kind: "app",      repo_url: "https://github.com/nlabrazi/sawt-ai.git",            branch: "master", production_url: "https://sawt-ai.nabster.dev",           vps_path: "/srv/apps/sawt-ai" },
-  { name: "SJVTDM",             slug: "sjvtdm",             kind: "app",      repo_url: "https://github.com/nlabrazi/sjvtdm.git",             branch: "master", production_url: "https://sjvtdm.nabster.dev",            vps_path: "/srv/apps/sjvtdm" },
+  { name: "SJVTDM",             slug: "sjvtdm",             kind: "service",  repo_url: "https://github.com/nlabrazi/sjvtdm.git",             branch: "master", production_url: "https://sjvtdm.nabster.dev",            vps_path: "/srv/apps/sjvtdm" },
   { name: "Umami",              slug: "umami",              kind: "service",  repo_url: nil,                                                  branch: nil,      production_url: "https://umami.nabster.dev",             vps_path: "/srv/apps/umami" }
 ]
 
@@ -19,16 +19,19 @@ end
 
 puts "\n🌱 Seed terminée : #{Project.count} projet(s) en base."
 
-admin_email = ENV["ADMIN_EMAIL"]
-admin_password = ENV["ADMIN_PASSWORD"]
+admin_username = ENV.fetch("ADMIN_USERNAME", "admin")
+admin_email = ENV["ADMIN_EMAIL"].presence || "#{admin_username}@sentinel.local"
+admin_password = ENV["ADMIN_PASSWORD"].presence
 
-if admin_email.present? && admin_password.present?
-  admin = User.find_or_initialize_by(email: admin_email)
+if admin_password.present?
+  admin = User.find_by(username: admin_username) || User.find_or_initialize_by(email: admin_email)
+  admin.username = admin_username
+  admin.email = admin_email
   admin.password = admin_password
   admin.password_confirmation = admin_password
   admin.save!
 
-  puts "👤 Admin prêt : #{admin.email}"
+  puts "👤 Admin prêt : #{admin.username}"
 else
-  puts "ℹ️  Admin non créé. Utilisez ADMIN_EMAIL=... ADMIN_PASSWORD=... bin/rails db:seed"
+  puts "ℹ️  Admin non créé. Définissez ADMIN_PASSWORD dans .env puis relancez bin/rails db:seed"
 end
