@@ -3,7 +3,7 @@
     class="
       grid grid-cols-1 gap-5 xl:grid-cols-[19rem_minmax(0,1fr)] xl:items-start
     ">
-    <div class="overflow-hidden rounded-xl border border-gray-800 bg-gray-950">
+    <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950">
       <% if project.screenshot.attached? %>
         <img
           src="<%= url_for(project.screenshot) %>"
@@ -24,7 +24,7 @@
       <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-2">
-            <h1 class="break-words text-2xl font-bold text-gray-100">
+            <h1 class="break-words text-2xl font-bold text-gray-900 dark:text-gray-100">
               <%= project.name %>
             </h1>
 
@@ -41,20 +41,20 @@
             <% end %>
           </div>
 
-          <p class="mt-2 break-all text-sm font-semibold text-green-300">
+          <p class="mt-2 break-all text-sm font-semibold text-green-700 dark:text-green-300">
             <%= project.production_url %>
           </p>
 
-          <p class="mt-3 text-sm text-gray-400">
+          <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">
             <% if project.app? %>
               Deploys from GitHub with
-              <span class="font-mono text-gray-200"><%= project.branch %></span>.
+              <span class="font-mono text-gray-700 dark:text-gray-200"><%= project.branch %></span>.
               <% if running_deployment %>
-                <span class="ml-2 font-semibold text-yellow-300">Deploy running</span>
+                <span class="ml-2 font-semibold text-yellow-700 dark:text-yellow-300">Deploy running</span>
               <% end %>
             <% else %>
               Service infra monitored from
-              <span class="font-mono text-gray-200"><%= project.vps_path %></span>.
+              <span class="font-mono text-gray-700 dark:text-gray-200"><%= project.vps_path %></span>.
             <% end %>
           </p>
         </div>
@@ -65,8 +65,9 @@
               <span
                 class="
                   inline-flex items-center justify-center gap-2 rounded-md border
-                  border-yellow-900/60 bg-yellow-950/40 px-4 py-2 text-sm font-semibold
-                  text-yellow-300
+                  border-yellow-200 bg-yellow-50 px-4 py-2 text-sm font-semibold
+                  text-yellow-700 dark:border-yellow-900/60 dark:bg-yellow-950/40
+                  dark:text-yellow-300
                 ">
                 <%= fa_icon(:rotate, class_name: "text-sm") %>
                 Running
@@ -95,7 +96,7 @@
 
           <%= button_to refresh_runtime_project_path(project),
           method: :post,
-          class: "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-200 hover:border-gray-500 hover:bg-gray-800",
+          class: "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:border-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800",
           title: "Lance un healthcheck HTTP immédiat",
           aria: { label: "Vérifier le runtime" } do %>
             <%= fa_icon(:heart_pulse, class_name: "text-sm") %>
@@ -106,7 +107,7 @@
             <% if project.app? %>
               <%= button_to refresh_github_commits_project_path(project),
               method: :post,
-              class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100" do %>
+              class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100" do %>
                 <%= fa_icon(:rotate, class_name: "text-sm text-gray-500") %>
                 Sync GitHub
               <% end %>
@@ -114,23 +115,23 @@
 
             <%= button_to refresh_cron_status_project_path(project),
             method: :post,
-            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100" do %>
+            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100" do %>
               <%= fa_icon(:clock, class_name: "text-sm text-gray-500") %>
               Sync jobs
             <% end %>
 
             <%= button_to refresh_screenshot_project_path(project),
             method: :post,
-            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-gray-100" do %>
+            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100" do %>
               <%= fa_icon(:image, class_name: "text-sm text-gray-500") %>
               Refresh preview
             <% end %>
 
-            <div class="border-t border-gray-800"></div>
+            <div class="border-t border-gray-200 dark:border-gray-800"></div>
 
             <%= button_to toggle_maintenance_project_path(project),
             method: :patch,
-            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-yellow-300 hover:bg-yellow-950/40" do %>
+            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-yellow-700 hover:bg-yellow-50 dark:text-yellow-300 dark:hover:bg-yellow-950/40" do %>
               <%= fa_icon(:wrench, class_name: "text-sm text-yellow-500") %>
               <%= project.maintenance_mode? ? "Disable maintenance" : "Enable maintenance" %>
             <% end %>
