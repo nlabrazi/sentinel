@@ -18,6 +18,7 @@ class ProjectsController < ApplicationController
     @github_pull_requests = @project.github_pull_requests.order(github_updated_at: :desc, created_at: :desc).limit(20)
     @running_deployment = @project.deployments.running.order(created_at: :desc).first
     @latest_ping = @project.latest_ping
+    @grafana_embed_url = GrafanaEmbedUrlBuilder.call(project: @project)
   end
 
   def deploy

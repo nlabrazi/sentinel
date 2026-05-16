@@ -1,5 +1,4 @@
 require "open-uri"
-require "cgi"
 require "shellwords"
 
 class Project < ApplicationRecord
@@ -126,22 +125,6 @@ class Project < ApplicationRecord
     return nil unless ENV["APIFLASH_ACCESS_KEY"].present?
 
     apiflash_screenshot_url(width: 1280, height: 720)
-  end
-
-  def grafana_embed_url
-    template = ENV["GRAFANA_EMBED_URL"].presence
-    return nil unless template
-
-    url = template
-      .gsub("{slug}", CGI.escape(slug.to_s))
-      .gsub("{name}", CGI.escape(name.to_s))
-
-    uri = URI.parse(url)
-    return nil unless uri.is_a?(URI::HTTP) && uri.host.present? && uri.userinfo.blank?
-
-    url
-  rescue URI::InvalidURIError
-    nil
   end
 
   def regenerate_screenshot!(force: false)
