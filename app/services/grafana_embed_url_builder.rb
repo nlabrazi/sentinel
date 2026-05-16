@@ -7,6 +7,7 @@ class GrafanaEmbedUrlBuilder
   DEFAULT_ORG_ID = "1"
   DEFAULT_FROM = "now-6h"
   DEFAULT_TO = "now"
+  DEFAULT_TIMEZONE = "browser"
   DEFAULT_GLOBAL_VARIABLE_VALUE = "All"
   VARIABLE_NAME_PATTERN = /\A[A-Za-z0-9_-]+\z/
 
@@ -82,6 +83,8 @@ class GrafanaEmbedUrlBuilder
     params << [ "orgId", env_value("GRAFANA_ORG_ID", DEFAULT_ORG_ID) ]
     params << [ "from", option_value(@from, "GRAFANA_DEFAULT_FROM", DEFAULT_FROM) ]
     params << [ "to", option_value(@to, "GRAFANA_DEFAULT_TO", DEFAULT_TO) ]
+    params << [ "timezone", env_value("GRAFANA_DEFAULT_TIMEZONE", DEFAULT_TIMEZONE) ]
+    params << [ "refresh", env_value("GRAFANA_REFRESH") ] if env_value("GRAFANA_REFRESH")
     params << [ "theme", option_value(@theme, "GRAFANA_DEFAULT_THEME", DEFAULT_THEME) ]
     params << [ "panelId", panel_id ] if panel_id
     append_kiosk_param(params)
@@ -107,7 +110,7 @@ class GrafanaEmbedUrlBuilder
   end
 
   def panel_id
-    @panel_id.to_s.strip.presence
+    @panel_id.to_s.strip.presence || env_value("GRAFANA_PANEL_ID")
   end
 
   def option_value(value, env_key, default)

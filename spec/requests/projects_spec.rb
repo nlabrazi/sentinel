@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Projects', type: :request do
-  GRAFANA_ENV_KEYS = %w[
+  PROJECTS_GRAFANA_ENV_KEYS = %w[
     GRAFANA_BASE_URL
     GRAFANA_DASHBOARD_UID
     GRAFANA_DASHBOARD_SLUG
@@ -10,17 +10,20 @@ RSpec.describe 'Projects', type: :request do
     GRAFANA_ORG_ID
     GRAFANA_DEFAULT_FROM
     GRAFANA_DEFAULT_TO
+    GRAFANA_DEFAULT_TIMEZONE
+    GRAFANA_REFRESH
+    GRAFANA_PANEL_ID
     GRAFANA_GLOBAL_VARIABLE_VALUE
     GRAFANA_EMBED_URL
   ].freeze
 
   around do |example|
-    original_env = GRAFANA_ENV_KEYS.to_h { |key| [key, ENV[key]] }
+    original_env = PROJECTS_GRAFANA_ENV_KEYS.to_h { |key| [key, ENV[key]] }
 
-    GRAFANA_ENV_KEYS.each { |key| ENV.delete(key) }
+    PROJECTS_GRAFANA_ENV_KEYS.each { |key| ENV.delete(key) }
     example.run
   ensure
-    GRAFANA_ENV_KEYS.each do |key|
+    PROJECTS_GRAFANA_ENV_KEYS.each do |key|
       if original_env[key].nil?
         ENV.delete(key)
       else
@@ -149,7 +152,7 @@ RSpec.describe 'Projects', type: :request do
       expect(response).to have_http_status(:success)
       expect(response.body).to include('title="Grafana dashboard for Project Grafana"')
       expect(response.body).to include(
-        'src="https://grafana.example.com/d/apps-overview/applications-overview?orgId=1&amp;from=now-6h&amp;to=now&amp;theme=dark&amp;var-app=prometheus-project-label"'
+        'src="https://grafana.example.com/d-solo/apps-overview/applications-overview?orgId=1&amp;from=now-6h&amp;to=now&amp;timezone=browser&amp;refresh=30s&amp;theme=dark&amp;panelId=panel-6&amp;var-app=prometheus-project-label"'
       )
       expect(response.body).to include('Ouvrir dans Grafana')
       expect(response.body).to include('sandbox="allow-scripts allow-same-origin allow-forms allow-popups"')
@@ -528,6 +531,9 @@ RSpec.describe 'Projects', type: :request do
     ENV['GRAFANA_ORG_ID'] = '1'
     ENV['GRAFANA_DEFAULT_FROM'] = 'now-6h'
     ENV['GRAFANA_DEFAULT_TO'] = 'now'
+    ENV['GRAFANA_DEFAULT_TIMEZONE'] = 'browser'
+    ENV['GRAFANA_REFRESH'] = '30s'
+    ENV['GRAFANA_PANEL_ID'] = 'panel-6'
     ENV['GRAFANA_GLOBAL_VARIABLE_VALUE'] = 'All'
   end
 end

@@ -11,6 +11,9 @@ RSpec.describe GrafanaEmbedUrlBuilder, type: :service do
     GRAFANA_ORG_ID
     GRAFANA_DEFAULT_FROM
     GRAFANA_DEFAULT_TO
+    GRAFANA_DEFAULT_TIMEZONE
+    GRAFANA_REFRESH
+    GRAFANA_PANEL_ID
     GRAFANA_GLOBAL_VARIABLE_VALUE
   ].freeze
 
@@ -38,6 +41,8 @@ RSpec.describe GrafanaEmbedUrlBuilder, type: :service do
     ENV["GRAFANA_ORG_ID"] = "1"
     ENV["GRAFANA_DEFAULT_FROM"] = "now-6h"
     ENV["GRAFANA_DEFAULT_TO"] = "now"
+    ENV["GRAFANA_DEFAULT_TIMEZONE"] = "browser"
+    ENV["GRAFANA_REFRESH"] = "30s"
     ENV["GRAFANA_GLOBAL_VARIABLE_VALUE"] = "All"
   end
 
@@ -55,6 +60,8 @@ RSpec.describe GrafanaEmbedUrlBuilder, type: :service do
       "orgId" => [ "1" ],
       "from" => [ "now-6h" ],
       "to" => [ "now" ],
+      "timezone" => [ "browser" ],
+      "refresh" => [ "30s" ],
       "theme" => [ "dark" ],
       "var-app" => [ "prometheus-app-label" ]
     )
@@ -75,6 +82,19 @@ RSpec.describe GrafanaEmbedUrlBuilder, type: :service do
     expect(uri.path).to eq("/d-solo/apps-overview/applications-overview")
     expect(query_params(uri)).to include(
       "panelId" => [ "12" ],
+      "var-app" => [ "media-tools" ]
+    )
+  end
+
+  it "builds a d-solo panel URL from the configured panel id" do
+    ENV["GRAFANA_PANEL_ID"] = "panel-6"
+    project = build(:project, grafana_app_value: "media-tools")
+
+    uri = URI.parse(described_class.call(project: project))
+
+    expect(uri.path).to eq("/d-solo/apps-overview/applications-overview")
+    expect(query_params(uri)).to include(
+      "panelId" => [ "panel-6" ],
       "var-app" => [ "media-tools" ]
     )
   end
@@ -103,6 +123,8 @@ RSpec.describe GrafanaEmbedUrlBuilder, type: :service do
     expect(query_params(uri)).to include(
       "from" => [ "now-1h" ],
       "to" => [ "now" ],
+      "timezone" => [ "browser" ],
+      "refresh" => [ "30s" ],
       "theme" => [ "light" ],
       "kiosk" => [],
       "var-app" => [ "media tools/prod" ]

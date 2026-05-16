@@ -10,6 +10,9 @@ RSpec.describe "Dashboards", type: :request do
     GRAFANA_ORG_ID
     GRAFANA_DEFAULT_FROM
     GRAFANA_DEFAULT_TO
+    GRAFANA_DEFAULT_TIMEZONE
+    GRAFANA_REFRESH
+    GRAFANA_PANEL_ID
     GRAFANA_GLOBAL_VARIABLE_VALUE
     GRAFANA_EMBED_URL
   ].freeze
@@ -76,7 +79,7 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include("Global observability")
       expect(response.body).to include('title="Global Grafana dashboard"')
       expect(response.body).to include(
-        'src="https://grafana.example.com/d/apps-overview/applications-overview?orgId=1&amp;from=now-6h&amp;to=now&amp;theme=dark&amp;var-app=All"'
+        'src="https://grafana.example.com/d-solo/apps-overview/applications-overview?orgId=1&amp;from=now-6h&amp;to=now&amp;timezone=browser&amp;refresh=30s&amp;theme=dark&amp;panelId=panel-6&amp;var-app=All"'
       )
       expect(response.body).to include("Ouvrir dans Grafana")
       expect(response.body).to include('sandbox="allow-scripts allow-same-origin allow-forms allow-popups"')
@@ -170,6 +173,9 @@ RSpec.describe "Dashboards", type: :request do
     ENV["GRAFANA_ORG_ID"] = "1"
     ENV["GRAFANA_DEFAULT_FROM"] = "now-6h"
     ENV["GRAFANA_DEFAULT_TO"] = "now"
+    ENV["GRAFANA_DEFAULT_TIMEZONE"] = "browser"
+    ENV["GRAFANA_REFRESH"] = "30s"
+    ENV["GRAFANA_PANEL_ID"] = "panel-6"
     ENV["GRAFANA_GLOBAL_VARIABLE_VALUE"] = "All"
   end
 end
