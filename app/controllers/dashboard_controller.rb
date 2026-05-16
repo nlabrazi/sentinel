@@ -7,6 +7,7 @@ class DashboardController < ApplicationController
     @running_deployments_by_project_id = running_deployments_by_project_id(@projects)
     @latest_pings_by_project_id = latest_pings_by_project_id(@projects)
     @screenshots_enabled = ENV["APIFLASH_ACCESS_KEY"].present?
+    @grafana_global_embed_url = GrafanaEmbedUrlBuilder.call
   end
 
   private
