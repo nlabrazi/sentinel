@@ -58,6 +58,14 @@ RSpec.describe Project, type: :model do
     end
   end
 
+  describe '#grafana_app_value' do
+    it 'can differ from the Sentinel slug' do
+      project = build(:project, slug: 'sentinel-project', grafana_app_value: 'prometheus-app-label')
+
+      expect(project.grafana_app_value).to eq('prometheus-app-label')
+    end
+  end
+
   describe 'URL safety' do
     it 'accepts HTTPS GitHub repository URLs' do
       project = build(:project, repo_url: 'https://github.com/nlabrazi/argandici.git')
