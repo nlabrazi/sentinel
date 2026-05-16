@@ -6,6 +6,7 @@ FactoryBot.define do
     branch { "master" }
     production_url { "https://#{slug}.example.com" }
     vps_path { "/srv/apps/#{slug}" }
+    grafana_app_value { slug }
     status { :unknown }
     maintenance_mode { false }
     last_commit_deployed { nil }

@@ -21,7 +21,8 @@
         project: @project,
         latest_ping: latest_ping,
         running_deployment: @running_deployment,
-        behind_count: behind_count %>
+        behind_count: behind_count,
+        grafana_embed_url: @grafana_embed_url %>
 
         <% if @project.app? %>
           <%= render "projects/show/github_commits",

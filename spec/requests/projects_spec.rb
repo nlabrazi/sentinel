@@ -1,6 +1,37 @@
 require 'rails_helper'
 
 RSpec.describe 'Projects', type: :request do
+  PROJECTS_GRAFANA_ENV_KEYS = %w[
+    GRAFANA_BASE_URL
+    GRAFANA_DASHBOARD_UID
+    GRAFANA_DASHBOARD_SLUG
+    GRAFANA_VARIABLE_NAME
+    GRAFANA_DEFAULT_THEME
+    GRAFANA_ORG_ID
+    GRAFANA_DEFAULT_FROM
+    GRAFANA_DEFAULT_TO
+    GRAFANA_DEFAULT_TIMEZONE
+    GRAFANA_REFRESH
+    GRAFANA_PANEL_ID
+    GRAFANA_GLOBAL_VARIABLE_VALUE
+    GRAFANA_EMBED_URL
+  ].freeze
+
+  around do |example|
+    original_env = PROJECTS_GRAFANA_ENV_KEYS.to_h { |key| [ key, ENV[key] ] }
+
+    PROJECTS_GRAFANA_ENV_KEYS.each { |key| ENV.delete(key) }
+    example.run
+  ensure
+    PROJECTS_GRAFANA_ENV_KEYS.each do |key|
+      if original_env[key].nil?
+        ENV.delete(key)
+      else
+        ENV[key] = original_env[key]
+      end
+    end
+  end
+
   describe 'GET /projects/:id' do
     it 'renders the project deployment history newest first' do
       sign_in create(:user)
@@ -92,7 +123,7 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).to include('HTTP code')
       expect(response.body).to include('Response time')
       expect(response.body).to include('Last error')
-      expect(response.body).to include('Check status')
+      expect(response.body).to include('Check health')
       expect(response.body).to include('Latest deployment')
       expect(response.body).to include('Deploy state')
       expect(response.body).to include('Idle')
@@ -103,6 +134,55 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).not_to include('Preview Servers')
       expect(response.body).not_to include('Web security')
       expect(response.body).not_to include('Domain management')
+    end
+
+    it 'renders the configured Grafana embed in the observability panel' do
+      configure_grafana_env
+
+      sign_in create(:user)
+      project = create(
+        :project,
+        name: 'Project Grafana',
+        slug: 'project-grafana',
+        grafana_app_value: 'prometheus-project-label'
+      )
+
+      get project_path(project)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('title="Grafana dashboard for Project Grafana"')
+      expect(response.body).to include(
+        'src="https://grafana.example.com/d-solo/apps-overview/applications-overview?orgId=1&amp;from=now-6h&amp;to=now&amp;timezone=browser&amp;refresh=30s&amp;theme=dark&amp;panelId=panel-6&amp;var-app=prometheus-project-label"'
+      )
+      expect(response.body).to include('Ouvrir dans Grafana')
+      expect(response.body).to include('sandbox="allow-scripts allow-same-origin allow-forms allow-popups"')
+      expect(response.body).not_to include('GRAFANA_EMBED_URL')
+    end
+
+    it 'renders a missing Grafana mapping state when the project has no Grafana value' do
+      configure_grafana_env
+
+      sign_in create(:user)
+      project = create(:project, grafana_app_value: nil)
+
+      get project_path(project)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('Grafana project mapping missing')
+      expect(response.body).to include('Set grafana_app_value for this project.')
+      expect(response.body).not_to include('<iframe')
+    end
+
+    it 'renders a Grafana configuration state when global settings are missing' do
+      sign_in create(:user)
+      project = create(:project, grafana_app_value: 'project-grafana')
+
+      get project_path(project)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('Grafana embed not configured')
+      expect(response.body).to include('Set GRAFANA_BASE_URL and GRAFANA_DASHBOARD_UID to display the dashboard.')
+      expect(response.body).not_to include('<iframe')
     end
 
     it 'renders recent GitHub pull requests newest first' do
@@ -440,5 +520,20 @@ RSpec.describe 'Projects', type: :request do
       expect(project.reload.maintenance_mode).to eq(false)
       expect(flash[:alert]).to include('permission denied')
     end
+  end
+
+  def configure_grafana_env
+    ENV['GRAFANA_BASE_URL'] = 'https://grafana.example.com'
+    ENV['GRAFANA_DASHBOARD_UID'] = 'apps-overview'
+    ENV['GRAFANA_DASHBOARD_SLUG'] = 'applications-overview'
+    ENV['GRAFANA_VARIABLE_NAME'] = 'app'
+    ENV['GRAFANA_DEFAULT_THEME'] = 'dark'
+    ENV['GRAFANA_ORG_ID'] = '1'
+    ENV['GRAFANA_DEFAULT_FROM'] = 'now-6h'
+    ENV['GRAFANA_DEFAULT_TO'] = 'now'
+    ENV['GRAFANA_DEFAULT_TIMEZONE'] = 'browser'
+    ENV['GRAFANA_REFRESH'] = '30s'
+    ENV['GRAFANA_PANEL_ID'] = 'panel-6'
+    ENV['GRAFANA_GLOBAL_VARIABLE_VALUE'] = 'All'
   end
 end

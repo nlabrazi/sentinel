@@ -8,7 +8,7 @@
 
 wrapper_classes = ["group/menu relative", html_class].join(" ") %>
 
-<details class="<%= wrapper_classes %>">
+<details class="<%= wrapper_classes %>" data-controller="action-menu" data-action="click@window->action-menu#closeOnOutsideClick">
   <summary
     class="
       flex cursor-pointer list-none items-center justify-center gap-2 rounded-md

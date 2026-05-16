@@ -98,9 +98,9 @@
           method: :post,
           class: "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:border-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800",
           title: "Lance un healthcheck HTTP immédiat",
-          aria: { label: "Vérifier le runtime" } do %>
+          aria: { label: "Vérifier le health status" } do %>
             <%= fa_icon(:heart_pulse, class_name: "text-sm") %>
-            Check runtime
+            Check health
           <% end %>
 
           <%= render layout: "shared/ui/action_menu", locals: { width: "w-64" } do %>
@@ -115,7 +115,8 @@
 
             <%= button_to refresh_cron_status_project_path(project),
             method: :post,
-            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100" do %>
+            class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100",
+            aria: { label: "Synchroniser les jobs" } do %>
               <%= fa_icon(:clock, class_name: "text-sm text-gray-500") %>
               Sync jobs
             <% end %>

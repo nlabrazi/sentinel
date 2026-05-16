@@ -86,4 +86,8 @@ group :development do
   gem "web-console"
 end
 
+# Secure user authentication
 gem "devise", "~> 5.0"
+
+# Image processing for Active Storage variants
+gem "image_processing", "~> 1.2"
