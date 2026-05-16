@@ -138,6 +138,8 @@
   </div>
 
   <div class="space-y-6">
+    <% grafana_embed_url = project.grafana_embed_url %>
+
     <section
       class="
         overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow
@@ -149,10 +151,18 @@
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Place prévue pour Grafana.</p>
           </div>
 
-          <span
-            class="
-              rounded-full bg-gray-100 dark:bg-gray-800 px-2.5 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400
-            ">Soon</span>
+          <% if grafana_embed_url.present? %>
+            <span
+              class="
+                rounded-full bg-green-100 dark:bg-green-900/40 px-2.5 py-1 text-xs font-semibold
+                text-green-700 dark:text-green-300
+              ">Live</span>
+          <% else %>
+            <span
+              class="
+                rounded-full bg-gray-100 dark:bg-gray-800 px-2.5 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400
+              ">Not configured</span>
+          <% end %>
         </div>
       </div>
 
@@ -181,16 +191,32 @@
           </div>
         </div>
 
-        <div
-          class="
-            mt-4 flex h-28 items-center justify-center rounded-lg border border-dashed
-            border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-950/60 text-center
-          ">
-          <div>
-            <p class="text-sm font-semibold text-gray-600 dark:text-gray-300">Grafana embed placeholder</p>
-            <p class="mt-1 text-xs text-gray-500">Uptime, latency, requests, errors.</p>
+        <% if grafana_embed_url.present? %>
+          <div
+            class="
+              mt-4 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800
+              bg-gray-950
+            ">
+            <iframe
+              class="h-80 w-full border-0"
+              src="<%= grafana_embed_url %>"
+              title="Grafana dashboard for <%= project.name %>"
+              loading="lazy"
+              referrerpolicy="no-referrer"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
           </div>
-        </div>
+        <% else %>
+          <div
+            class="
+              mt-4 flex h-28 items-center justify-center rounded-lg border border-dashed
+              border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-950/60 text-center
+            ">
+            <div>
+              <p class="text-sm font-semibold text-gray-600 dark:text-gray-300">Grafana embed not configured</p>
+              <p class="mt-1 text-xs text-gray-500">Set GRAFANA_EMBED_URL to display the dashboard.</p>
+            </div>
+          </div>
+        <% end %>
       </div>
     </section>
 

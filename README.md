@@ -30,6 +30,7 @@
         <li><a href="#-docker">Docker</a></li>
         <li><a href="#️-usage">Usage</a></li>
         <li><a href="#-local-notes">Local Notes</a></li>
+        <li><a href="#grafana-embed">Grafana Embed</a></li>
         <li><a href="#-deploysh-contract">deploy.sh Contract</a></li>
         <li><a href="#-statussh-contract">status.sh Contract</a></li>
         <li><a href="#-scripts">Scripts</a></li>
@@ -166,6 +167,28 @@ The Rails container mounts the project directory into `/app`, so code changes ar
 - GitHub API access requires `GITHUB_TOKEN`.
 - SSH execution requires `VPS_HOST`, `VPS_USER`, and `SSH_KEY_PATH`.
 - Screenshots are optional and require `APIFLASH_ACCESS_KEY`.
+
+### Grafana Embed
+
+Sentinel embeds Grafana as a private, authenticated preview. It does not use external shares, snapshots, or URL tokens. The user must already have a valid Grafana browser session for the iframe to load.
+
+The `.env` file only stores global Grafana settings:
+
+```env
+GRAFANA_BASE_URL=https://grafana.nabster.dev
+GRAFANA_DASHBOARD_UID=
+GRAFANA_DASHBOARD_SLUG=applications-overview
+GRAFANA_VARIABLE_NAME=app
+GRAFANA_DEFAULT_THEME=dark
+GRAFANA_ORG_ID=1
+GRAFANA_DEFAULT_FROM=now-6h
+GRAFANA_DEFAULT_TO=now
+GRAFANA_GLOBAL_VARIABLE_VALUE=All
+```
+
+Project-specific filtering belongs in the database, not in `.env`. Each project can define a Grafana variable value such as `sawt-ai`, `media-tools`, or `umami`; Sentinel then builds the final embed URL dynamically.
+
+Grafana must allow private iframe embedding for the Sentinel origin. In Grafana configuration, this usually means enabling `allow_embedding = true` and making sure the browser can send the Grafana session cookie in the iframe context.
 
 ### 📜 deploy.sh Contract
 

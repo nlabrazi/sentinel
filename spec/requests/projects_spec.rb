@@ -105,6 +105,26 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).not_to include('Domain management')
     end
 
+    it 'renders the configured Grafana embed in the observability panel' do
+      original_grafana_embed_url = ENV['GRAFANA_EMBED_URL']
+      ENV['GRAFANA_EMBED_URL'] = 'https://grafana.example.com/d-solo/sentinel/project?orgId=1&var-project={slug}'
+
+      sign_in create(:user)
+      project = create(:project, name: 'Project Grafana', slug: 'project-grafana')
+
+      get project_path(project)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('title="Grafana dashboard for Project Grafana"')
+      expect(response.body).to include(
+        'src="https://grafana.example.com/d-solo/sentinel/project?orgId=1&amp;var-project=project-grafana"'
+      )
+      expect(response.body).to include('sandbox="allow-scripts allow-same-origin allow-forms allow-popups"')
+      expect(response.body).not_to include('Grafana embed placeholder')
+    ensure
+      ENV['GRAFANA_EMBED_URL'] = original_grafana_embed_url
+    end
+
     it 'renders recent GitHub pull requests newest first' do
       sign_in create(:user)
       project = create(:project)
