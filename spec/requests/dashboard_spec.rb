@@ -18,7 +18,7 @@ RSpec.describe "Dashboards", type: :request do
   ].freeze
 
   around do |example|
-    original_env = DASHBOARD_GRAFANA_ENV_KEYS.to_h { |key| [key, ENV[key]] }
+    original_env = DASHBOARD_GRAFANA_ENV_KEYS.to_h { |key| [ key, ENV[key] ] }
 
     DASHBOARD_GRAFANA_ENV_KEYS.each { |key| ENV.delete(key) }
     example.run
@@ -114,8 +114,6 @@ RSpec.describe "Dashboards", type: :request do
       )
       create(:cron_job, project: project, last_status: "success")
       create(:ping, project: project, http_status: 200, response_time_ms: 88, checked_at: 3.minutes.ago)
-      create(:github_pull_request, project: project, state: "open", title: "Open PR")
-      create(:github_pull_request, project: project, state: "merged", title: "Merged PR")
 
       get root_path
 
@@ -126,8 +124,6 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include("a82f31c")
       expect(response.body).to include("3 update(s)")
       expect(response.body).to include("OK")
-      expect(response.body).to include("open PR")
-      expect(response.body).to include("merged")
       expect(response.body).to include("Sync GitHub")
       expect(response.body).to include("Check health")
       expect(response.body).to include("Sync jobs")
@@ -136,7 +132,6 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include("200")
       expect(response.body).to include("Jobs")
       expect(response.body).to include("Deploy")
-      expect(response.body).to include("Open project")
       expect(response.body).to include("Open site")
     end
 

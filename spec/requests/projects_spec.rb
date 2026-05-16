@@ -18,7 +18,7 @@ RSpec.describe 'Projects', type: :request do
   ].freeze
 
   around do |example|
-    original_env = PROJECTS_GRAFANA_ENV_KEYS.to_h { |key| [key, ENV[key]] }
+    original_env = PROJECTS_GRAFANA_ENV_KEYS.to_h { |key| [ key, ENV[key] ] }
 
     PROJECTS_GRAFANA_ENV_KEYS.each { |key| ENV.delete(key) }
     example.run
