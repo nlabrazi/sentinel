@@ -81,7 +81,10 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include(
         'src="https://grafana.example.com/d-solo/apps-overview/applications-overview?orgId=1&amp;from=now-6h&amp;to=now&amp;timezone=browser&amp;refresh=30s&amp;theme=dark&amp;panelId=panel-6&amp;var-app=All"'
       )
-      expect(response.body).to include("Ouvrir dans Grafana")
+      expect(response.body).to include("Se connecter à Grafana")
+      expect(response.body).to include('href="https://grafana.nabster.dev/login/generic_oauth"')
+      expect(response.body).to include('target="_blank"')
+      expect(response.body).to include('rel="noopener"')
       expect(response.body).to include('sandbox="allow-scripts allow-same-origin allow-forms allow-popups"')
     end
 
