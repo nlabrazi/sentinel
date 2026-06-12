@@ -258,6 +258,16 @@
           ">status.sh</code>, puis l’interface synchronise cet état avec l’action
         <span class="font-semibold text-gray-700 dark:text-gray-200">Sync cron</span>.
       </p>
+      <p class="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">
+        Ce monitoring est optionnel. Activez-le uniquement sur les projets qui
+        exposent réellement ce contrat, sinon laissez-le désactivé pour éviter
+        les faux positifs et les erreurs de synchronisation inutiles.
+      </p>
+      <p class="mt-3 text-sm leading-6 text-gray-500 dark:text-gray-400">
+        Même logique pour le healthcheck HTTP : un bot, un worker ou un service
+        sans vraie vitrine web peut laisser ce monitoring désactivé pour ne pas
+        remonter de faux `offline`.
+      </p>
     </div>
 
     <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">

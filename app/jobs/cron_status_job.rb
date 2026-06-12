@@ -2,7 +2,7 @@ class CronStatusJob < ApplicationJob
   queue_as :default
 
   def perform
-    Project.find_each do |project|
+    Project.where(cron_monitoring_enabled: true).find_each do |project|
       begin
         CronStatusSyncService.new(project).call
       rescue StandardError => e

@@ -41,12 +41,69 @@ class Project < ApplicationRecord
     bash_command("cd #{Shellwords.escape(vps_path)} && ./status.sh")
   end
 
+  def runtime_monitoring_enabled_label
+    runtime_monitoring_enabled? ? "Enabled" : "Disabled"
+  end
+
+  def cron_monitoring_enabled_label
+    cron_monitoring_enabled? ? "Enabled" : "Disabled"
+  end
+
+  def runtime_status
+    return "disabled" unless runtime_monitoring_enabled?
+
+    status
+  end
+
+  def runtime_status_label
+    case runtime_status
+    when "online"
+      "Online"
+    when "offline"
+      "Offline"
+    when "disabled"
+      "Disabled"
+    else
+      "Unknown"
+    end
+  end
+
+  def runtime_status_tone
+    case runtime_status
+    when "online"
+      :success
+    when "offline"
+      :danger
+    when "disabled"
+      :muted
+    else
+      :neutral
+    end
+  end
+
+  def runtime_status_icon
+    case runtime_status
+    when "online"
+      :circle_check
+    when "offline"
+      :circle_xmark
+    else
+      :circle_question
+    end
+  end
+
+  def runtime_needs_attention?
+    runtime_monitoring_enabled? && offline?
+  end
+
   def maintenance_command(enabled)
     action = enabled ? "touch" : "rm -f"
     bash_command("#{action} #{Shellwords.escape(maintenance_flag_path)}")
   end
 
   def cron_summary_status
+    return "disabled" unless cron_monitoring_enabled?
+
     jobs = loaded_or_query_cron_jobs
     return "not_reported" if jobs.empty?
 
@@ -64,6 +121,8 @@ class Project < ApplicationRecord
 
   def cron_summary_label
     case cron_summary_status
+    when "disabled"
+      "Disabled"
     when "ok"
       "OK"
     when "failed"
@@ -79,6 +138,8 @@ class Project < ApplicationRecord
 
   def cron_summary_tone
     case cron_summary_status
+    when "disabled"
+      :neutral
     when "ok"
       :success
     when "failed"
@@ -92,6 +153,8 @@ class Project < ApplicationRecord
 
   def cron_summary_icon
     case cron_summary_status
+    when "disabled"
+      :clock
     when "ok"
       :circle_check
     when "failed"

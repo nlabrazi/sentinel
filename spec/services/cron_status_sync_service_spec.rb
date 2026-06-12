@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe CronStatusSyncService, type: :service do
-  let(:project) { create(:project) }
+  let(:project) { create(:project, cron_monitoring_enabled: true) }
   let(:ssh) { instance_double(SshExecutionService) }
   let(:service) { described_class.new(project) }
 

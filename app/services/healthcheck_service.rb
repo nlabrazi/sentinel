@@ -9,6 +9,8 @@ class HealthcheckService
   end
 
   def call
+    return :disabled unless @project.runtime_monitoring_enabled?
+
     started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     response = HTTParty.get(
       @project.production_url,

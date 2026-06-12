@@ -5,6 +5,7 @@ Rails.application.routes.draw do
     member do
       post :deploy
       patch :toggle_maintenance
+      patch :update_monitoring
       post :refresh_screenshot
       post :refresh_github_commits
       post :refresh_runtime

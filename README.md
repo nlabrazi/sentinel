@@ -248,6 +248,10 @@ Accepted statuses are normalized to `success` and `failed` when possible. For ex
 
 Sentinel stores the latest cron state on each cron job and creates one execution history entry per `last_execution_at` timestamp.
 
+Cron monitoring is opt-in at the project level. Set `cron_monitoring_enabled` only for projects that actually expose `status.sh` and a cron status payload. Projects without scheduled jobs should leave it disabled to avoid false-positive warnings and failed sync attempts.
+
+Runtime monitoring can also be disabled per project through `runtime_monitoring_enabled`. This is useful for bots, workers, or internal services that should not be treated like public websites and must not raise `offline` noise in the dashboard.
+
 ### 🧪 Scripts
 
 ```bash

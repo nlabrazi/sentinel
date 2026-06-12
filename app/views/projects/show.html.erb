@@ -24,6 +24,8 @@
         behind_count: behind_count,
         grafana_embed_url: @grafana_embed_url %>
 
+        <%= render "projects/show/monitoring_settings", project: @project %>
+
         <% if @project.app? %>
           <%= render "projects/show/github_commits",
           project: @project,

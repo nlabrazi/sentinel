@@ -6,6 +6,7 @@ class ProjectsController < ApplicationController
     :refresh_github_commits,
     :refresh_runtime,
     :refresh_cron_status,
+    :update_monitoring,
     :toggle_maintenance
   ]
 
@@ -69,6 +70,11 @@ class ProjectsController < ApplicationController
   end
 
   def refresh_runtime
+    unless @project.runtime_monitoring_enabled?
+      redirect_back fallback_location: @project, notice: "Monitoring runtime désactivé pour ce projet."
+      return
+    end
+
     status = HealthcheckService.new(@project).call
 
     redirect_back fallback_location: @project, notice: "Healthcheck terminé : #{status}."
@@ -78,6 +84,11 @@ class ProjectsController < ApplicationController
   end
 
   def refresh_cron_status
+    unless @project.cron_monitoring_enabled?
+      redirect_back fallback_location: @project, notice: "Monitoring cron désactivé pour ce projet."
+      return
+    end
+
     synced = CronStatusSyncService.new(@project).call
 
     if synced
@@ -91,9 +102,28 @@ class ProjectsController < ApplicationController
     redirect_back fallback_location: @project, alert: "Synchronisation cron impossible pour le moment."
   end
 
+  def update_monitoring
+    runtime_will_be_disabled =
+      @project.runtime_monitoring_enabled? &&
+        !ActiveModel::Type::Boolean.new.cast(monitoring_params[:runtime_monitoring_enabled])
+
+    @project.assign_attributes(monitoring_params)
+    @project.status = :unknown if runtime_will_be_disabled
+    @project.save!
+
+    redirect_back fallback_location: @project, notice: "Préférences de monitoring mises à jour."
+  rescue StandardError => e
+    Rails.logger.error "Monitoring update failed for #{@project.slug}: #{e.message}"
+    redirect_back fallback_location: @project, alert: "Mise à jour du monitoring impossible pour le moment."
+  end
+
   private
 
   def set_project
     @project = Project.find(params[:id])
+  end
+
+  def monitoring_params
+    params.require(:project).permit(:runtime_monitoring_enabled, :cron_monitoring_enabled)
   end
 end

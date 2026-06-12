@@ -7,27 +7,37 @@
       sm:justify-between
     ">
     <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Health status</h2>
-    <%= button_to refresh_runtime_project_path(project),
-    method: :post,
-    class: "inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:border-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800",
-    title: "Lance un healthcheck HTTP immédiat",
-    aria: { label: "Vérifier le health status" } do %>
-      <%= fa_icon(:heart_pulse, class_name: "h-3.5 w-3.5") %>
-      Check health
+    <% if project.runtime_monitoring_enabled? %>
+      <%= button_to refresh_runtime_project_path(project),
+      method: :post,
+      class: "inline-flex w-fit cursor-pointer items-center justify-center gap-2 rounded border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:border-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800",
+      title: "Lance un healthcheck HTTP immédiat",
+      aria: { label: "Vérifier le health status" } do %>
+        <%= fa_icon(:heart_pulse, class_name: "h-3.5 w-3.5") %>
+        Check health
+      <% end %>
     <% end %>
   </div>
 
-  <dl class="mt-6 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+  <% unless project.runtime_monitoring_enabled? %>
+    <%= render "shared/ui/empty_state",
+    title: "Runtime monitoring disabled.",
+    description:
+      "Réactivez le healthcheck uniquement pour les projets qui exposent une URL pertinente à surveiller.",
+    icon: :heart_pulse,
+    html_class: "mt-6" %>
+  <% else %>
+    <dl class="mt-6 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
     <div>
       <dt class="text-gray-500 dark:text-gray-400">Current status</dt>
       <dd
         class="
           mt-2 inline-flex items-center gap-2 font-semibold
-          <%= project.online? ? 'text-green-700 dark:text-green-400' : project.offline? ? 'text-red-700 dark:text-red-400' : 'text-gray-600 dark:text-gray-300' %>
+          <%= project.runtime_status == 'online' ? 'text-green-700 dark:text-green-400' : project.runtime_status == 'offline' ? 'text-red-700 dark:text-red-400' : 'text-gray-600 dark:text-gray-300' %>
         ">
         <span
-          class="h-2 w-2 rounded-full <%= project.online? ? 'bg-green-400' : project.offline? ? 'bg-red-400' : 'bg-gray-500' %>"></span>
-        <%= project.status %>
+          class="h-2 w-2 rounded-full <%= project.runtime_status == 'online' ? 'bg-green-400' : project.runtime_status == 'offline' ? 'bg-red-400' : 'bg-gray-500' %>"></span>
+        <%= project.runtime_status_label %>
       </dd>
     </div>
     <div>
@@ -86,5 +96,6 @@
         </dd>
       </div>
     <% end %>
-  </dl>
+    </dl>
+  <% end %>
 </section>
