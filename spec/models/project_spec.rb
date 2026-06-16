@@ -142,14 +142,20 @@ RSpec.describe Project, type: :model do
   end
 
   describe '#cron_summary_status' do
-    it 'returns not_reported when no cron job is configured' do
+    it 'returns disabled when cron monitoring is turned off' do
       project = create(:project)
+
+      expect(project.cron_summary_status).to eq('disabled')
+    end
+
+    it 'returns not_reported when cron monitoring is enabled but no cron job is configured' do
+      project = create(:project, cron_monitoring_enabled: true)
 
       expect(project.cron_summary_status).to eq('not_reported')
     end
 
     it 'returns ok when all cron jobs succeeded' do
-      project = create(:project)
+      project = create(:project, cron_monitoring_enabled: true)
       create(:cron_job, project: project, last_status: 'success')
       create(:cron_job, project: project, name: 'Other job', last_status: 'success')
 
@@ -157,7 +163,7 @@ RSpec.describe Project, type: :model do
     end
 
     it 'returns failed when at least one cron job failed' do
-      project = create(:project)
+      project = create(:project, cron_monitoring_enabled: true)
       create(:cron_job, project: project, last_status: 'success')
       create(:cron_job, project: project, name: 'Failing job', last_status: 'failed')
 

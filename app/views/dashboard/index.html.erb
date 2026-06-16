@@ -38,7 +38,7 @@
 
         <%= render "shared/ui/status_metric",
         label: "Offline",
-        value: @projects.count(&:offline?),
+        value: @projects.count(&:runtime_needs_attention?),
         tone: :danger,
         html_class: "dark:bg-gray-950" %>
 
@@ -113,7 +113,7 @@
           <% latest_ping = @latest_pings_by_project_id[project.id] %>
           <% behind_count = project.commits_behind.to_i %>
           <% needs_attention =
-            project.offline? || behind_count.positive? || project.cron_needs_attention? ||
+            project.runtime_needs_attention? || behind_count.positive? || project.cron_needs_attention? ||
               project.maintenance_mode? %>
 
           <article
@@ -153,12 +153,9 @@
                       "break-words text-base font-bold text-gray-900 hover:text-cyan-700 dark:text-gray-100 dark:hover:text-cyan-300" %>
 
                     <%= render "shared/ui/badge",
-                    label: project.status,
-                    variant: project.online? ? :success : project.offline? ? :danger : :neutral,
-                    icon:
-                      project.online? ?
-                        :circle_check :
-                        project.offline? ? :circle_xmark : :circle_question %>
+                    label: project.runtime_status_label,
+                    variant: project.runtime_status == "online" ? :success : project.runtime_status == "offline" ? :danger : :neutral,
+                    icon: project.runtime_status_icon %>
 
                     <% if needs_attention %>
                       <%= render "shared/ui/badge",
@@ -222,24 +219,26 @@
                   <p
                     class="
                       mt-1 inline-flex items-center gap-2 font-semibold
-                      <%= project.online? ? 'text-green-700 dark:text-green-300' : project.offline? ? 'text-red-700 dark:text-red-300' : 'text-gray-600 dark:text-gray-300' %>
+                      <%= project.runtime_status == 'online' ? 'text-green-700 dark:text-green-300' : project.runtime_status == 'offline' ? 'text-red-700 dark:text-red-300' : 'text-gray-600 dark:text-gray-300' %>
                     ">
                     <span
                       class="
-                        h-1.5 w-1.5 rounded-full <%= project.online? ? 'bg-green-300' : project.offline? ? 'bg-red-300' : 'bg-gray-500' %>
+                        h-1.5 w-1.5 rounded-full <%= project.runtime_status == 'online' ? 'bg-green-300' : project.runtime_status == 'offline' ? 'bg-red-300' : 'bg-gray-500' %>
                       "></span>
-                    <%= project.status %>
+                    <%= project.runtime_status_label %>
                   </p>
 
-                  <% if latest_ping %>
+                  <% if project.runtime_monitoring_enabled? && latest_ping %>
                     <p class="mt-1 truncate text-xs text-gray-500">
                       <%= latest_ping.http_status ? "HTTP #{latest_ping.http_status}" : "No HTTP code" %>
                       ·
                       <%= time_ago_in_words(latest_ping.checked_at || latest_ping.created_at) %>
                       ago
                     </p>
-                  <% else %>
+                  <% elsif project.runtime_monitoring_enabled? %>
                     <p class="mt-1 text-xs text-gray-600">Never checked</p>
+                  <% else %>
+                    <p class="mt-1 text-xs text-gray-600">Monitoring disabled</p>
                   <% end %>
                 </div>
 
@@ -292,16 +291,18 @@
 
                   <p
                     class="
-                      mt-1 font-semibold <%= project.cron_summary_tone == :success ? 'text-green-700 dark:text-green-300' : project.cron_summary_tone == :danger ? 'text-red-700 dark:text-red-300' : 'text-yellow-700 dark:text-yellow-300' %>
+                      mt-1 font-semibold <%= project.cron_summary_tone == :success ? 'text-green-700 dark:text-green-300' : project.cron_summary_tone == :danger ? 'text-red-700 dark:text-red-300' : project.cron_summary_tone == :warning ? 'text-yellow-700 dark:text-yellow-300' : 'text-gray-600 dark:text-gray-300' %>
                     ">
                     <%= project.cron_summary_label %>
                   </p>
 
-                  <% if project.cron_synced_at %>
+                  <% if project.cron_monitoring_enabled? && project.cron_synced_at %>
                     <p class="mt-1 text-xs text-gray-500"><%= time_ago_in_words(project.cron_synced_at) %>
                       ago</p>
-                  <% else %>
+                  <% elsif project.cron_monitoring_enabled? %>
                     <p class="mt-1 text-xs text-gray-600">Never synced</p>
+                  <% else %>
+                    <p class="mt-1 text-xs text-gray-600">No cron monitoring</p>
                   <% end %>
                 </div>
               </div>
@@ -362,22 +363,26 @@
                     <% end %>
                   <% end %>
 
-                  <%= button_to refresh_runtime_project_path(project),
-        method: :post,
-        class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100",
-        title: "Lance un healthcheck HTTP immédiat pour ce projet",
-        aria: { label: "Vérifier le health status de #{project.name}" } do %>
-                    <%= fa_icon(:heart_pulse, class_name: "text-sm text-gray-500") %>
-                    Check health
+                  <% if project.runtime_monitoring_enabled? %>
+                    <%= button_to refresh_runtime_project_path(project),
+          method: :post,
+          class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100",
+          title: "Lance un healthcheck HTTP immédiat pour ce projet",
+          aria: { label: "Vérifier le health status de #{project.name}" } do %>
+                      <%= fa_icon(:heart_pulse, class_name: "text-sm text-gray-500") %>
+                      Check health
+                    <% end %>
                   <% end %>
 
-                  <%= button_to refresh_cron_status_project_path(project),
-        method: :post,
-        class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100",
-        title: "Synchronise les statuts cron publiés par le projet",
-        aria: { label: "Synchroniser les jobs de #{project.name}" } do %>
-                    <%= fa_icon(:clock, class_name: "text-sm text-gray-500") %>
-                    Sync jobs
+                  <% if project.cron_monitoring_enabled? %>
+                    <%= button_to refresh_cron_status_project_path(project),
+          method: :post,
+          class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100",
+          title: "Synchronise les statuts cron publiés par le projet",
+          aria: { label: "Synchroniser les jobs de #{project.name}" } do %>
+                      <%= fa_icon(:clock, class_name: "text-sm text-gray-500") %>
+                      Sync jobs
+                    <% end %>
                   <% end %>
                 <% end %>
               </div>

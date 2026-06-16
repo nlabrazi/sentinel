@@ -94,7 +94,8 @@ RSpec.describe 'Projects', type: :request do
         production_url: 'https://project-overview.example.com',
         last_commit_deployed: 'abcdef123',
         github_synced_at: 6.minutes.ago,
-        cron_synced_at: 8.minutes.ago
+        cron_synced_at: 8.minutes.ago,
+        cron_monitoring_enabled: true
       )
       create(:deployment, project: project, commit_sha: 'abcdef123', status: :success, created_at: 5.minutes.ago)
 
@@ -111,6 +112,7 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).to include('GitHub synced')
       expect(response.body).to include('Sync GitHub')
       expect(response.body).to include('Sync jobs')
+      expect(response.body).to include('Save monitoring')
       expect(response.body).to include('Deployment command')
       expect(response.body).to include('Cron jobs')
       expect(response.body).to include('Cron synced')
@@ -258,7 +260,7 @@ RSpec.describe 'Projects', type: :request do
 
     it 'renders detailed cron job status' do
       sign_in create(:user)
-      project = create(:project)
+      project = create(:project, cron_monitoring_enabled: true)
       cron_job = create(
         :cron_job,
         project: project,
@@ -280,6 +282,31 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).to include('failed')
       expect(response.body).to include('42s')
       expect(response.body).to include('Import failed on row 12')
+    end
+
+    it 'renders cron monitoring as disabled when the project has no cron integration' do
+      sign_in create(:user)
+      project = create(:project, cron_monitoring_enabled: false)
+
+      get project_path(project)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('Monitoring cron désactivé pour ce projet.')
+      expect(response.body).to include('Cron monitoring disabled.')
+      expect(response.body).not_to include('Sync jobs')
+    end
+
+    it 'renders runtime monitoring as disabled without offline noise' do
+      sign_in create(:user)
+      project = create(:project, runtime_monitoring_enabled: false, status: :offline)
+
+      get project_path(project)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('Runtime monitoring disabled.')
+      expect(response.body).to include('Disabled')
+      expect(response.body).not_to include('Check health')
+      expect(response.body).not_to include('Offline')
     end
 
     it 'renders the latest healthcheck details' do
@@ -320,7 +347,7 @@ RSpec.describe 'Projects', type: :request do
 
   describe 'POST /projects/:id/deploy' do
     let(:user) { create(:user) }
-    let(:project) { create(:project) }
+    let(:project) { create(:project, cron_monitoring_enabled: true) }
 
     before do
       sign_in user
@@ -432,11 +459,20 @@ RSpec.describe 'Projects', type: :request do
       expect(response).to redirect_to(project_path(project))
       expect(flash[:alert]).to eq('Healthcheck impossible pour le moment.')
     end
+
+    it 'returns a neutral notice when runtime monitoring is disabled for the project' do
+      disabled_project = create(:project, runtime_monitoring_enabled: false)
+
+      post refresh_runtime_project_path(disabled_project)
+
+      expect(response).to redirect_to(project_path(disabled_project))
+      expect(flash[:notice]).to eq('Monitoring runtime désactivé pour ce projet.')
+    end
   end
 
   describe 'POST /projects/:id/refresh_cron_status' do
     let(:user) { create(:user) }
-    let(:project) { create(:project) }
+    let(:project) { create(:project, cron_monitoring_enabled: true) }
 
     before do
       sign_in user
@@ -484,6 +520,15 @@ RSpec.describe 'Projects', type: :request do
       expect(response).to redirect_to(project_path(project))
       expect(flash[:alert]).to eq('Synchronisation cron impossible pour le moment.')
     end
+
+    it 'returns a neutral notice when cron monitoring is disabled for the project' do
+      disabled_project = create(:project, cron_monitoring_enabled: false)
+
+      post refresh_cron_status_project_path(disabled_project)
+
+      expect(response).to redirect_to(project_path(disabled_project))
+      expect(flash[:notice]).to eq('Monitoring cron désactivé pour ce projet.')
+    end
   end
 
   describe 'PATCH /projects/:id/toggle_maintenance' do
@@ -519,6 +564,30 @@ RSpec.describe 'Projects', type: :request do
       expect(response).to redirect_to(project_path(project))
       expect(project.reload.maintenance_mode).to eq(false)
       expect(flash[:alert]).to include('permission denied')
+    end
+  end
+
+  describe 'PATCH /projects/:id/update_monitoring' do
+    let(:user) { create(:user) }
+    let(:project) { create(:project, runtime_monitoring_enabled: true, cron_monitoring_enabled: false, status: :offline) }
+
+    before do
+      sign_in user
+    end
+
+    it 'updates monitoring preferences from the project view' do
+      patch update_monitoring_project_path(project), params: {
+        project: {
+          runtime_monitoring_enabled: '0',
+          cron_monitoring_enabled: '1'
+        }
+      }
+
+      expect(response).to redirect_to(project_path(project))
+      expect(flash[:notice]).to eq('Préférences de monitoring mises à jour.')
+      expect(project.reload.runtime_monitoring_enabled).to eq(false)
+      expect(project.cron_monitoring_enabled).to eq(true)
+      expect(project.status).to eq('unknown')
     end
   end
 

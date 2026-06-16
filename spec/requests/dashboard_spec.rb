@@ -113,7 +113,8 @@ RSpec.describe "Dashboards", type: :request do
         latest_commit_available: "a91dd20999",
         commits_behind: 3,
         github_synced_at: 4.minutes.ago,
-        cron_synced_at: 2.minutes.ago
+        cron_synced_at: 2.minutes.ago,
+        cron_monitoring_enabled: true
       )
       create(:cron_job, project: project, last_status: "success")
       create(:ping, project: project, http_status: 200, response_time_ms: 88, checked_at: 3.minutes.ago)
@@ -136,6 +137,30 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include("Jobs")
       expect(response.body).to include("Deploy")
       expect(response.body).to include("Open site")
+    end
+
+    it "renders disabled cron monitoring without counting it as a jobs issue" do
+      sign_in create(:user)
+      create(:project, name: "No Cron App", cron_monitoring_enabled: false)
+
+      get root_path
+
+      expect(response.body).to include("No Cron App")
+      expect(response.body).to include("Disabled")
+      expect(response.body).to include("No cron monitoring")
+      expect(response.body).not_to include("Sync jobs")
+    end
+
+    it "silences offline status when runtime monitoring is disabled" do
+      sign_in create(:user)
+      create(:project, name: "SJVTDM Bot", runtime_monitoring_enabled: false, status: :offline)
+
+      get root_path
+
+      expect(response.body).to include("SJVTDM Bot")
+      expect(response.body).to include("Disabled")
+      expect(response.body).to include("Monitoring disabled")
+      expect(response.body).not_to include("Check health")
     end
 
     it "renders a running state instead of the deploy action when a project is deploying" do

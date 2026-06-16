@@ -14,5 +14,7 @@ FactoryBot.define do
     commits_behind { 0 }
     github_synced_at { nil }
     cron_synced_at { nil }
+    runtime_monitoring_enabled { true }
+    cron_monitoring_enabled { false }
   end
 end

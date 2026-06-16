@@ -18,6 +18,19 @@ RSpec.describe HealthcheckAllJob, type: :job do
     end
   end
 
+  it 'skips projects with runtime monitoring disabled' do
+    monitored_project = create(:project, runtime_monitoring_enabled: true)
+    disabled_project = create(:project, runtime_monitoring_enabled: false)
+    monitored_service = instance_double(HealthcheckService, call: :online)
+
+    allow(HealthcheckService).to receive(:new).with(monitored_project).and_return(monitored_service)
+
+    described_class.perform_now
+
+    expect(monitored_service).to have_received(:call)
+    expect(HealthcheckService).not_to have_received(:new).with(disabled_project)
+  end
+
   it 'continues when one project healthcheck fails' do
     failed_project = create(:project, slug: 'broken')
     healthy_project = create(:project, slug: 'healthy')

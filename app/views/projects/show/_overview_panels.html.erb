@@ -66,7 +66,9 @@
         <div class="px-5 py-4">
           <dt class="text-gray-500">Jobs sync</dt>
           <dd class="mt-1 font-semibold text-gray-900 dark:text-gray-100">
-            <% if project.cron_synced_at %>
+            <% if !project.cron_monitoring_enabled? %>
+              Disabled
+            <% elsif project.cron_synced_at %>
               <%= time_ago_in_words(project.cron_synced_at) %>
               ago
             <% else %>
@@ -177,22 +179,22 @@
           <div class="rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-3 py-3">
             <p class="text-xs text-gray-500">Status</p>
             <p
-              class="mt-1 font-semibold <%= project.online? ? 'text-green-700 dark:text-green-300' : project.offline? ? 'text-red-700 dark:text-red-300' : 'text-gray-600 dark:text-gray-300' %>">
-              <%= project.status %>
+              class="mt-1 font-semibold <%= project.runtime_status == 'online' ? 'text-green-700 dark:text-green-300' : project.runtime_status == 'offline' ? 'text-red-700 dark:text-red-300' : 'text-gray-600 dark:text-gray-300' %>">
+              <%= project.runtime_status_label %>
             </p>
           </div>
 
           <div class="rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-3 py-3">
             <p class="text-xs text-gray-500">HTTP</p>
             <p class="mt-1 font-semibold text-gray-900 dark:text-gray-100">
-              <%= latest_ping&.http_status || "unknown" %>
+              <%= project.runtime_monitoring_enabled? ? (latest_ping&.http_status || "unknown") : "disabled" %>
             </p>
           </div>
 
           <div class="rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-3 py-3">
             <p class="text-xs text-gray-500">Latency</p>
             <p class="mt-1 font-semibold text-gray-900 dark:text-gray-100">
-              <%= latest_ping&.response_time_ms ? "#{latest_ping.response_time_ms}ms" : "unknown" %>
+              <%= project.runtime_monitoring_enabled? ? (latest_ping&.response_time_ms ? "#{latest_ping.response_time_ms}ms" : "unknown") : "disabled" %>
             </p>
           </div>
         </div>

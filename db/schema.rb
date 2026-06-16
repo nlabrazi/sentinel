@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_16_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_26_133000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -136,6 +136,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_100000) do
     t.string "branch"
     t.integer "commits_behind"
     t.datetime "created_at", null: false
+    t.boolean "cron_monitoring_enabled", default: false, null: false
     t.datetime "cron_synced_at"
     t.datetime "github_synced_at"
     t.string "grafana_app_value"
@@ -146,6 +147,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_100000) do
     t.string "name"
     t.string "production_url"
     t.string "repo_url"
+    t.boolean "runtime_monitoring_enabled", default: true, null: false
     t.string "slug"
     t.integer "status"
     t.datetime "updated_at", null: false

@@ -19,6 +19,14 @@ RSpec.describe HealthcheckService, type: :service do
     expect(project.pings.last.response_time_ms).to be >= 0
   end
 
+  it 'returns disabled and does not persist anything when runtime monitoring is off' do
+    project.update!(runtime_monitoring_enabled: false)
+
+    expect(service.call).to eq(:disabled)
+    expect(project.reload.status).to eq('unknown')
+    expect(project.pings).to be_empty
+  end
+
   it 'updates status to offline if request fails' do
     stub_request(:get, project.production_url).to_return(status: 500)
 
