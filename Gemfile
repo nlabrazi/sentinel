@@ -39,7 +39,7 @@ gem "thruster", require: false
 # ---------------- AJOUTS POUR LE PROJET SENTINEL ----------------
 
 # GitHub API
-gem "octokit", "~> 9.0"          # dernière majeure stable (vérif : vérifiez rubygems)
+gem "octokit", "~> 10.0"         # dernière majeure stable (vérif : vérifiez rubygems)
 gem "faraday-retry", "~> 2.3"
 
 # Connexion SSH au VPS
@@ -74,9 +74,9 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 
   # ---------------- AJOUTS POUR LE PROJET SENTINEL ----------------
-  gem "rspec-rails", "~> 7.0"                    # Compatible Rails 8
+  gem "rspec-rails", "~> 8.0"                    # Compatible Rails 8
   gem "factory_bot_rails", "~> 6.4"
-  gem "shoulda-matchers", "~> 6.2"
+  gem "shoulda-matchers", "~> 8.0"
   gem "webmock", "~> 3.24"                       # Pour stubber les appels HTTP/SSH en test
   gem "simplecov", "~> 0.22", require: false     # Couverture de test (optionnel)
 end
@@ -90,4 +90,4 @@ end
 gem "devise", "~> 5.0"
 
 # Image processing for Active Storage variants
-gem "image_processing", "~> 1.2"
+gem "image_processing", "~> 2.0"
