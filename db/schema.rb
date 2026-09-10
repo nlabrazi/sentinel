@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_26_133000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_10_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -145,11 +145,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_26_133000) do
     t.string "latest_commit_available"
     t.boolean "maintenance_mode"
     t.string "name"
+    t.string "production_branch", default: "master", null: false
     t.string "production_url"
     t.string "repo_url"
     t.boolean "runtime_monitoring_enabled", default: true, null: false
     t.string "slug"
+    t.string "staging_branch", default: "staging"
+    t.integer "staging_commits_ahead", default: 0, null: false
+    t.integer "staging_commits_behind", default: 0, null: false
     t.integer "status"
+    t.datetime "status_changed_at"
     t.datetime "updated_at", null: false
     t.string "vps_path"
     t.index ["kind"], name: "index_projects_on_kind"

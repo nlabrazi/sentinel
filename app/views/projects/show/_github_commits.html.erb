@@ -48,9 +48,31 @@
           <div class="min-w-0">
             <p class="truncate font-semibold text-gray-900 dark:text-gray-100">
               <%= commit.message %>
+              <% if commit.html_url.present? %>
+                <%= link_to commit.html_url,
+                      class: "hover:text-cyan-600 hover:underline dark:hover:text-cyan-400",
+                      target: "_blank",
+                      rel: "noopener" do %>
+                  <%= commit.message %>
+                  <%= fa_icon(:arrow_up_right_from_square, class_name: "ml-1 inline text-xs text-gray-400") %>
+                <% end %>
+              <% else %>
+                <%= commit.message %>
+              <% end %>
             </p>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
               <code class="rounded bg-gray-50 dark:bg-gray-950 px-1.5 py-0.5 text-xs text-gray-700 dark:text-gray-200"><%= short_sha %></code>
+              <% if commit.html_url.present? %>
+                <%= link_to commit.html_url,
+                      class: "inline-flex items-center gap-1 rounded bg-gray-50 px-1.5 py-0.5 font-mono text-xs text-cyan-600 hover:underline dark:bg-gray-950 dark:text-cyan-400",
+                      target: "_blank",
+                      rel: "noopener",
+                      title: "Voir le commit sur GitHub" do %>
+                  <%= short_sha %>
+                <% end %>
+              <% else %>
+                <code class="rounded bg-gray-50 px-1.5 py-0.5 text-xs text-gray-700 dark:bg-gray-950 dark:text-gray-200"><%= short_sha %></code>
+              <% end %>
               <% if commit.author_login.present? || commit.author_name.present? %>
                 <span class="mx-1 text-gray-600">·</span>
                 <%= commit.author_login.presence || commit.author_name %>

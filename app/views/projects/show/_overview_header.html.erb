@@ -6,7 +6,7 @@
     <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950">
       <% if project.screenshot.attached? %>
         <img
-          src="<%= url_for(project.screenshot) %>"
+          src="<%= url_for(project.screenshot) %>" <%# herb:disable erb-prefer-image-tag-helper %>
           alt="Aperçu de <%= project.name %>"
           class="h-full min-h-56 w-full object-cover"
           loading="lazy">
