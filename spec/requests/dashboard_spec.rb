@@ -86,6 +86,10 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include('target="_blank"')
       expect(response.body).to include('rel="noopener"')
       expect(response.body).to include('sandbox="allow-scripts allow-same-origin allow-forms allow-popups"')
+      expect(response.body).to include('data-controller="collapsible"')
+      expect(response.body).to include('data-collapsible-storage-key-value="sentinel_dashboard_grafana_open"')
+      expect(response.body).to include("Masquer")
+      expect(response.body).to include('data-collapsible-target="content"')
     end
 
     it "renders the latest deployment timestamp for each project" do
