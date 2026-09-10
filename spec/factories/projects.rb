@@ -21,5 +21,18 @@ FactoryBot.define do
     cron_synced_at { nil }
     runtime_monitoring_enabled { true }
     cron_monitoring_enabled { false }
+
+    trait :cron do
+      kind { :cron }
+      production_url { nil }
+      cron_monitoring_enabled { true }
+      runtime_monitoring_enabled { false }
+    end
+
+    trait :service do
+      kind { :service }
+      repo_url { nil }
+      branch { nil }
+    end
   end
 end

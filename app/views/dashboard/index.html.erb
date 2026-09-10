@@ -247,11 +247,16 @@
                     rounded-md border border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800
                     dark:bg-gray-950/70
                   ">
-                  <% if project.app? %>
-                    <p class="flex items-center gap-1.5 text-xs font-medium text-gray-500">
+                  <p class="flex items-center gap-1.5 text-xs font-medium text-gray-500">
+                    <% if project.app? %>
                       <%= fa_icon(:code_commit, class_name: "text-gray-400") %>
                       Version
-                    </p>
+                    <% else %>
+                      <%= fa_icon(:server, class_name: "text-gray-400") %>
+                      Type
+                    <% end %>
+                  </p>
+                  <% if project.app? %>
                     <p
                       class="
                         mt-1 font-semibold <%= behind_count.positive? ? 'text-yellow-700 dark:text-yellow-300' : 'text-green-700 dark:text-green-300' %>
@@ -259,7 +264,12 @@
                       <%= behind_count.positive? ? "#{behind_count} update(s)" : "Up to date" %>
                     </p>
 
-                    <p class="mt-1 truncate text-xs text-gray-500">
+                  <% else %>
+                    <p class="mt-1 font-semibold text-cyan-700 dark:text-cyan-300">Service</p>
+                  <% end %>
+
+                  <p class="mt-1 truncate text-xs text-gray-500">
+                    <% if project.app? %>
                       prod
                       <span class="font-mono text-gray-600 dark:text-gray-400">
                         <%= if project.last_commit_deployed.present?
@@ -268,15 +278,10 @@
                           "unknown"
                         end %>
                       </span>
-                    </p>
-                  <% else %>
-                    <p class="flex items-center gap-1.5 text-xs font-medium text-gray-500">
-                      <%= fa_icon(:server, class_name: "text-gray-400") %>
-                      Type
-                    </p>
-                    <p class="mt-1 font-semibold text-cyan-700 dark:text-cyan-300">Service</p>
-                    <p class="mt-1 truncate text-xs text-gray-500">Infra monitored</p>
-                  <% end %>
+                    <% else %>
+                      Infra monitored
+                    <% end %>
+                  </p>
                 </div>
 
                 <div

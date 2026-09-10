@@ -231,13 +231,20 @@
               border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-950/60 text-center
             ">
             <div>
-              <% if grafana_mapping_missing %>
-                <p class="text-sm font-semibold text-gray-600 dark:text-gray-300">Grafana project mapping missing</p>
-                <p class="mt-1 text-xs text-gray-500">Set grafana_app_value for this project.</p>
-              <% else %>
-                <p class="text-sm font-semibold text-gray-600 dark:text-gray-300">Grafana embed not configured</p>
-                <p class="mt-1 text-xs text-gray-500">Set GRAFANA_BASE_URL and GRAFANA_DASHBOARD_UID to display the dashboard.</p>
-              <% end %>
+              <p class="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                <% if grafana_mapping_missing %>
+                  Grafana project mapping missing
+                <% else %>
+                  Grafana embed not configured
+                <% end %>
+              </p>
+              <p class="mt-1 text-xs text-gray-500">
+                <% if grafana_mapping_missing %>
+                  Set grafana_app_value for this project.
+                <% else %>
+                  Set GRAFANA_BASE_URL and GRAFANA_DASHBOARD_UID to display the dashboard.
+                <% end %>
+              </p>
             </div>
           </div>
         <% end %>

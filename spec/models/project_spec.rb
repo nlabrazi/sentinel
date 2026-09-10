@@ -15,10 +15,9 @@ RSpec.describe Project, type: :model do
     it { is_expected.to validate_uniqueness_of(:slug) }
     it { is_expected.to validate_presence_of(:repo_url) }
     it { is_expected.to validate_presence_of(:branch) }
-    it { is_expected.to validate_presence_of(:production_url) }
     it { is_expected.to validate_presence_of(:vps_path) }
     it { is_expected.to define_enum_for(:status).with_values(online: 0, offline: 1, unknown: 2).backed_by_column_of_type(:integer) }
-    it { is_expected.to define_enum_for(:kind).with_values(app: 'app', service: 'service').backed_by_column_of_type(:string) }
+    it { is_expected.to define_enum_for(:kind).with_values(app: 'app', service: 'service', cron: 'cron').backed_by_column_of_type(:string) }
 
     it 'requires a repository URL and branch for apps' do
       project = build(:project, kind: :app, repo_url: nil, branch: nil)
@@ -28,8 +27,27 @@ RSpec.describe Project, type: :model do
       expect(project.errors[:branch]).to be_present
     end
 
+    it 'requires a production URL for apps' do
+      project = build(:project, kind: :app, production_url: nil)
+
+      expect(project).not_to be_valid
+      expect(project.errors[:production_url]).to be_present
+    end
+
     it 'allows services without a repository URL or branch' do
       project = build(:project, kind: :service, repo_url: nil, branch: nil)
+
+      expect(project).to be_valid
+    end
+
+    it 'allows crons without a production URL' do
+      project = build(:project, kind: :cron, production_url: nil)
+
+      expect(project).to be_valid
+    end
+
+    it 'allows services without a production URL' do
+      project = build(:project, kind: :service, production_url: nil, repo_url: nil, branch: nil)
 
       expect(project).to be_valid
     end
