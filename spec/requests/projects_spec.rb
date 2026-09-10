@@ -185,6 +185,10 @@ RSpec.describe 'Projects', type: :request do
       )
       expect(response.body).to include('Ouvrir dans Grafana')
       expect(response.body).to include('sandbox="allow-scripts allow-same-origin allow-forms allow-popups"')
+      expect(response.body).to include('data-controller="collapsible"')
+      expect(response.body).to include("data-collapsible-storage-key-value=\"sentinel_project_#{project.id}_grafana_open\"")
+      expect(response.body).to include('data-collapsible-target="content"')
+      expect(response.body).to include('Masquer')
       expect(response.body).not_to include('GRAFANA_EMBED_URL')
     end
 
@@ -307,8 +311,23 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).to include('./bin/daily-import')
       expect(response.body).to include('0 2 * * *')
       expect(response.body).to include('failed')
+      expect(response.body).to include('1 failed')
       expect(response.body).to include('42s')
+      expect(response.body).to include('Exit error:')
       expect(response.body).to include('Import failed on row 12')
+    end
+
+    it 'renders Umami analytics preparation panel' do
+      sign_in create(:user)
+      project = create(:project)
+
+      get project_path(project)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('Analytics')
+      expect(response.body).to include('Préparation métriques de visites Umami.')
+      expect(response.body).to include('Connecteur Umami')
+      expect(response.body).to include('Visiteurs (24h)')
     end
 
     it 'renders cron monitoring as disabled when the project has no cron integration' do

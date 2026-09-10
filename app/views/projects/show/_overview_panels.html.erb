@@ -174,46 +174,153 @@
         </div>
       </div>
     </section>
+
+    <section
+      class="
+        overflow-hidden rounded-xl border border-gray-200 bg-white shadow dark:border-gray-800
+        dark:bg-gray-900
+      ">
+      <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-800">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">Analytics</h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Préparation métriques de visites Umami.</p>
+          </div>
+
+          <span
+            class="
+              rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-500 dark:bg-gray-800
+              dark:text-gray-400
+            ">V2.1</span>
+        </div>
+      </div>
+
+      <div class="space-y-4 p-5">
+        <div class="grid grid-cols-3 gap-3 text-sm">
+          <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800 dark:bg-gray-950">
+            <p class="text-xs text-gray-500">Visiteurs (24h)</p>
+            <p class="mt-1 font-semibold text-gray-400 dark:text-gray-600">—</p>
+          </div>
+
+          <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800 dark:bg-gray-950">
+            <p class="text-xs text-gray-500">Pages vues</p>
+            <p class="mt-1 font-semibold text-gray-400 dark:text-gray-600">—</p>
+          </div>
+
+          <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800 dark:bg-gray-950">
+            <p class="text-xs text-gray-500">Taux de rebond</p>
+            <p class="mt-1 font-semibold text-gray-400 dark:text-gray-600">—</p>
+          </div>
+        </div>
+
+        <div class="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-950/60">
+          <p class="text-xs font-semibold text-gray-700 dark:text-gray-200">Connecteur Umami</p>
+          <p class="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
+            Prêt pour l'intégration de l'API Umami auto-hébergée. Les métriques apparaîtront automatiquement une fois le tracking ID associé.
+          </p>
+        </div>
+      </div>
+    </section>
   </div>
 
   <div class="space-y-6">
     <% grafana_mapping_missing = project.grafana_app_value.blank? %>
 
     <section
-      class="
-        overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow
-      ">
-      <div class="border-b border-gray-200 dark:border-gray-800 px-5 py-4">
+      class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow dark:border-gray-800 dark:bg-gray-900"
+      <% if grafana_embed_url.present? %>
+        data-controller="collapsible"
+        data-collapsible-storage-key-value="sentinel_project_<%= project.id %>_grafana_open"
+        data-collapsible-open-value="true"
+      <% end %>>
+      <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-800">
         <div class="flex items-center justify-between gap-4">
-          <div>
-            <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">Observability</h2>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Place prévue pour Grafana.</p>
+          <div
+            <% if grafana_embed_url.present? %>
+              class="flex cursor-pointer select-none items-center gap-2.5"
+              data-action="click->collapsible#toggle keydown.enter->collapsible#toggle keydown.space->collapsible#toggle"
+              role="button"
+              tabindex="0"
+              aria-expanded="true"
+              data-collapsible-target="trigger"
+            <% end %>>
+            <% if grafana_embed_url.present? %>
+              <span
+                class="
+                  inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md
+                  border border-gray-200 text-gray-500 transition-transform duration-200
+                  dark:border-gray-700 dark:text-gray-400
+                "
+                data-collapsible-target="icon">
+                <%= fa_icon(:chevron_right, class_name: "text-[10px]") %>
+              </span>
+            <% end %>
+
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">Observability</h2>
+                <% if grafana_embed_url.present? %>
+                  <span
+                    class="
+                      rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700
+                      dark:bg-green-900/40 dark:text-green-300
+                    ">Live</span>
+                <% elsif grafana_mapping_missing %>
+                  <span
+                    class="
+                      rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-semibold text-yellow-700
+                      dark:bg-yellow-900/40 dark:text-yellow-300
+                    ">Mapping missing</span>
+                <% else %>
+                  <span
+                    class="
+                      rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-500
+                      dark:bg-gray-800 dark:text-gray-400
+                    ">Not configured</span>
+                <% end %>
+              </div>
+              <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+                <% if grafana_embed_url.present? %>
+                  Métriques Grafana du projet (cliquer pour replier ou déplier).
+                <% else %>
+                  Place prévue pour Grafana.
+                <% end %>
+              </p>
+            </div>
           </div>
 
           <% if grafana_embed_url.present? %>
-            <span
-              class="
-                rounded-full bg-green-100 dark:bg-green-900/40 px-2.5 py-1 text-xs font-semibold
-                text-green-700 dark:text-green-300
-              ">Live</span>
-          <% elsif grafana_mapping_missing %>
-            <span
-              class="
-                rounded-full bg-yellow-100 dark:bg-yellow-900/40 px-2.5 py-1 text-xs font-semibold
-                text-yellow-700 dark:text-yellow-300
-              ">Mapping missing</span>
-          <% else %>
-            <span
-              class="
-                rounded-full bg-gray-100 dark:bg-gray-800 px-2.5 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400
-              ">Not configured</span>
+            <div class="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                class="
+                  inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-md border
+                  border-gray-300 px-2.5 py-1.5 text-xs font-semibold text-gray-700 transition
+                  hover:border-gray-400 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400
+                  dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500 dark:hover:bg-gray-800
+                "
+                data-action="click->collapsible#toggle"
+                aria-label="Replier ou déplier le panneau Grafana">
+                <%= fa_icon(:chart_line, class_name: "text-[10px] text-gray-500") %>
+                <span data-collapsible-target="buttonLabel">Masquer</span>
+              </button>
+
+              <%= render "shared/ui/button",
+              href: grafana_embed_url,
+              label: "Ouvrir",
+              icon: :arrow_up_right_from_square,
+              variant: :secondary,
+              size: :sm,
+              target: "_blank",
+              rel: "noopener" %>
+            </div>
           <% end %>
         </div>
       </div>
 
       <div class="p-5">
         <div class="grid grid-cols-3 gap-3 text-sm">
-          <div class="rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-3 py-3">
+          <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800 dark:bg-gray-950">
             <p class="text-xs text-gray-500">Status</p>
             <p
               class="mt-1 font-semibold <%= project.runtime_status == 'online' ? 'text-green-700 dark:text-green-300' : project.runtime_status == 'offline' ? 'text-red-700 dark:text-red-300' : 'text-gray-600 dark:text-gray-300' %>">
@@ -221,14 +328,14 @@
             </p>
           </div>
 
-          <div class="rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-3 py-3">
+          <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800 dark:bg-gray-950">
             <p class="text-xs text-gray-500">HTTP</p>
             <p class="mt-1 font-semibold text-gray-900 dark:text-gray-100">
               <%= project.runtime_monitoring_enabled? ? (latest_ping&.http_status || "unknown") : "disabled" %>
             </p>
           </div>
 
-          <div class="rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-3 py-3">
+          <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800 dark:bg-gray-950">
             <p class="text-xs text-gray-500">Latency</p>
             <p class="mt-1 font-semibold text-gray-900 dark:text-gray-100">
               <%= project.runtime_monitoring_enabled? ? (latest_ping&.response_time_ms ? "#{latest_ping.response_time_ms}ms" : "unknown") : "disabled" %>
@@ -237,35 +344,38 @@
         </div>
 
         <% if grafana_embed_url.present? %>
-          <div
-            class="
-              mt-4 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800
-              bg-gray-950
-            ">
-            <iframe
-              class="h-80 w-full border-0"
-              src="<%= grafana_embed_url %>"
-              title="Grafana dashboard for <%= project.name %>"
-              loading="lazy"
-              referrerpolicy="no-referrer"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
-          </div>
+          <div data-collapsible-target="content">
+            <div
+              class="
+                mt-4 overflow-hidden rounded-lg border border-gray-200 bg-gray-950
+                dark:border-gray-800
+              ">
+              <iframe
+                class="h-80 w-full border-0"
+                src="<%= grafana_embed_url %>"
+                title="Grafana dashboard for <%= project.name %>"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+            </div>
 
-          <div class="mt-3 flex justify-end">
-            <%= render "shared/ui/button",
-            href: grafana_embed_url,
-            label: "Ouvrir dans Grafana",
-            icon: :arrow_up_right_from_square,
-            variant: :secondary,
-            size: :sm,
-            target: "_blank",
-            rel: "noopener" %>
+            <div class="mt-3 flex justify-end">
+              <%= render "shared/ui/button",
+              href: grafana_embed_url,
+              label: "Ouvrir dans Grafana",
+              icon: :arrow_up_right_from_square,
+              variant: :secondary,
+              size: :sm,
+              target: "_blank",
+              rel: "noopener" %>
+            </div>
           </div>
         <% else %>
           <div
             class="
               mt-4 flex h-28 items-center justify-center rounded-lg border border-dashed
-              border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-950/60 text-center
+              border-gray-300 bg-gray-50 text-center dark:border-gray-700
+              dark:bg-gray-950/60
             ">
             <div>
               <p class="text-sm font-semibold text-gray-600 dark:text-gray-300">
