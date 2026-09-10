@@ -221,6 +221,10 @@ RSpec.describe 'Pages', type: :request do
       expect(response.body).to include('Questions fréquentes')
       expect(response.body).to include('Est-ce que Sentinel remplace une CI/CD complète ?')
       expect(response.body).to include('docker compose exec sentinel-api bundle exec rspec')
+      expect(response.body).to include("Onboarding d'un projet sur le VPS &amp; Contrat deploy.sh")
+      expect(response.body).to include('Template conseillé pour deploy.sh')
+      expect(response.body).to include('Bascule du mode maintenance (Zéro reload)')
+      expect(response.body).to include('Observabilité &amp; Dashboards Grafana')
       expect(response.body.scan('<details').size).to eq(4)
     end
   end
