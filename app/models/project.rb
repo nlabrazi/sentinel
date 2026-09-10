@@ -169,6 +169,18 @@ class Project < ApplicationRecord
     end
   end
 
+  def github_compare_staging_url
+    return nil if repo_url.blank? || staging_branch.blank? || github_repo.include?(" ")
+
+    "https://github.com/#{github_repo}/compare/#{effective_production_branch}...#{staging_branch}"
+  end
+
+  def github_compare_deploy_url
+    return nil if repo_url.blank? || last_commit_deployed.blank? || github_repo.include?(" ")
+
+    "https://github.com/#{github_repo}/compare/#{last_commit_deployed}...#{effective_production_branch}"
+  end
+
   def maintenance_command(enabled)
     action = enabled ? "touch" : "rm -f"
     bash_command("#{action} #{Shellwords.escape(maintenance_flag_path)}")

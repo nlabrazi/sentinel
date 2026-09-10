@@ -138,6 +138,33 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).not_to include('Domain management')
     end
 
+    it 'renders staging branch drift and comparison links when configured' do
+      sign_in create(:user)
+      project = create(
+        :project,
+        name: 'Staging Drift Project',
+        production_branch: 'master',
+        staging_branch: 'staging',
+        staging_commits_ahead: 4,
+        staging_commits_behind: 1,
+        repo_url: 'https://github.com/nlabrazi/sentinel.git',
+        last_commit_deployed: 'deploy123',
+        commits_behind: 2
+      )
+
+      get project_path(project)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('Staging branch')
+      expect(response.body).to include('staging')
+      expect(response.body).to include('Staging drift')
+      expect(response.body).to include('+4 / -1')
+      expect(response.body).to include('https://github.com/nlabrazi/sentinel/compare/master...staging')
+      expect(response.body).to include('Diff staging')
+      expect(response.body).to include('Diff prod')
+      expect(response.body).to include('https://github.com/nlabrazi/sentinel/compare/deploy123...master')
+    end
+
     it 'renders the configured Grafana embed in the observability panel' do
       configure_grafana_env
 

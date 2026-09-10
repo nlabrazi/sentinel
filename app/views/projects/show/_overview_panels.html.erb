@@ -13,7 +13,7 @@
       </div>
 
       <dl class="grid grid-cols-1 text-sm sm:grid-cols-2">
-        <div class="border-b border-gray-200 dark:border-gray-800 px-5 py-4 sm:border-r">
+        <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-800 sm:border-r">
           <dt class="text-gray-500">Production</dt>
           <dd class="mt-1 font-mono font-semibold text-gray-900 dark:text-gray-100">
             <%= if project.last_commit_deployed.present?
@@ -24,7 +24,7 @@
           </dd>
         </div>
 
-        <div class="border-b border-gray-200 dark:border-gray-800 px-5 py-4">
+        <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-800">
           <dt class="text-gray-500"><%= project.branch %></dt>
           <dd class="mt-1 font-mono font-semibold text-gray-900 dark:text-gray-100">
             <%= if project.latest_commit_available.present?
@@ -35,15 +35,25 @@
           </dd>
         </div>
 
-        <div class="border-b border-gray-200 dark:border-gray-800 px-5 py-4 sm:border-r">
+        <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-800 sm:border-r">
           <dt class="text-gray-500">Version</dt>
           <dd
-            class="mt-1 font-semibold <%= behind_count.positive? ? 'text-yellow-700 dark:text-yellow-300' : 'text-green-700 dark:text-green-300' %>">
-            <%= behind_count.positive? ? "#{behind_count} update(s)" : "Up to date" %>
+            class="mt-1 flex flex-wrap items-center gap-2 font-semibold <%= behind_count.positive? ? 'text-yellow-700 dark:text-yellow-300' : 'text-green-700 dark:text-green-300' %>">
+            <span><%= behind_count.positive? ? "#{behind_count} update(s)" : "Up to date" %></span>
+            <% if behind_count.positive? && project.github_compare_deploy_url.present? %>
+              <%= link_to project.github_compare_deploy_url,
+                    target: "_blank",
+                    rel: "noopener",
+                    class: "inline-flex items-center gap-1 text-xs font-normal text-cyan-600 hover:underline dark:text-cyan-400",
+                    title: "Voir les commits non déployés sur GitHub" do %>
+                <%= fa_icon(:arrow_up_right_from_square, class_name: "text-[10px]") %>
+                Diff prod
+              <% end %>
+            <% end %>
           </dd>
         </div>
 
-        <div class="border-b border-gray-200 dark:border-gray-800 px-5 py-4">
+        <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-800">
           <dt class="text-gray-500">Deploy state</dt>
           <dd
             class="mt-1 font-semibold <%= running_deployment ? 'text-yellow-700 dark:text-yellow-300' : 'text-gray-900 dark:text-gray-100' %>">
@@ -51,7 +61,34 @@
           </dd>
         </div>
 
-        <div class="border-b border-gray-200 dark:border-gray-800 px-5 py-4 sm:border-r sm:border-b-0">
+        <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-800 sm:border-r">
+          <dt class="text-gray-500">Staging branch</dt>
+          <dd class="mt-1 font-mono font-semibold text-gray-900 dark:text-gray-100">
+            <%= project.staging_branch.presence || "None" %>
+          </dd>
+        </div>
+
+        <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-800">
+          <dt class="text-gray-500">Staging drift</dt>
+          <dd class="mt-1 flex flex-wrap items-center gap-2">
+            <%= render "shared/ui/badge",
+            label: project.staging_sync_label,
+            variant: project.staging_sync_tone,
+            icon: :code_compare %>
+            <% if project.github_compare_staging_url.present? %>
+              <%= link_to project.github_compare_staging_url,
+                    target: "_blank",
+                    rel: "noopener",
+                    class: "inline-flex items-center gap-1 text-xs font-medium text-cyan-600 hover:underline dark:text-cyan-400",
+                    title: "Comparer staging avec la branche de production sur GitHub" do %>
+                <%= fa_icon(:arrow_up_right_from_square, class_name: "text-[10px]") %>
+                Diff staging
+              <% end %>
+            <% end %>
+          </dd>
+        </div>
+
+        <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-800 sm:border-b-0 sm:border-r">
           <dt class="text-gray-500">GitHub sync</dt>
           <dd class="mt-1 font-semibold text-gray-900 dark:text-gray-100">
             <% if project.github_synced_at %>

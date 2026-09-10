@@ -31,6 +31,6 @@ linter:
   rules: {}
 
 formatter:
-  enabled: true
+  enabled: false
   indentWidth: 2
   maxLineLength: 80

@@ -371,4 +371,21 @@ RSpec.describe Project, type: :model do
       expect(project.status_changed_at).to be > old_time
     end
   end
+
+  describe '#github_compare_staging_url and #github_compare_deploy_url' do
+    it 'returns the correct compare URL between production and staging' do
+      project = build(:project, repo_url: 'https://github.com/nlabrazi/sentinel.git', production_branch: 'master', staging_branch: 'staging')
+      expect(project.github_compare_staging_url).to eq('https://github.com/nlabrazi/sentinel/compare/master...staging')
+    end
+
+    it 'returns nil when staging branch or repo url is blank' do
+      project = build(:project, repo_url: nil, staging_branch: 'staging')
+      expect(project.github_compare_staging_url).to be_nil
+    end
+
+    it 'returns the correct compare URL for deployed commit vs production branch' do
+      project = build(:project, repo_url: 'https://github.com/nlabrazi/sentinel.git', production_branch: 'master', last_commit_deployed: 'abc1234')
+      expect(project.github_compare_deploy_url).to eq('https://github.com/nlabrazi/sentinel/compare/abc1234...master')
+    end
+  end
 end

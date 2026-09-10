@@ -48,6 +48,19 @@
             <p class="truncate font-semibold text-gray-900 dark:text-gray-100">
               #<%= pull_request.number %>
               <%= pull_request.title %>
+              <% if pull_request.html_url.present? %>
+                <%= link_to pull_request.html_url,
+                      class: "hover:text-cyan-600 hover:underline dark:hover:text-cyan-400",
+                      target: "_blank",
+                      rel: "noopener" do %>
+                  #<%= pull_request.number %>
+                  <%= pull_request.title %>
+                  <%= fa_icon(:arrow_up_right_from_square, class_name: "ml-1 inline text-xs text-gray-400") %>
+                <% end %>
+              <% else %>
+                #<%= pull_request.number %>
+                <%= pull_request.title %>
+              <% end %>
             </p>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
               <% if pull_request.author_login.present? %>
