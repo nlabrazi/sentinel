@@ -359,6 +359,6 @@ class Project < ApplicationRecord
   end
 
   def update_status_changed_at
-    self.status_changed_at = Time.current
+    self.status_changed_at = Time.current unless status_changed_at_changed?
   end
 end
