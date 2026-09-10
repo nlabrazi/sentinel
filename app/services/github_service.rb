@@ -55,20 +55,6 @@ class GithubService
 
   def recent_commits(limit: 20)
     @client.commits(@project.github_repo, sha: @project.branch, per_page: limit).map do |commit|
-      commit_payload = commit[:commit] || {}
-      author_payload = commit_payload[:author] || {}
-      committer_payload = commit_payload[:committer] || {}
-      github_author = commit[:author] || {}
-
-      {
-        sha: commit[:sha],
-        message: commit_payload[:message].to_s.lines.first.to_s.strip,
-        author_name: author_payload[:name],
-        author_login: github_author[:login],
-        authored_at: author_payload[:date],
-        committed_at: committer_payload[:date],
-        html_url: commit[:html_url]
-      }
       normalize_commit(commit)
     end
   rescue Octokit::Error, Faraday::Error => e

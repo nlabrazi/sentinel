@@ -388,12 +388,20 @@ RSpec.describe 'Projects', type: :request do
       pull_requests_service = instance_double(GithubPullRequestsSyncService, call: 2)
       allow(GithubCommitsSyncService).to receive(:new).with(project).and_return(commits_service)
       allow(GithubPullRequestsSyncService).to receive(:new).with(project).and_return(pull_requests_service)
+      service = instance_double(
+        SyncProjectGithubService,
+        call: true,
+        synced_commits_count: 3,
+        synced_pull_requests_count: 2
+      )
+      allow(SyncProjectGithubService).to receive(:new).with(project).and_return(service)
 
       post refresh_github_commits_project_path(project)
 
       expect(commits_service).to have_received(:call)
       expect(pull_requests_service).to have_received(:call)
       expect(project.reload.github_synced_at).to be_present
+      expect(service).to have_received(:call)
       expect(response).to redirect_to(project_path(project))
       expect(flash[:notice]).to eq('3 commit(s) et 2 pull request(s) synchronisé(s) depuis GitHub.')
     end
@@ -403,6 +411,13 @@ RSpec.describe 'Projects', type: :request do
       pull_requests_service = instance_double(GithubPullRequestsSyncService, call: 0)
       allow(GithubCommitsSyncService).to receive(:new).with(project).and_return(commits_service)
       allow(GithubPullRequestsSyncService).to receive(:new).with(project).and_return(pull_requests_service)
+      service = instance_double(
+        SyncProjectGithubService,
+        call: true,
+        synced_commits_count: 1,
+        synced_pull_requests_count: 0
+      )
+      allow(SyncProjectGithubService).to receive(:new).with(project).and_return(service)
 
       post refresh_github_commits_project_path(project), headers: { 'HTTP_REFERER' => root_url }
 
@@ -413,6 +428,8 @@ RSpec.describe 'Projects', type: :request do
       commits_service = instance_double(GithubCommitsSyncService)
       allow(GithubCommitsSyncService).to receive(:new).with(project).and_return(commits_service)
       allow(commits_service).to receive(:call).and_raise(StandardError, 'GitHub is unavailable')
+      service = instance_double(SyncProjectGithubService, call: false)
+      allow(SyncProjectGithubService).to receive(:new).with(project).and_return(service)
 
       post refresh_github_commits_project_path(project)
 
