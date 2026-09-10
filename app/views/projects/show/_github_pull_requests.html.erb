@@ -56,7 +56,7 @@
               <% end %>
               <span class="font-mono text-xs">
                 <%= pull_request.head_ref.presence || "unknown" %>
-                ->
+                -&gt;
                 <%= pull_request.base_ref.presence || project.branch %>
               </span>
             </p>

@@ -263,4 +263,94 @@ RSpec.describe Project, type: :model do
       expect(project.latest_ping).not_to eq(old_ping)
     end
   end
+
+  describe '#status_duration_human' do
+    it 'returns nil when status_changed_at is blank' do
+      project = build(:project, status_changed_at: nil)
+      expect(project.status_duration_human).to be_nil
+    end
+
+    it 'returns "à l\'instant" when changed less than 60 seconds ago' do
+      project = build(:project, status_changed_at: 30.seconds.ago)
+      expect(project.status_duration_human).to eq("à l'instant")
+    end
+
+    it 'returns minutes when changed less than an hour ago' do
+      project = build(:project, status_changed_at: 25.minutes.ago)
+      expect(project.status_duration_human).to eq("depuis 25 min")
+    end
+
+    it 'returns hours when changed less than a day ago' do
+      project = build(:project, status_changed_at: 4.hours.ago)
+      expect(project.status_duration_human).to eq("depuis 4 h")
+    end
+
+    it 'returns days when changed more than a day ago' do
+      project = build(:project, status_changed_at: 12.days.ago)
+      expect(project.status_duration_human).to eq("depuis 12 j")
+    end
+  end
+
+  describe '#staging_sync_status and #staging_sync_label' do
+    it 'returns not_configured when staging_branch is blank' do
+      project = build(:project, staging_branch: nil)
+      expect(project.staging_sync_status).to eq(:not_configured)
+      expect(project.staging_sync_label).to eq("Non configuré")
+      expect(project.staging_sync_tone).to eq(:neutral)
+    end
+
+    it 'returns synced when ahead and behind are 0' do
+      project = build(:project, staging_branch: 'staging', staging_commits_ahead: 0, staging_commits_behind: 0)
+      expect(project.staging_sync_status).to eq(:synced)
+      expect(project.staging_sync_label).to eq("Synchronisé avec master")
+      expect(project.staging_sync_tone).to eq(:success)
+    end
+
+    it 'returns ahead when staging has unmerged commits' do
+      project = build(:project, staging_branch: 'staging', staging_commits_ahead: 3, staging_commits_behind: 0)
+      expect(project.staging_sync_status).to eq(:ahead)
+      expect(project.staging_sync_label).to eq("+3 commits (en avance)")
+      expect(project.staging_sync_tone).to eq(:info)
+    end
+
+    it 'returns behind when master has advanced' do
+      project = build(:project, staging_branch: 'staging', staging_commits_ahead: 0, staging_commits_behind: 2)
+      expect(project.staging_sync_status).to eq(:behind)
+      expect(project.staging_sync_label).to eq("-2 commits (en retard)")
+      expect(project.staging_sync_tone).to eq(:warning)
+    end
+
+    it 'returns diverged when both ahead and behind are positive' do
+      project = build(:project, staging_branch: 'staging', staging_commits_ahead: 4, staging_commits_behind: 1)
+      expect(project.staging_sync_status).to eq(:diverged)
+      expect(project.staging_sync_label).to eq("+4 / -1")
+      expect(project.staging_sync_tone).to eq(:warning)
+    end
+  end
+
+  describe '#prod_needs_deploy?' do
+    it 'returns true when commits_behind is positive' do
+      project = build(:project, commits_behind: 2)
+      expect(project.prod_needs_deploy?).to be(true)
+    end
+
+    it 'returns false when commits_behind is zero' do
+      project = build(:project, commits_behind: 0)
+      expect(project.prod_needs_deploy?).to be(false)
+    end
+  end
+
+  describe 'status_changed_at callback' do
+    it 'automatically records the timestamp when status changes' do
+      project = create(:project, status: :unknown)
+      old_time = 1.hour.ago.change(usec: 0)
+      project.update_column(:status_changed_at, old_time)
+
+      expect {
+        project.update!(status: :online)
+      }.to change { project.status_changed_at }
+
+      expect(project.status_changed_at).to be > old_time
+    end
+  end
 end

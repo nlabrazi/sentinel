@@ -4,6 +4,11 @@ FactoryBot.define do
     slug { name.parameterize }
     repo_url { "https://github.com/user/#{slug}.git" }
     branch { "master" }
+    production_branch { "master" }
+    staging_branch { "staging" }
+    staging_commits_ahead { 0 }
+    staging_commits_behind { 0 }
+    status_changed_at { nil }
     production_url { "https://#{slug}.example.com" }
     vps_path { "/srv/apps/#{slug}" }
     grafana_app_value { slug }
