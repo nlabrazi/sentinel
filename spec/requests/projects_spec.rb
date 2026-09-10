@@ -640,6 +640,44 @@ RSpec.describe 'Projects', type: :request do
     end
   end
 
+  describe 'POST /projects/:id/quick_command' do
+    let(:project) { create(:project) }
+
+    it 'redirects anonymous users to the login page' do
+      post quick_command_project_path(project), params: { command: 'git status' }
+
+      expect(response).to redirect_to(new_user_session_path)
+    end
+
+    it 'executes an authorized command and returns JSON' do
+      sign_in create(:user)
+      fake_service = instance_double(
+        QuickCommandExecutionService,
+        call: { success: true, exit_code: 0, stdout: "On branch main\n", stderr: "", duration: 0.12 }
+      )
+      allow(QuickCommandExecutionService).to receive(:new).with(project, 'git status').and_return(fake_service)
+
+      post quick_command_project_path(project), params: { command: 'git status' }
+
+      expect(response).to have_http_status(:success)
+      json = JSON.parse(response.body)
+      expect(json['success']).to be true
+      expect(json['stdout']).to eq("On branch main\n")
+      expect(json['command']).to eq('git status')
+    end
+
+    it 'handles forbidden commands and returns error JSON' do
+      sign_in create(:user)
+
+      post quick_command_project_path(project), params: { command: 'rm -rf tmp' }
+
+      expect(response).to have_http_status(:success)
+      json = JSON.parse(response.body)
+      expect(json['success']).to be false
+      expect(json['stderr']).to include('Forbidden command or token: rm')
+    end
+  end
+
   def configure_grafana_env
     ENV['GRAFANA_BASE_URL'] = 'https://grafana.example.com'
     ENV['GRAFANA_DASHBOARD_UID'] = 'apps-overview'
