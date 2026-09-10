@@ -41,6 +41,9 @@ RSpec.describe 'Deployments', type: :request do
       expect(response.body).to include('/srv/apps/sentinel-api')
       expect(response.body).to include('Pulling image')
       expect(response.body).to include('Command failed')
+      expect(response.body).to include('Redéployer')
+      expect(response.body).to include('Copier')
+      expect(response.body).to include('Télécharger')
     end
 
     it 'renders an empty log state when no log was recorded' do

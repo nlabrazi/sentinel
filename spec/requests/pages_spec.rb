@@ -95,6 +95,60 @@ RSpec.describe 'Pages', type: :request do
       expect(response.body).not_to include('oldest')
       expect(response.body).not_to include(deployment_path(oldest_deployment))
     end
+
+    it 'filters deployments by project' do
+      sign_in create(:user)
+      project_a = create(:project, name: 'Alpha Project')
+      project_b = create(:project, name: 'Beta Project')
+      deploy_a = create(:deployment, project: project_a, commit_sha: 'alphacommit')
+      deploy_b = create(:deployment, project: project_b, commit_sha: 'betacommit')
+
+      get deploys_path, params: { project_id: project_a.id }
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include(deployment_path(deploy_a))
+      expect(response.body).not_to include(deployment_path(deploy_b))
+    end
+
+    it 'filters deployments by status' do
+      sign_in create(:user)
+      project = create(:project)
+      deploy_success = create(:deployment, project: project, status: :success, commit_sha: 'succ123')
+      deploy_failed = create(:deployment, project: project, status: :failed, commit_sha: 'fail123')
+
+      get deploys_path, params: { status: 'failed' }
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include(deployment_path(deploy_failed))
+      expect(response.body).not_to include(deployment_path(deploy_success))
+    end
+
+    it 'searches deployments by commit SHA or project name' do
+      sign_in create(:user)
+      project_search = create(:project, name: 'Target App')
+      project_other = create(:project, name: 'Other App')
+      deploy_match = create(:deployment, project: project_search, commit_sha: 'findme123')
+      deploy_other = create(:deployment, project: project_other, commit_sha: 'hidden456')
+
+      get deploys_path, params: { q: 'Target' }
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include(deployment_path(deploy_match))
+      expect(response.body).not_to include(deployment_path(deploy_other))
+    end
+
+    it 'displays an active alert banner when a deployment is running' do
+      sign_in create(:user)
+      project = create(:project, name: 'Live Deploy Project')
+      running_deploy = create(:deployment, project: project, status: :running, commit_sha: 'runcommit1')
+
+      get deploys_path
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('déploiement en cours')
+      expect(response.body).to include('Live Deploy Project')
+      expect(response.body).to include(deployment_path(running_deploy))
+    end
   end
 
   describe 'GET /documentation' do

@@ -1,7 +1,16 @@
 class PagesController < ApplicationController
   def deploys
     @page_title = "Deployments"
-    @deployments = Deployment.includes(:project).order(created_at: :desc).limit(20)
+    @projects = Project.order(:name)
+    @running_deployments = Deployment.includes(:project).where(status: :running).order(created_at: :desc)
+
+    scope = filtered_deployments_scope
+
+    @total_count = scope.count
+    @limit = (params[:limit].presence || 20).to_i.clamp(10, 100)
+    @deployments = scope.limit(@limit)
+
+    calculate_deployment_stats
   end
 
   def settings
@@ -58,5 +67,30 @@ class PagesController < ApplicationController
 
   def value_or_missing(value)
     value.present? ? value : "Missing"
+  end
+
+  def filtered_deployments_scope
+    scope = Deployment.includes(:project).order(created_at: :desc)
+    scope = scope.where(project_id: params[:project_id]) if params[:project_id].present?
+    scope = scope.where(status: params[:status]) if params[:status].present? && Deployment.statuses.key?(params[:status])
+
+    if params[:q].present?
+      query = "%#{Deployment.sanitize_sql_like(params[:q].to_s.strip)}%"
+      scope = scope.joins(:project).where(
+        "deployments.commit_sha ILIKE :query OR projects.name ILIKE :query",
+        query: query
+      )
+    end
+
+    scope
+  end
+
+  def calculate_deployment_stats
+    @total_deployments_count = Deployment.count
+    @success_deployments_count = Deployment.where(status: :success).count
+    @failed_deployments_count = Deployment.where(status: :failed).count
+    finished_count = @success_deployments_count + @failed_deployments_count
+    @success_rate = finished_count.positive? ? ((@success_deployments_count.to_f / finished_count) * 100).round(1) : 0
+    @avg_duration = Deployment.where(status: :success).where.not(duration: nil).average(:duration)&.round || 0
   end
 end
