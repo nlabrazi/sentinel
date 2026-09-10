@@ -6,6 +6,7 @@ class ProjectsController < ApplicationController
     :refresh_github_commits,
     :refresh_runtime,
     :refresh_cron_status,
+    :quick_command,
     :update_monitoring,
     :toggle_maintenance
   ]
@@ -102,6 +103,20 @@ class ProjectsController < ApplicationController
   rescue StandardError => e
     Rails.logger.error "Cron status refresh failed for #{@project.slug}: #{e.message}"
     redirect_back fallback_location: @project, alert: "Synchronisation cron impossible pour le moment."
+  end
+
+  def quick_command
+    command = params[:command]
+    result = QuickCommandExecutionService.new(@project, command).call
+
+    render json: {
+      success: result[:success],
+      command: command,
+      stdout: result[:stdout],
+      stderr: result[:stderr],
+      exit_code: result[:exit_code],
+      duration: result[:duration]
+    }
   end
 
   def update_monitoring
