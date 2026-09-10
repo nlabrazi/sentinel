@@ -15,14 +15,11 @@ class Project < ApplicationRecord
   has_one_attached :screenshot
 
   enum :status, { online: 0, offline: 1, unknown: 2 }, default: :unknown
-  enum :kind, { app: "app", service: "service" }, default: :app
   enum :kind, { app: "app", service: "service", cron: "cron" }, default: :app
 
   before_validation :sync_production_branch
   before_save :update_status_changed_at, if: :status_changed?
 
-  validates :name, :slug, :production_url, :vps_path, presence: true
-  validates :repo_url, :branch, presence: true, if: :app?
   validates :name, :slug, :vps_path, presence: true
   validates :production_url, :repo_url, :branch, presence: true, if: :app?
 
@@ -261,7 +258,6 @@ class Project < ApplicationRecord
   end
 
   def fresh_screenshot_url
-    return nil unless ENV["APIFLASH_ACCESS_KEY"].present?
     return nil unless ENV["APIFLASH_ACCESS_KEY"].present? && production_url.present?
 
     apiflash_screenshot_url(width: 1280, height: 720)
@@ -359,9 +355,6 @@ class Project < ApplicationRecord
   end
 
   def sync_production_branch
-    self.production_branch = branch if branch.present? && (production_branch.blank? || branch_changed?)
-    self.branch = production_branch if production_branch.present? && branch.blank?
-    self.production_branch = branch if branch.present? && (production_branch.blank? || production_branch == "master")
     self.production_branch = branch if branch.present? && (production_branch.blank? || (!production_branch_changed? && branch_changed?))
   end
 

@@ -138,4 +138,91 @@ RSpec.describe GithubService, type: :service do
       expect(Rails.logger).to have_received(:warn).with(/GitHub recent pull requests lookup failed/)
     end
   end
+
+  describe '#compare_branches' do
+    let(:comparison_payload) do
+      {
+        ahead_by: 2,
+        behind_by: 1,
+        status: 'diverged',
+        total_commits: 3,
+        html_url: 'https://github.com/nlabrazi/argandici/compare/main...staging',
+        permalink_url: 'https://github.com/nlabrazi/argandici/compare/nlabrazi:abc...nlabrazi:def',
+        commits: [
+          {
+            sha: 'commit123',
+            html_url: 'https://github.com/nlabrazi/argandici/commit/commit123',
+            author: { login: 'nlabrazi' },
+            commit: {
+              message: "Feature in staging\n\nExtended notes",
+              author: { name: 'Nicolas Labrazi', date: Time.zone.parse('2026-05-07T09:00:00Z') },
+              committer: { date: Time.zone.parse('2026-05-07T09:01:00Z') }
+            }
+          }
+        ]
+      }
+    end
+
+    it 'compares explicit base and head branches' do
+      allow(client).to receive(:compare)
+        .with('nlabrazi/argandici', 'main', 'feature/test')
+        .and_return(comparison_payload)
+
+      result = service.compare_branches('main', 'feature/test')
+
+      expect(result).to eq({
+        base_branch: 'main',
+        head_branch: 'feature/test',
+        ahead_by: 2,
+        behind_by: 1,
+        status: 'diverged',
+        total_commits: 3,
+        html_url: 'https://github.com/nlabrazi/argandici/compare/main...staging',
+        permalink_url: 'https://github.com/nlabrazi/argandici/compare/nlabrazi:abc...nlabrazi:def',
+        commits: [
+          {
+            sha: 'commit123',
+            message: 'Feature in staging',
+            author_name: 'Nicolas Labrazi',
+            author_login: 'nlabrazi',
+            authored_at: Time.zone.parse('2026-05-07T09:00:00Z'),
+            committed_at: Time.zone.parse('2026-05-07T09:01:00Z'),
+            html_url: 'https://github.com/nlabrazi/argandici/commit/commit123'
+          }
+        ]
+      })
+    end
+
+    it 'defaults to effective_production_branch and staging_branch' do
+      allow(client).to receive(:compare)
+        .with('nlabrazi/argandici', 'main', 'staging')
+        .and_return(comparison_payload)
+
+      result = service.compare_branches
+
+      expect(result[:base_branch]).to eq('main')
+      expect(result[:head_branch]).to eq('staging')
+      expect(result[:ahead_by]).to eq(2)
+      expect(result[:behind_by]).to eq(1)
+    end
+
+    it 'returns nil when staging branch is blank and no head branch is given' do
+      project.staging_branch = nil
+
+      expect(service.compare_branches).to be_nil
+    end
+
+    it 'returns nil when project has no repository URL' do
+      project.repo_url = nil
+
+      expect(service.compare_branches).to be_nil
+    end
+
+    it 'returns nil and logs when GitHub comparison fails' do
+      allow(client).to receive(:compare).and_raise(Octokit::NotFound)
+
+      expect(service.compare_branches('main', 'staging')).to be_nil
+      expect(Rails.logger).to have_received(:warn).with(/GitHub branch comparison \(main\.\.\.staging\) failed/)
+    end
+  end
 end

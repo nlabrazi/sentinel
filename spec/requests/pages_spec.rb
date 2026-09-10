@@ -15,7 +15,6 @@ RSpec.describe 'Pages', type: :request do
       expect(response.body).to include('Application information')
       expect(response.body).to include('Access policy')
       expect(response.body).to include('Environment variables')
-      expect(response.body).to include('Access & security')
       expect(response.body).to include('Access &amp; security')
       expect(CGI.unescapeHTML(response.body)).to include('Access & security')
       expect(response.body).not_to include('Configuration de l’application (placeholder).')

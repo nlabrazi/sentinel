@@ -4,7 +4,7 @@ FactoryBot.define do
     slug { name.parameterize }
     repo_url { "https://github.com/user/#{slug}.git" }
     branch { "master" }
-    production_branch { "master" }
+    production_branch { branch }
     staging_branch { "staging" }
     staging_commits_ahead { 0 }
     staging_commits_behind { 0 }
