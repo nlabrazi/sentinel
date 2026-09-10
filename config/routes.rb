@@ -15,5 +15,8 @@ Rails.application.routes.draw do
   resources :deployments, only: [ :show ]
   get "/deploys", to: "pages#deploys", as: :deploys
   get "/settings", to: "pages#settings", as: :settings
+  post "/settings/trigger_healthcheck", to: "pages#trigger_healthcheck_all", as: :trigger_healthcheck_settings
+  post "/settings/trigger_sync_github", to: "pages#trigger_sync_github_all", as: :trigger_sync_github_settings
+  post "/settings/trigger_sync_cron", to: "pages#trigger_sync_cron_all", as: :trigger_sync_cron_settings
   get "/documentation", to: "pages#documentation", as: :documentation
 end

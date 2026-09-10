@@ -27,6 +27,20 @@ RSpec.describe 'Pages', type: :request do
       expect(response.body).not_to include('Read-only settings')
     end
 
+    it 'renders operational triggers and background worker observability' do
+      sign_in create(:user)
+
+      get settings_path
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("Actions d'exploitation globales")
+      expect(response.body).to include('Healthcheck global')
+      expect(response.body).to include('Sync GitHub global')
+      expect(response.body).to include('Sync Crons VPS')
+      expect(response.body).to include("Workers &amp; Tâches d'arrière-plan")
+      expect(response.body).to include('Solid Queue actif')
+    end
+
     it 'does not render secret values' do
       sign_in create(:user)
       allow(ENV).to receive(:[]).and_call_original
@@ -37,6 +51,45 @@ RSpec.describe 'Pages', type: :request do
       expect(response.body).to include('GitHub token')
       expect(response.body).to include('Configured')
       expect(response.body).not_to include('super-secret-token')
+    end
+  end
+
+  describe 'POST /settings/trigger_healthcheck' do
+    it 'enqueues a HealthcheckAllJob and redirects with notice' do
+      sign_in create(:user)
+      expect {
+        post trigger_healthcheck_settings_path
+      }.to have_enqueued_job(HealthcheckAllJob)
+
+      expect(response).to redirect_to(settings_path)
+      follow_redirect!
+      expect(response.body).to include('Healthcheck global déclenché')
+    end
+  end
+
+  describe 'POST /settings/trigger_sync_github' do
+    it 'enqueues a SyncGithubJob and redirects with notice' do
+      sign_in create(:user)
+      expect {
+        post trigger_sync_github_settings_path
+      }.to have_enqueued_job(SyncGithubJob)
+
+      expect(response).to redirect_to(settings_path)
+      follow_redirect!
+      expect(response.body).to include('Synchronisation GitHub déclenchée')
+    end
+  end
+
+  describe 'POST /settings/trigger_sync_cron' do
+    it 'enqueues a CronStatusJob and redirects with notice' do
+      sign_in create(:user)
+      expect {
+        post trigger_sync_cron_settings_path
+      }.to have_enqueued_job(CronStatusJob)
+
+      expect(response).to redirect_to(settings_path)
+      follow_redirect!
+      expect(response.body).to include('Synchronisation des statuts cron déclenchée')
     end
   end
 
