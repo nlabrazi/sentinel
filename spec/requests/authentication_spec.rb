@@ -14,16 +14,31 @@ RSpec.describe "Authentication", type: :request do
 
   describe "POST /users/sign_in" do
     it "signs in with a username and password" do
-      user = create(:user, username: "admin", password: "password123", password_confirmation: "password123")
+      user = create(:user, username: "admin", password: "password123456", password_confirmation: "password123456")
 
       post user_session_path, params: {
         user: {
           username: user.username,
-          password: "password123"
+          password: "password123456"
         }
       }
 
       expect(response).to redirect_to(root_path)
+    end
+
+    it "locks the account after maximum failed attempts" do
+      user = create(:user, username: "admin", password: "password123456", password_confirmation: "password123456")
+
+      5.times do
+        post user_session_path, params: {
+          user: {
+            username: user.username,
+            password: "wrongpassword123"
+          }
+        }
+      end
+
+      expect(user.reload.access_locked?).to be true
     end
   end
 end
