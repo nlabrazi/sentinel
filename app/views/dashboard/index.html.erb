@@ -23,40 +23,53 @@
         <% end %>
       </div>
 
-      <div class="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 xl:grid-cols-6">
+      <div class="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
         <%= render "shared/ui/status_metric",
         label: "Projects",
         value: @projects.size,
+        icon: :folder,
         tone: :neutral,
         html_class: "dark:bg-gray-950" %>
 
         <%= render "shared/ui/status_metric",
         label: "Online",
         value: @projects.count(&:online?),
+        icon: :circle_check,
         tone: :success,
         html_class: "dark:bg-gray-950" %>
 
         <%= render "shared/ui/status_metric",
         label: "Offline",
         value: @projects.count(&:runtime_needs_attention?),
+        icon: :circle_xmark,
         tone: :danger,
         html_class: "dark:bg-gray-950" %>
 
         <%= render "shared/ui/status_metric",
         label: "Behind",
         value: @projects.count { |project| project.commits_behind.to_i.positive? },
+        icon: :rocket,
         tone: :warning,
+        html_class: "dark:bg-gray-950" %>
+
+        <%= render "shared/ui/status_metric",
+        label: "Staging sync",
+        value: @projects.count { |project| project.staging_sync_status == :ahead || project.staging_sync_status == :diverged },
+        icon: :code_compare,
+        tone: :info,
         html_class: "dark:bg-gray-950" %>
 
         <%= render "shared/ui/status_metric",
         label: "Jobs issues",
         value: @projects.count(&:cron_needs_attention?),
+        icon: :clock,
         tone: :warning,
         html_class: "dark:bg-gray-950" %>
 
         <%= render "shared/ui/status_metric",
         label: "Maintenance",
         value: @projects.count(&:maintenance_mode?),
+        icon: :wrench,
         tone: :warning,
         html_class: "dark:bg-gray-950" %>
       </div>
@@ -64,36 +77,73 @@
 
     <% if @grafana_global_embed_url.present? %>
       <section
-        class="border-b border-gray-200 px-4 py-5 dark:border-gray-800 sm:px-6">
+        class="border-b border-gray-200 px-4 py-5 dark:border-gray-800 sm:px-6"
+        data-controller="collapsible"
+        data-collapsible-storage-key-value="sentinel_dashboard_grafana_open"
+        data-collapsible-open-value="true">
         <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div>
-            <div class="flex flex-wrap items-center gap-2">
-              <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">Global observability</h2>
-              <span
-                class="
-                  rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700
-                  dark:bg-green-900/40 dark:text-green-300
-                ">Live</span>
+          <div
+            class="flex cursor-pointer select-none items-start gap-3"
+            data-action="click->collapsible#toggle keydown.enter->collapsible#toggle keydown.space->collapsible#toggle"
+            role="button"
+            tabindex="0"
+            aria-expanded="true"
+            data-collapsible-target="trigger">
+            <span
+              class="
+                mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md
+                border border-gray-200 text-gray-500 transition-transform duration-200
+                dark:border-gray-700 dark:text-gray-400
+              "
+              data-collapsible-target="icon">
+              <%= fa_icon(:chevron_right, class_name: "text-[10px]") %>
+            </span>
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">Global observability</h2>
+                <span
+                  class="
+                    rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700
+                    dark:bg-green-900/40 dark:text-green-300
+                  ">Live</span>
+              </div>
+              <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Vue Grafana globale des applications (cliquer pour replier ou déplier).</p>
             </div>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Vue Grafana globale des applications.</p>
           </div>
 
-          <%= render "shared/ui/button",
-          href: "https://grafana.nabster.dev/login/generic_oauth",
-          label: "Se connecter à Grafana",
-          icon: :right_to_bracket,
-          variant: :secondary,
-          size: :sm,
-          target: "_blank",
-          rel: "noopener",
-          html_class: "shrink-0" %>
+          <div class="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              class="
+                inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-md border
+                border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 transition
+                hover:border-gray-400 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-400
+                dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-500 dark:hover:bg-gray-800
+              "
+              data-action="click->collapsible#toggle"
+              aria-label="Replier ou déplier le panneau Grafana">
+              <%= fa_icon(:chart_line, class_name: "text-xs text-gray-500") %>
+              <span data-collapsible-target="buttonLabel">Masquer</span>
+            </button>
+
+            <%= render "shared/ui/button",
+            href: "https://grafana.nabster.dev/login/generic_oauth",
+            label: "Se connecter à Grafana",
+            icon: :right_to_bracket,
+            variant: :secondary,
+            size: :sm,
+            target: "_blank",
+            rel: "noopener",
+            html_class: "shrink-0" %>
+          </div>
         </div>
 
         <div
           class="
             mt-4 overflow-hidden rounded-lg border border-gray-200 bg-gray-950
             dark:border-gray-800
-          ">
+          "
+          data-collapsible-target="content">
           <iframe
             class="h-72 w-full border-0"
             src="<%= @grafana_global_embed_url %>"
@@ -137,6 +187,16 @@
                     class:
                       "aspect-video w-full object-cover opacity-90 transition group-hover:opacity-100",
                     loading: "lazy" %>
+                  <% elsif project.cron? %>
+                    <div class="flex aspect-video w-full flex-col items-center justify-center gap-1 bg-cyan-950/20 text-cyan-500">
+                      <%= fa_icon(:clock, class_name: "text-xl text-cyan-500") %>
+                      <span class="text-[10px] font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">Cron</span>
+                    </div>
+                  <% elsif project.service? %>
+                    <div class="flex aspect-video w-full flex-col items-center justify-center gap-1 bg-indigo-950/20 text-indigo-400">
+                      <%= fa_icon(:server, class_name: "text-xl text-indigo-400") %>
+                      <span class="text-[10px] font-semibold uppercase tracking-wider text-indigo-500 dark:text-indigo-300">Service</span>
+                    </div>
                   <% else %>
                     <div
                       class="
@@ -157,6 +217,18 @@
                     variant: project.runtime_status == "online" ? :success : project.runtime_status == "offline" ? :danger : :neutral,
                     icon: project.runtime_status_icon %>
 
+                    <% if project.status_duration_human.present? %>
+                      <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        <%= project.status_duration_human %>
+                      </span>
+                    <% end %>
+
+                    <% if project.cron? %>
+                      <%= render "shared/ui/badge", label: "Cron", variant: :info, icon: :clock %>
+                    <% elsif project.service? %>
+                      <%= render "shared/ui/badge", label: "Service", variant: :neutral, icon: :server %>
+                    <% end %>
+
                     <% if needs_attention %>
                       <%= render "shared/ui/badge",
                       label: "À vérifier",
@@ -169,23 +241,37 @@
                     <% end %>
                   </div>
 
-                  <p class="mt-1 break-all text-sm font-medium text-gray-500 dark:text-gray-400">
-                    <%= project.production_url %>
-                  </p>
+                  <% if project.production_url.present? %>
+                    <p class="mt-1 break-all text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <%= project.production_url %>
+                    </p>
+                  <% else %>
+                    <p class="mt-1 text-sm font-medium text-gray-400 dark:text-gray-500">
+                      <%= project.cron? ? "Job batch VPS (#{project.vps_path})" : "Service infra" %>
+                    </p>
+                  <% end %>
 
                   <div
                     class="
                       mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500
                     ">
-                    <% if project.app? %>
+                    <% if project.repo_url.present? %>
                       <span class="inline-flex min-w-0 items-center gap-1.5">
                         <%= fa_icon(:code_branch, class_name: "text-gray-400") %>
                         <span class="truncate font-mono text-gray-600 dark:text-gray-400"><%= project.github_repo %></span>
                       </span>
                       <span class="inline-flex items-center gap-1.5">
                         <%= fa_icon(:code_branch, class_name: "text-gray-400") %>
-                        <span class="font-mono text-gray-600 dark:text-gray-400"><%= project.branch %></span>
+                        <span class="font-mono text-gray-600 dark:text-gray-400"><%= project.effective_production_branch %></span>
                       </span>
+                      <% if project.staging_branch.present? %>
+                        <span class="inline-flex items-center gap-1.5">
+                          <span class="font-mono text-gray-500 dark:text-gray-400">staging:</span>
+                          <span class="font-medium <%= project.staging_sync_tone == :success ? 'text-green-600 dark:text-green-400' : project.staging_sync_tone == :info ? 'text-cyan-600 dark:text-cyan-400' : 'text-amber-600 dark:text-amber-400' %>">
+                            <%= project.staging_sync_label %>
+                          </span>
+                        </span>
+                      <% end %>
                     <% else %>
                       <span class="inline-flex items-center gap-1.5">
                         <%= fa_icon(:server, class_name: "text-gray-400") %>
@@ -194,7 +280,7 @@
                       <span class="truncate font-mono text-gray-600 dark:text-gray-400"><%= project.vps_path %></span>
                     <% end %>
 
-                    <% if latest_deployment && project.app? %>
+                    <% if latest_deployment && (project.app? || project.cron?) %>
                       <span class="inline-flex items-center gap-1.5">
                         <%= fa_icon(:rocket, class_name: "text-gray-400") %>
                         Deploy
@@ -247,19 +333,28 @@
                     rounded-md border border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800
                     dark:bg-gray-950/70
                   ">
-                  <% if project.app? %>
-                    <p class="flex items-center gap-1.5 text-xs font-medium text-gray-500">
+                  <p class="flex items-center gap-1.5 text-xs font-medium text-gray-500">
+                    <% if project.repo_url.present? %>
                       <%= fa_icon(:code_commit, class_name: "text-gray-400") %>
                       Version
-                    </p>
+                    <% else %>
+                      <%= fa_icon(:server, class_name: "text-gray-400") %>
+                      Type
+                    <% end %>
+                  </p>
+                  <% if project.repo_url.present? %>
                     <p
                       class="
                         mt-1 font-semibold <%= behind_count.positive? ? 'text-yellow-700 dark:text-yellow-300' : 'text-green-700 dark:text-green-300' %>
                       ">
                       <%= behind_count.positive? ? "#{behind_count} update(s)" : "Up to date" %>
                     </p>
+                  <% else %>
+                    <p class="mt-1 font-semibold text-cyan-700 dark:text-cyan-300">Service</p>
+                  <% end %>
 
-                    <p class="mt-1 truncate text-xs text-gray-500">
+                  <p class="mt-1 truncate text-xs text-gray-500">
+                    <% if project.repo_url.present? %>
                       prod
                       <span class="font-mono text-gray-600 dark:text-gray-400">
                         <%= if project.last_commit_deployed.present?
@@ -268,15 +363,10 @@
                           "unknown"
                         end %>
                       </span>
-                    </p>
-                  <% else %>
-                    <p class="flex items-center gap-1.5 text-xs font-medium text-gray-500">
-                      <%= fa_icon(:server, class_name: "text-gray-400") %>
-                      Type
-                    </p>
-                    <p class="mt-1 font-semibold text-cyan-700 dark:text-cyan-300">Service</p>
-                    <p class="mt-1 truncate text-xs text-gray-500">Infra monitored</p>
-                  <% end %>
+                    <% else %>
+                      Infra monitored
+                    <% end %>
+                  </p>
                 </div>
 
                 <div
@@ -308,7 +398,7 @@
               </div>
 
               <div class="flex flex-col gap-2 xl:items-end">
-                <% if project.app? && running_deployment %>
+                <% if (project.app? || project.cron?) && running_deployment %>
                   <span
                     class="
                       inline-flex w-full items-center justify-center gap-2 rounded-md bg-gray-100 px-3
@@ -319,7 +409,7 @@
                     <%= fa_icon(:rotate, class_name: "text-sm") %>
                     Running
                   </span>
-                <% elsif project.app? && behind_count.positive? %>
+                <% elsif (project.app? || project.cron?) && behind_count.positive? %>
                   <%= button_to deploy_project_path(project),
                         method: :post,
                         class: "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-cyan-300 px-3 py-2 text-sm font-bold text-gray-950 hover:bg-cyan-200 xl:w-40",
@@ -344,20 +434,23 @@
     html_class: "w-full xl:w-40"
   } do %>
 
-                  <%= link_to project.production_url,
-        class: "flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100",
-        target: "_blank",
-        rel: "noopener",
-        title: "Ouvre le site en production" do %>
-                    <%= fa_icon(:arrow_up_right_from_square, class_name: "text-sm text-gray-500") %>
-                    Open site
+                  <% if project.production_url.present? %>
+                    <%= link_to project.production_url,
+          class: "flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100",
+          target: "_blank",
+          rel: "noopener",
+          title: "Ouvre le site en production" do %>
+                      <%= fa_icon(:arrow_up_right_from_square, class_name: "text-sm text-gray-500") %>
+                      Open site
+                    <% end %>
                   <% end %>
-                  <% if project.app? %>
+
+                  <% if project.repo_url.present? %>
                     <%= button_to refresh_github_commits_project_path(project),
-        method: :post,
-        class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100",
-        title: "Synchronise les commits et pull requests GitHub pour ce projet",
-        aria: { label: "Synchroniser GitHub pour #{project.name}" } do %>
+          method: :post,
+          class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100",
+          title: "Synchronise les commits et pull requests GitHub pour ce projet",
+          aria: { label: "Synchroniser GitHub pour #{project.name}" } do %>
                       <%= fa_icon(:rotate, class_name: "text-sm text-gray-500") %>
                       Sync GitHub
                     <% end %>

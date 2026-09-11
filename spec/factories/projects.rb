@@ -4,6 +4,11 @@ FactoryBot.define do
     slug { name.parameterize }
     repo_url { "https://github.com/user/#{slug}.git" }
     branch { "master" }
+    production_branch { branch }
+    staging_branch { "staging" }
+    staging_commits_ahead { 0 }
+    staging_commits_behind { 0 }
+    status_changed_at { nil }
     production_url { "https://#{slug}.example.com" }
     vps_path { "/srv/apps/#{slug}" }
     grafana_app_value { slug }
@@ -16,5 +21,18 @@ FactoryBot.define do
     cron_synced_at { nil }
     runtime_monitoring_enabled { true }
     cron_monitoring_enabled { false }
+
+    trait :cron do
+      kind { :cron }
+      production_url { nil }
+      cron_monitoring_enabled { true }
+      runtime_monitoring_enabled { false }
+    end
+
+    trait :service do
+      kind { :service }
+      repo_url { nil }
+      branch { nil }
+    end
   end
 end

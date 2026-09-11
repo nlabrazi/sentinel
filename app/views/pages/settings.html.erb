@@ -1,193 +1,273 @@
-<div class="space-y-8">
-  <section
-    class="
-      max-w-4xl rounded-lg border border-gray-200 bg-white p-6 shadow
-      dark:border-gray-800 dark:bg-gray-900
-    ">
-    <div class="flex flex-wrap items-center gap-2">
-      <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">Settings for
-        <%= @settings_summary[:app_name] %></h1>
-      <span
-        class="
-          rounded bg-gray-200 px-2 py-0.5 text-xs font-semibold text-gray-800
-          dark:bg-gray-700 dark:text-gray-100
-        "><%= @settings_summary[:environment] %></span>
-      <span
-        class="
-          rounded bg-gray-200 px-2 py-0.5 text-xs font-semibold text-gray-800
-          dark:bg-gray-700 dark:text-gray-100
-        ">Read-only</span>
+<section class="mx-auto max-w-7xl space-y-6">
+  <% if notice.present? %>
+    <div class="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800 dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300">
+      <div class="flex items-center gap-2">
+        <%= fa_icon(:circle_check, class_name: "h-4 w-4") %>
+        <span><%= notice %></span>
+      </div>
     </div>
-    <p class="mt-3 text-sm text-gray-600 dark:text-gray-300"><%= @settings_summary[:project_count] %>
-      managed project(s).</p>
-    <p class="mt-4 text-sm text-gray-600 dark:text-gray-300">
-      <% if @settings_summary[:created_at] %>
-        First project created on
-        <%= l(@settings_summary[:created_at].to_date, format: :long) %>.
-      <% else %>
-        No project has been registered yet.
-      <% end %>
-    </p>
+  <% end %>
+
+  <!-- Top Header Banner -->
+  <header class="rounded-lg border border-gray-200 bg-white p-5 shadow dark:border-gray-800 dark:bg-gray-900 sm:p-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <div class="flex flex-wrap items-center gap-2">
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Settings for <%= @settings_summary[:app_name] %>
+          </h1>
+          <span class="rounded bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-200">
+            <%= @settings_summary[:environment] %>
+          </span>
+          <span class="rounded bg-cyan-100 px-2 py-0.5 text-xs font-semibold text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300">
+            Ops Control Center
+          </span>
+        </div>
+        <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+          Supervision de l'infrastructure VPS, état des workers d'arrière-plan et déclencheurs d'exploitation.
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+        <span class="rounded-md border border-gray-200 bg-gray-50 px-3 py-1.5 font-medium dark:border-gray-800 dark:bg-gray-950">
+          <%= @settings_summary[:project_count] %> projet(s) géré(s)
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 1. Actions d'exploitation globales -->
+  <section class="rounded-lg border border-gray-200 bg-white p-5 shadow dark:border-gray-800 dark:bg-gray-900">
+    <div class="border-b border-gray-200 pb-3 dark:border-gray-800">
+      <h2 class="text-base font-bold text-gray-900 dark:text-gray-100">
+        Actions d'exploitation globales
+      </h2>
+      <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+        Exécutez à la demande les tâches asynchrones d'audit et de synchronisation pour tous les projets.
+      </p>
+    </div>
+
+    <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div class="flex flex-col justify-between rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950/60">
+        <div>
+          <div class="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+            <%= fa_icon(:heart_pulse, class_name: "h-4 w-4 text-cyan-500") %>
+            <span>Healthcheck global</span>
+          </div>
+          <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+            Vérifie la disponibilité HTTP de tous les projets ayant le monitoring activé.
+          </p>
+        </div>
+        <div class="mt-4">
+          <%= button_to trigger_healthcheck_settings_path,
+              method: :post,
+              data: { turbo_confirm: "Lancer un healthcheck HTTP immédiat sur tous les projets activés ?" },
+              class: "w-full cursor-pointer rounded-md bg-cyan-400 px-3 py-1.5 text-xs font-bold text-gray-950 hover:bg-cyan-300 transition-colors" do %>
+            Déclencher l'audit
+          <% end %>
+        </div>
+      </div>
+
+      <div class="flex flex-col justify-between rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950/60">
+        <div>
+          <div class="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+            <%= fa_icon(:rotate, class_name: "h-4 w-4 text-indigo-500") %>
+            <span>Sync GitHub global</span>
+          </div>
+          <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+            Interroge l'API GitHub pour mettre à jour les commits récents et les pull requests ouvertes.
+          </p>
+        </div>
+        <div class="mt-4">
+          <%= button_to trigger_sync_github_settings_path,
+              method: :post,
+              data: { turbo_confirm: "Synchroniser immédiatement les commits et PRs GitHub de tous les projets ?" },
+              class: "w-full cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-bold text-gray-900 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+            Synchroniser
+          <% end %>
+        </div>
+      </div>
+
+      <div class="flex flex-col justify-between rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950/60">
+        <div>
+          <div class="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+            <%= fa_icon(:clock, class_name: "h-4 w-4 text-emerald-500") %>
+            <span>Sync Crons VPS</span>
+          </div>
+          <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+            Lit le fichier de statut sur le VPS pour enregistrer l'historique des tâches planifiées.
+          </p>
+        </div>
+        <div class="mt-4">
+          <%= button_to trigger_sync_cron_settings_path,
+              method: :post,
+              data: { turbo_confirm: "Synchroniser les statuts cron sur le VPS pour tous les projets ?" },
+              class: "w-full cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-bold text-gray-900 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+            Synchroniser
+          <% end %>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <div class="flex flex-col gap-8 lg:flex-row">
-    <aside class="w-full shrink-0 text-sm lg:w-64">
-      <nav class="space-y-6">
-        <div>
-          <a
-            href="#general"
-            class="
-              flex items-center gap-2 font-semibold text-indigo-600 dark:text-indigo-400
-            ">
-            <span class="h-2 w-2 rotate-45 bg-indigo-500"></span>
-            General
-          </a>
-          <div class="mt-4 space-y-3 pl-8 text-gray-500 dark:text-gray-400">
-            <a
-              href="#application-information"
-              class="block hover:text-gray-900 dark:hover:text-gray-100">Application details</a>
-            <a
-              href="#access-policy"
-              class="block hover:text-gray-900 dark:hover:text-gray-100">Access policy</a>
-          </div>
+  <!-- 2x2 Clean Dashboard Grid -->
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+
+    <!-- Card 1: General app settings & Application details -->
+    <section class="flex flex-col justify-between rounded-lg border border-gray-200 bg-white p-5 shadow dark:border-gray-800 dark:bg-gray-900">
+      <div>
+        <div class="flex items-center gap-2 border-b border-gray-200 pb-3 dark:border-gray-800">
+          <%= fa_icon(:server, class_name: "h-4 w-4 text-cyan-500") %>
+          <h2 class="text-base font-bold text-gray-900 dark:text-gray-100">General app settings</h2>
         </div>
 
-        <div>
-          <a
-            href="#environment-variables"
-            class="
-              font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400
-              dark:hover:text-gray-100
-            ">Environment variables</a>
-        </div>
-
-        <div>
-          <a
-            href="#access-security"
-            class="
-              font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400
-              dark:hover:text-gray-100
-            ">Access &amp; security</a>
-        </div>
-      </nav>
-    </aside>
-
-    <main class="min-w-0 flex-1 space-y-10">
-      <section id="general" class="space-y-8">
-        <div>
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">General app settings</h2>
-        </div>
-
-        <div id="application-information" class="space-y-4">
-          <div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Application details</h3>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Application profile and operational information</p>
-          </div>
-
-          <div
-            class="
-              overflow-hidden rounded-lg border border-gray-200 bg-white shadow
-              dark:border-gray-800 dark:bg-gray-900
-            ">
-            <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
-              <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Application information</h4>
+        <div class="mt-3">
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            Application details &bull; Application information
+          </h3>
+          <dl class="mt-3 divide-y divide-gray-100 text-sm dark:divide-gray-800">
+            <% @settings_sections[:application_information].each do |label, value| %>
+              <div class="flex items-center justify-between py-2.5">
+                <dt class="font-medium text-gray-500 dark:text-gray-400"><%= label %></dt>
+                <dd class="font-semibold text-gray-900 dark:text-gray-100"><%= value %></dd>
+              </div>
+            <% end %>
+            <div class="flex items-center justify-between py-2.5">
+              <dt class="font-medium text-gray-500 dark:text-gray-400">Premier projet</dt>
+              <dd class="text-xs text-gray-700 dark:text-gray-300">
+                <% if @settings_summary[:created_at] %>
+                  <%= l(@settings_summary[:created_at].to_date, format: :long) %>
+                <% else %>
+                  Aucun
+                <% end %>
+              </dd>
             </div>
+          </dl>
+        </div>
+      </div>
+    </section>
 
-            <div class="divide-y divide-gray-100 dark:divide-gray-800">
-              <% @settings_sections[:application_information].each_with_index do |(label, value), index| %>
-                <div
-                  class="
-                    grid grid-cols-1 gap-2 px-6 py-4 text-sm <%= index.odd? ? 'bg-gray-50 dark:bg-gray-800/70' : '' %>
-                    sm:grid-cols-3
-                  ">
-                  <dt class="font-medium text-gray-900 dark:text-gray-100"><%= label %>:</dt>
-                  <dd
-                    class="
-                      break-words font-semibold text-gray-900 dark:text-gray-100 sm:col-span-2
-                    "><%= value %></dd>
-                </div>
-              <% end %>
-            </div>
-          </div>
+    <!-- Card 2: Environment variables -->
+    <section class="flex flex-col justify-between rounded-lg border border-gray-200 bg-white p-5 shadow dark:border-gray-800 dark:bg-gray-900">
+      <div>
+        <div class="flex items-center gap-2 border-b border-gray-200 pb-3 dark:border-gray-800">
+          <%= fa_icon(:terminal, class_name: "h-4 w-4 text-indigo-500") %>
+          <h2 class="text-base font-bold text-gray-900 dark:text-gray-100">Environment variables</h2>
         </div>
 
-        <div id="access-policy" class="space-y-1">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Access policy</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">The application requires authentication before exposing project or
-            deployment data.</p>
-        </div>
-      </section>
-
-      <section id="environment-variables" class="space-y-4">
-        <div>
-          <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Environment variables</h2>
-          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Runtime configuration status. Secret values are never displayed.</p>
-        </div>
-
-        <div
-          class="
-            overflow-hidden rounded-lg border border-gray-200 bg-white shadow
-            dark:border-gray-800 dark:bg-gray-900
-          ">
-          <div class="divide-y divide-gray-100 dark:divide-gray-800">
-            <% @settings_sections[:environment_variables].each_with_index do |(label, value), index| %>
-              <div
-                class="
-                  grid grid-cols-1 gap-2 px-6 py-4 text-sm <%= index.odd? ? 'bg-gray-50 dark:bg-gray-800/70' : '' %>
-                  sm:grid-cols-3
-                ">
-                <dt class="font-medium text-gray-900 dark:text-gray-100"><%= label %>:</dt>
-                <dd class="sm:col-span-2">
+        <div class="mt-3">
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            État de configuration d'exécution. Les valeurs de secrets ne sont jamais exposées.
+          </p>
+          <dl class="mt-3 divide-y divide-gray-100 text-sm dark:divide-gray-800">
+            <% @settings_sections[:environment_variables].each do |label, value| %>
+              <div class="flex items-center justify-between py-2.5">
+                <dt class="font-medium text-gray-500 dark:text-gray-400"><%= label %></dt>
+                <dd>
                   <% if value == "Configured" %>
-                    <span
-                      class="
-                        rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800
-                        dark:bg-green-900/30 dark:text-green-300
-                      ">Configured</span>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                      <%= fa_icon(:circle_check, class_name: "h-3 w-3") %>
+                      Configured
+                    </span>
                   <% elsif value == "Missing" %>
-                    <span
-                      class="
-                        rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-800
-                        dark:bg-red-900/30 dark:text-red-300
-                      ">Missing</span>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-800 dark:bg-red-900/30 dark:text-red-300">
+                      <%= fa_icon(:circle_xmark, class_name: "h-3 w-3") %>
+                      Missing
+                    </span>
                   <% else %>
-                    <span class="break-words font-semibold text-gray-900 dark:text-gray-100"><%= value %></span>
+                    <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs font-semibold text-gray-800 dark:bg-gray-800 dark:text-gray-200">
+                      <%= value %>
+                    </code>
                   <% end %>
                 </dd>
               </div>
             <% end %>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- Card 3: Workers & Solid Queue Observability -->
+    <section class="flex flex-col justify-between rounded-lg border border-gray-200 bg-white p-5 shadow dark:border-gray-800 dark:bg-gray-900">
+      <div>
+        <div class="flex items-center justify-between border-b border-gray-200 pb-3 dark:border-gray-800">
+          <div class="flex items-center gap-2">
+            <%= fa_icon(:clock, class_name: "h-4 w-4 text-emerald-500") %>
+            <h2 class="text-base font-bold text-gray-900 dark:text-gray-100">
+              Workers &amp; Tâches d'arrière-plan
+            </h2>
+          </div>
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-800 dark:bg-green-900/40 dark:text-green-300">
+            <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500"></span>
+            Solid Queue actif
+          </span>
+        </div>
+
+        <div class="mt-4 grid grid-cols-2 gap-3">
+          <div class="rounded-md border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950">
+            <dt class="text-xs text-gray-500 dark:text-gray-400">Processus actifs</dt>
+            <dd class="mt-1 font-semibold text-gray-900 dark:text-gray-100"><%= @solid_queue_summary[:active_processes] %></dd>
+          </div>
+          <div class="rounded-md border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950">
+            <dt class="text-xs text-gray-500 dark:text-gray-400">Jobs échoués</dt>
+            <dd class="mt-1 font-semibold <%= @solid_queue_summary[:failed_executions].to_i.positive? ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100' %>">
+              <%= @solid_queue_summary[:failed_executions] %>
+            </dd>
           </div>
         </div>
-      </section>
 
-      <section id="access-security" class="space-y-4">
-        <div>
-          <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Access &amp; security</h2>
-          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Authentication, CI and audit posture</p>
+        <div class="mt-4 overflow-hidden rounded-md border border-gray-200 dark:border-gray-800">
+          <table class="min-w-full divide-y divide-gray-200 text-xs dark:divide-gray-800">
+            <thead class="bg-gray-50 dark:bg-gray-950">
+              <tr>
+                <th class="px-3 py-2 text-left font-semibold text-gray-500">Tâche récurrente</th>
+                <th class="px-3 py-2 text-left font-semibold text-gray-500">Fréquence</th>
+                <th class="px-3 py-2 text-left font-semibold text-gray-500">Job</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+              <% @solid_queue_summary[:recurring_tasks].each do |task| %>
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/40">
+                  <td class="px-3 py-2 font-medium text-gray-900 dark:text-gray-100"><%= task[:name] %></td>
+                  <td class="px-3 py-2 text-gray-600 dark:text-gray-300"><%= task[:schedule] %></td>
+                  <td class="px-3 py-2 font-mono text-gray-500 dark:text-gray-400"><%= task[:job] %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Card 4: Access & security -->
+    <section class="flex flex-col justify-between rounded-lg border border-gray-200 bg-white p-5 shadow dark:border-gray-800 dark:bg-gray-900">
+      <div>
+        <div class="flex items-center gap-2 border-b border-gray-200 pb-3 dark:border-gray-800">
+          <%= fa_icon(:shield_halved, class_name: "h-4 w-4 text-cyan-500") %>
+          <h2 class="text-base font-bold text-gray-900 dark:text-gray-100">Access &amp; security</h2>
         </div>
 
-        <div
-          class="
-            overflow-hidden rounded-lg border border-gray-200 bg-white shadow
-            dark:border-gray-800 dark:bg-gray-900
-          ">
-          <div class="divide-y divide-gray-100 dark:divide-gray-800">
-            <% @settings_sections[:access_security].each_with_index do |(label, value), index| %>
-              <div
-                class="
-                  grid grid-cols-1 gap-2 px-6 py-4 text-sm <%= index.odd? ? 'bg-gray-50 dark:bg-gray-800/70' : '' %>
-                  sm:grid-cols-3
-                ">
-                <dt class="font-medium text-gray-900 dark:text-gray-100"><%= label %>:</dt>
-                <dd
-                  class="
-                    break-words font-semibold text-gray-900 dark:text-gray-100 sm:col-span-2
-                  "><%= value %></dd>
+        <div class="mt-3 space-y-3">
+          <div>
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              Access policy
+            </h3>
+            <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">
+              The application requires authentication before exposing project or deployment data.
+            </p>
+          </div>
+
+          <dl class="divide-y divide-gray-100 text-sm dark:divide-gray-800">
+            <% @settings_sections[:access_security].each do |label, value| %>
+              <div class="flex items-center justify-between py-2.5">
+                <dt class="font-medium text-gray-500 dark:text-gray-400"><%= label %></dt>
+                <dd class="text-right text-xs font-semibold text-gray-900 dark:text-gray-100"><%= value %></dd>
               </div>
             <% end %>
-          </div>
+          </dl>
         </div>
-      </section>
-    </main>
+      </div>
+    </section>
+
   </div>
-</div>
+</section>
