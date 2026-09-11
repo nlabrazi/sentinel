@@ -200,7 +200,7 @@ Devise.setup do |config|
   config.lock_strategy = :failed_attempts
 
   # Defines which key will be used when locking and unlocking an account
-  config.unlock_keys = [:email]
+  config.unlock_keys = [ :email ]
 
   # Defines which strategy will be used to unlock an account.
   # :email = Sends an unlock link to the user email
@@ -273,7 +273,7 @@ Devise.setup do |config|
 
   # ==> OmniAuth
   # Authentik Single Sign-On via OpenID Connect
-  authentik_issuer = ENV["AUTHENTIK_ISSUER"].presence || "https://authentik.nabster.dev/application/o/sentinel/"
+  authentik_issuer = ENV["AUTHENTIK_ISSUER"].presence || "https://auth.nabster.dev/application/o/sentinel/"
   config.omniauth :openid_connect, {
     name: :openid_connect,
     scope: [ :openid, :email, :profile ],
