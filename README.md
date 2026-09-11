@@ -8,44 +8,46 @@
 [![License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
-
-
 <!-- TABLE OF CONTENTS -->
 <details>
   <summary>Table of Contents</summary>
   <ol>
     <li>
-      <a href="#about-the-project">About The Project</a>
+      <a href="#-about-the-project">About The Project</a>
       <ul>
-        <li><a href="#️-description">Description</a></li>
-        <li><a href="#-mvp-scope">MVP Scope</a></li>
-        <li><a href="#-planned-features">Planned Features</a></li>
-        <li><a href="#️-built-with">Built With</a></li>
+        <li><a href="#ℹ️-description">Description</a></li>
+        <li><a href="#-core-features">Core Features</a></li>
+        <li><a href="#🏗️-built-with">Built With</a></li>
       </ul>
     </li>
     <li>
       <a href="#-getting-started">Getting Started</a>
       <ul>
         <li><a href="#-installation">Installation</a></li>
-        <li><a href="#-docker">Docker</a></li>
-        <li><a href="#️-usage">Usage</a></li>
-        <li><a href="#-local-notes">Local Notes</a></li>
-        <li><a href="#grafana-embed">Grafana Embed</a></li>
-        <li><a href="#-deploysh-contract">deploy.sh Contract</a></li>
-        <li><a href="#-statussh-contract">status.sh Contract</a></li>
-        <li><a href="#-scripts">Scripts</a></li>
+        <li><a href="#-docker-compose">Docker Compose</a></li>
+        <li><a href="#-first-login--seeding">First Login & Seeding</a></li>
+        <li><a href="#-environment-variables-reference">Environment Variables Reference</a></li>
       </ul>
     </li>
-    <li><a href="#-contributing">Contributing</a>
+    <li>
+      <a href="#-operational-contracts--architecture">Operational Contracts & Architecture</a>
       <ul>
-        <li><a href="#-license">License</a></li>
-        <li><a href="#-contact">Contact</a></li>
+        <li><a href="#-deploysh-contract">deploy.sh Contract</a></li>
+        <li><a href="#-statussh--cron-statusjson-contract">status.sh & cron-status.json Contract</a></li>
+        <li><a href="#-quick-terminal-security-model">Quick Terminal Security Model</a></li>
+        <li><a href="#-zero-reload-maintenance-mode">Zero-Reload Maintenance Mode</a></li>
+        <li><a href="#-grafana--loki-embed">Grafana & Loki Embed</a></li>
+        <li><a href="#-umami-analytics-v2-integration">Umami Analytics v2 Integration</a></li>
+        <li><a href="#-authentik-oidc-single-sign-on">Authentik OIDC Single Sign-On</a></li>
+        <li><a href="#-solid-queue--background-workers">Solid Queue & Background Workers</a></li>
       </ul>
     </li>
+    <li><a href="#-cli--development-commands">CLI & Development Commands</a></li>
+    <li><a href="#-contributing">Contributing</a></li>
+    <li><a href="#-license">License</a></li>
+    <li><a href="#-contact">Contact</a></li>
   </ol>
 </details>
-
-
 
 <!-- ABOUT THE PROJECT -->
 # 🧠 About The Project
@@ -56,54 +58,112 @@
   </a>
 </p>
 
-
-
-<!-- DESCRIPTION -->
 ### ℹ️ Description
 
-Sentinel is a personal DevOps control panel inspired by Netlify, built to monitor and operate Docker projects deployed on a VPS.
+**Sentinel** is a self-hosted DevOps & project operations control panel inspired by Netlify and Vercel, designed specifically to monitor, operate, and deploy Docker-based projects running on a VPS.
 
-It is not designed to replace Grafana, Loki, SSH, or the terminal. Its goal is to centralize common project operations in a simple, stable, and readable Rails interface.
+It is not built to replace Prometheus, Grafana, Loki, or direct SSH access. Rather, its mission is to centralize day-to-day project operations in a clean, robust, and readable Rails interface:
 
-- 📦 Project Inventory: List all deployed projects from a single dashboard.
-- 🚦 Health Status: Track simple online/offline/unknown project states.
-- 🔁 Deployment Flow: Trigger standardized VPS deploy scripts through SSH.
-- 🧾 Deploy History: Keep deployment status, duration, commit SHA, and logs.
-- 🔗 GitHub Sync: Compare deployed commits with the configured GitHub branch.
-- 🔐 Safe Operations: Run predefined commands only, never arbitrary shell commands from the UI.
-
----
-
-## 🎯 MVP Scope
-
-Sentinel focuses on a small and reliable first version:
-
-- Dashboard with projects, health state, commit drift, and latest deployment.
-- Project page with production URL, VPS path, deploy action, maintenance mode, and deployment history.
-- GitHub API integration for branch commit status.
-- SSH execution against a restricted VPS user.
-- Standardized project layout under `/srv/apps/<project>`.
-- Standardized deployment entrypoint through `/srv/apps/<project>/deploy.sh`.
-
-Sentinel intentionally does not manage Docker containers directly from arbitrary UI commands.
+-  **Project Catalog & Classification**: Monitor applications (`app`), background daemons (`service`), and scheduled workloads (`cron`).
+- 🚦 **Automated Healthchecks**: Periodic HTTP checks, latency logging, response history, and runtime opt-in controls.
+- 🔁 **Standardized Deployment Pipeline**: One-click deployments via SSH executing a predefined script with atomic concurrency locks and live streaming logs.
+- 🧾 **Deployments Dashboard**: Global view of all deployments across projects with live KPIs, status/project filters, and full search.
+- 🔗 **GitHub Synchronization & Commit Drift**: Track differences between deployed commits, production branches, and staging branches with direct comparison links.
+- ⏱️ **Scheduled Tasks & Cron Supervision**: Visibility over cron jobs, last execution status, run duration, failure highlights, and execution history.
+- 💻 **Interactive Quick Terminal**: In-browser diagnostic terminal with a strict whitelist of safe binaries to inspect VPS applications in real time.
+- 📈 **Umami Analytics v2**: Direct visibility of 30-day visitors and pageviews from self-hosted Umami instances with auto-discovery and background sync.
+- 📊 **Private Grafana Observability**: Embedded project-scoped Grafana dashboards matching UI theme without leaking credentials in URLs.
+- 🛡️ **Zero-Reload Maintenance Mode**: Instant maintenance toggling on the VPS without reloading Nginx.
+- 🔐 **Hardened Security & Authentik SSO**: Dual login with local Devise accounts (12+ character passwords, brute-force lockable) and 1-click Authentik OIDC SSO.
+- ⚙️ **Ops Control Center**: Immediate global triggers, background worker heartbeat monitoring, and comprehensive system metrics.
+- 🌐 **Internationalization (i18n)**: Full English and French language support with persistent cookie-based locale switching.
 
 ---
 
-## 🚀 Planned Features
+## ⚡ Core Features
 
-- 📊 Reliable Dashboard: Improve global visibility across all VPS projects.
-- 🧪 Healthchecks: Add simple and explicit HTTP healthcheck history.
-- 🧾 Deploy Logs: Improve deployment log readability and failure diagnosis.
-- 🔄 GitHub Sync: Keep commit drift updated on a recurring schedule.
-- 🔐 SSH Hardening: Keep the SSH execution surface limited to known project operations.
-- ⏱️ Cron Monitoring: Track recurring project jobs and last execution status.
-- 📣 Notifications: Send important deployment or health alerts to Telegram.
-- 🧰 Maintenance Mode: Standardize project maintenance toggling.
-- 📈 Observability Links: Link to existing Grafana/Loki dashboards instead of replacing them.
+### 📦 1. Project Management & Typology
+- Each managed project has a dedicated card and detail view.
+- Projects are categorized by kind:
+  - `app`: Standard web applications requiring a repository URL, production URL, and HTTP healthcheck.
+  - `service`: Background daemons, workers, or bots that do not expose public HTTP endpoints.
+  - `cron`: Projects dedicated to scheduled batch jobs.
+- Granular monitoring toggles per project:
+  - `runtime_monitoring_enabled`: Opt-in or opt-out of HTTP availability checks.
+  - `cron_monitoring_enabled`: Opt-in or opt-out of scheduled cron job status synchronization.
+
+### 🔁 2. Safe SSH Deployment Pipeline
+- Triggers `/srv/apps/<project>/deploy.sh` on the VPS over a hardened SSH connection.
+- **Concurrency Locking**: Sentinel rejects any deployment attempt if another deployment is already running on the same project.
+- Captures `stdout` and `stderr` with configurable execution timeouts (`SSH_COMMAND_TIMEOUT_SECONDS`).
+- Automatically truncates excessive logs safely to preserve database performance while keeping critical failure diagnostics visible.
+
+### 🧾 3. Centralized Deployments Hub (`/deploys`)
+- Operational overview with global KPIs:
+  - Total deployments count
+  - Overall success rate percentage
+  - Failed deployments counter
+  - Average deployment duration
+- Comprehensive multi-criteria filtering:
+  - Filter by project
+  - Filter by status (`running`, `success`, `failed`)
+  - Full-text search on commit SHA or project name
+- Prominent live banner whenever a deployment is actively running.
+- Per-deployment log view with one-click clipboard copy and expandable drawer.
+
+### 🔗 4. GitHub Sync & Branch Drift Detection
+- Compares the deployed commit SHA against the remote production branch (`effective_production_branch`).
+- **Staging Sync**: Tracks drift between `staging_branch` and `production_branch` (`ahead`, `behind`, `synced`, `diverged`).
+- Direct GitHub diff links:
+  - Comparison between deployed commit and production branch: `https://github.com/<repo>/compare/<deployed_sha>...<prod_branch>`
+  - Comparison between production branch and staging: `https://github.com/<repo>/compare/<prod_branch>...<staging_branch>`
+- Pull request inspection displaying open and merged PR counts.
+
+### ⏱️ 5. Cron Job Supervision & Status Contract
+- Reads execution status published by the project under `/srv/apps/<project>/sentinel/cron-status.json`.
+- Color-coded indicators: OK (`success`), Failed (highlighted with error alert), Never run, and Not reported.
+- Execution history panel tracking run timestamps, duration (in seconds), exit status, and last log output.
+
+### 💻 6. Interactive Quick Terminal
+- Embedded web console on each project show page to run fast diagnostic commands on the remote VPS.
+- Strict security model enforced by `QuickCommandExecutionService`:
+  - **Whitelisted Binaries Only**: `git`, `docker`, `docker-compose`, `cat`, `head`, `tail`, `grep`, `egrep`, `fgrep`, `wc`, `find`, `ls`, `diff`, `stat`, `file`, `uptime`, `df`, `free`, `ps`, `pwd`, `date`, `whoami`, `uname`.
+  - **Forbidden Constructs**: Rejects `sudo`, `su`, `rm`, `kill`, `chmod`, `chown`, `curl`, `wget`, `nc`, interpreters (`python`, `ruby`, `node`, `php`, `sh`), command chaining (`;`, `&&`, `|`), redirects (`>`, `<`), and command substitutions (`$()`, `` ` ``).
+  - **Zero Secret Access**: Strict rejection of paths referencing `.env`, `*.key`, `*.pem`, `id_rsa`, `credentials*.enc`, or directory traversal (`..`).
+  - Command history navigation with arrow keys, 1-click suggestion chips (`docker compose ps`, `df -h`, `uptime`), and clipboard copy.
+
+### 📈 7. Umami Analytics v2 Integration
+- Direct integration with self-hosted Umami analytics instances.
+- Supports Bearer JWT authentication (`UMAMI_AUTH_TOKEN`) or dynamic token generation via service account credentials (`UMAMI_USERNAME` / `UMAMI_PASSWORD`).
+- Automatically resolves websites by matching `production_url` hostnames or via explicit `umami_website_id`.
+- Synchronizes 30-day unique visitors, 30-day pageviews, and direct links to the public analytics dashboard.
+- Background sync via `SyncUmamiJob` and on-demand sync from the project page or Ops Control Center.
+
+### 📊 8. Embedded Grafana Dashboards
+- Embeds private Grafana dashboards inside an authenticated iframe.
+- Scoped dynamically per project using the `grafana_app_value` attribute (e.g. `var-app=myapp`).
+- Automatically aligns theme (`dark` / `light`) with Sentinel's dark mode controller.
+- Does not expose secret tokens in iframe URLs; relies on the user's active Grafana browser session.
+
+### 🔐 9. Hardened Authentication & Authentik SSO
+- **Dual Authentication**:
+  - Local Devise account: Hardened with 12-character minimum passwords and the `Lockable` module to mitigate brute-force attacks.
+  - Authentik Single Sign-On (OIDC): 1-click authentication via OpenID Connect with automatic account provisioning and email reconciliation.
+- Public user registration is disabled by default to maintain private infrastructure access.
+
+### ⚙️ 10. Ops Control Center (`/settings`)
+- Unified 2x2 operational dashboard:
+  - **Global Ops Triggers**: On-demand execution of Healthcheck, GitHub Sync, Cron Sync, and Umami Sync across all projects.
+  - **Application Details**: Rails version, Ruby version, database adapter, Active Storage provider, and total project/deployment counts.
+  - **Environment Variables**: Status indicators (`Configured` / `Missing`) for all external integrations without ever exposing raw secret values.
+  - **Solid Queue & Background Workers**: Active worker process counts, heartbeat verification (< 5 min), failed execution counts, and recurring schedule overview.
+
+### 🌐 11. Internationalization (i18n) & Dark Mode
+- Full support for English (`en`) and French (`fr`).
+- Locale switcher located in the sidebar/navigation with persistent cookie storage.
+- First-class Dark Mode support toggled from the user interface.
 
 ---
-
-
 
 ### 🏗️ Built With
 
@@ -118,12 +178,12 @@ Sentinel intentionally does not manage Docker containers directly from arbitrary
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
+---
 
 <!-- GETTING STARTED -->
 # ✅ Getting Started
 
-This project is a Ruby on Rails application running on `http://localhost:3000` through Docker Compose.
+Sentinel runs as a Ruby on Rails application inside Docker Compose.
 
 ### 💻 Installation
 
@@ -132,101 +192,153 @@ This project is a Ruby on Rails application running on `http://localhost:3000` t
 git clone git@github.com:nlabrazi/sentinel.git
 cd sentinel
 
-# Copy environment variables
+# Copy the example environment variables file
 cp .env.example .env
 ```
 
-Fill the required values in `.env` when you need GitHub, SSH, or screenshot integrations.
+Review and adjust `.env` with your VPS SSH credentials, GitHub token, Authentik settings, Umami configuration, and Grafana parameters.
 
-### 🐳 Docker
+### 🐳 Docker Compose
 
 ```bash
-# First start, or after dependency/Dockerfile changes
+# Build and boot the stack (Rails API, Web UI, and PostgreSQL database)
 docker compose up --build
 
-# Regular start
-docker compose up
+# Regular start in background
+docker compose up -d
 ```
 
-The Rails container mounts the project directory into `/app`, so code changes are reflected inside the running application.
+The application mounts the workspace into `/app`, allowing live code reloading during development.
 
-### ▶️ Usage
+### 🔑 First Login & Seeding
 
-1. Open `http://localhost:3000`
-2. Sign in with the configured admin user
-3. Review project status from the dashboard
-4. Open a project page
-5. Trigger a deployment when the project needs to be updated
-6. Review deployment history and logs
+```bash
+# Run database migrations
+docker compose exec sentinel-api bin/rails db:migrate
 
-### 🔧 Local Notes
-
-- The canonical test environment is Docker Compose.
-- PostgreSQL runs through the `sentinel-db` service.
-- Background jobs run with Rails Active Job and Solid Queue.
-- GitHub API access requires `GITHUB_TOKEN`.
-- SSH execution requires `VPS_HOST`, `VPS_USER`, and `SSH_KEY_PATH`.
-- Screenshots are optional and require `APIFLASH_ACCESS_KEY`.
-
-### Grafana Embed
-
-Sentinel embeds Grafana as a private, authenticated preview. It does not use external shares, snapshots, or URL tokens. The user must already have a valid Grafana browser session for the iframe to load.
-
-The `.env` file only stores global Grafana settings:
-
-```env
-GRAFANA_BASE_URL=https://grafana.nabster.dev
-GRAFANA_DASHBOARD_UID=
-GRAFANA_DASHBOARD_SLUG=applications-overview
-GRAFANA_VARIABLE_NAME=app
-GRAFANA_DEFAULT_THEME=dark
-GRAFANA_ORG_ID=1
-GRAFANA_DEFAULT_FROM=now-6h
-GRAFANA_DEFAULT_TO=now
-GRAFANA_GLOBAL_VARIABLE_VALUE=All
+# Seed local database (creates the initial admin account and sample projects)
+docker compose exec sentinel-api bin/rails db:seed
 ```
 
-Project-specific filtering belongs in the database, not in `.env`. Each project can define a Grafana variable value such as `sawt-ai`, `media-tools`, or `umami`; Sentinel then builds the final embed URL dynamically.
+Default credentials generated by `db/seeds.rb` use the values defined in `.env`:
+- **Username**: `admin` (or `$ADMIN_USERNAME`)
+- **Password**: Configured in `$ADMIN_PASSWORD` (minimum 12 characters)
 
-Grafana must allow private iframe embedding for the Sentinel origin. In Grafana configuration, this usually means enabling `allow_embedding = true` and making sure the browser can send the Grafana session cookie in the iframe context.
+Navigate to `http://localhost:3000` and sign in.
+
+---
+
+### 🔧 Environment Variables Reference
+
+| Category | Variable | Description |
+| :--- | :--- | :--- |
+| **Core & Rails** | `SECRET_KEY_BASE` | Rails secret key base for session integrity (generate with `bin/rails secret`). |
+| | `RAILS_LOG_LEVEL` | Application log level (`debug`, `info`, `warn`, `error`). Default: `info`. |
+| **Database** | `POSTGRES_HOST` | PostgreSQL host (`sentinel-db` in Docker Compose). |
+| | `POSTGRES_USER` | PostgreSQL database user. Default: `postgres`. |
+| | `POSTGRES_PASSWORD` | PostgreSQL database password. Default: `postgres`. |
+| **Storage** | `ACTIVE_STORAGE_SERVICE` | Storage driver: `local` (stored in `./storage`) or `cloudinary`. |
+| | `CLOUDINARY_URL` | Cloudinary connection URI (when using cloud storage). |
+| | `CLOUDINARY_FOLDER` | Destination folder in Cloudinary (e.g. `sentinel/development`). |
+| **Screenshots** | `APIFLASH_ACCESS_KEY` | Optional ApiFlash API key used to generate automated project screenshots. |
+| **GitHub** | `GITHUB_TOKEN` | GitHub Personal Access Token for commit, PR, and drift tracking. |
+| **VPS / SSH** | `VPS_HOST` | Hostname or IP address of the target VPS. |
+| | `VPS_USER` | SSH user on the VPS (must belong to the `docker` group). |
+| | `SSH_KEY_PATH` | Path to the private SSH key inside the container (`/app/config/ssh_key/id_rsa`). |
+| | `SSH_KNOWN_HOSTS_PATH` | Path to the known_hosts file (`/app/config/ssh_key/known_hosts`). |
+| | `SSH_CONNECT_TIMEOUT_SECONDS` | Maximum seconds allowed to establish SSH connection. Default: `10`. |
+| | `SSH_COMMAND_TIMEOUT_SECONDS` | Maximum seconds allowed for deploy command execution. Default: `600`. |
+| **Seeded Admin** | `ADMIN_USERNAME` | Default seeded administrator username. Default: `admin`. |
+| | `ADMIN_EMAIL` | Administrator contact email. |
+| | `ADMIN_PASSWORD` | Administrator initial password (must be >= 12 characters). |
+| **Umami Analytics** | `UMAMI_BASE_URL` | URL of your self-hosted Umami instance (e.g. `https://umami.nabster.dev`). |
+| | `UMAMI_AUTH_TOKEN` | Bearer JWT token for Umami v2 API (recommended method). |
+| | `UMAMI_USERNAME` | Dedicated Umami service account username (alternative method). |
+| | `UMAMI_PASSWORD` | Dedicated Umami service account password (alternative method). |
+| **Authentik SSO** | `AUTHENTIK_ENABLED` | Set to `true` to enable OpenID Connect SSO login. |
+| | `AUTHENTIK_ISSUER` | Authentik OIDC Issuer endpoint (e.g. `https://auth.nabster.dev/application/o/sentinel/`). |
+| | `AUTHENTIK_CLIENT_ID` | OAuth2 / OIDC Client ID generated in Authentik. |
+| | `AUTHENTIK_CLIENT_SECRET` | OAuth2 / OIDC Client Secret generated in Authentik. |
+| | `AUTHENTIK_REDIRECT_URI` | OIDC Callback URL (`https://<domain>/users/auth/openid_connect/callback`). |
+| **Grafana Embed** | `GRAFANA_BASE_URL` | Base URL of Grafana instance (e.g. `https://grafana.nabster.dev`). |
+| | `GRAFANA_DASHBOARD_UID` | Dashboard unique identifier. |
+| | `GRAFANA_DASHBOARD_SLUG` | Dashboard slug (e.g. `applications-overview`). |
+| | `GRAFANA_VARIABLE_NAME` | Name of the dashboard filter variable. Default: `app`. |
+| | `GRAFANA_DEFAULT_THEME` | Default embed theme (`dark` / `light`). Default: `dark`. |
+| | `GRAFANA_ORG_ID` | Grafana organization identifier. Default: `1`. |
+| | `GRAFANA_DEFAULT_FROM` | Start time window. Default: `now-6h`. |
+| | `GRAFANA_DEFAULT_TO` | End time window. Default: `now`. |
+| | `GRAFANA_DEFAULT_TIMEZONE` | Timezone setting for Grafana dashboard. Default: `browser`. |
+| | `GRAFANA_REFRESH` | Dashboard auto-refresh interval. Default: `30s`. |
+| | `GRAFANA_PANEL_ID` | Target panel ID for single panel preview. Default: `panel-6`. |
+| | `GRAFANA_GLOBAL_VARIABLE_VALUE`| Value used when no specific project filter is selected. Default: `All`. |
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+
+<!-- OPERATIONAL CONTRACTS -->
+# 📜 Operational Contracts & Architecture
+
+Sentinel standardizes how projects interact with the VPS infrastructure. Every project hosted on the VPS adheres to clear, non-intrusive contracts.
 
 ### 📜 deploy.sh Contract
 
-Each managed project should expose a deployment script at:
+Each managed project exposes an executable deployment script at:
 
 ```bash
 /srv/apps/<project>/deploy.sh
 ```
 
-The script must:
+**Contract Rules**:
+- Executable by the configured VPS SSH user (`chmod +x deploy.sh`).
+- Strictly non-interactive (must not wait for user input).
+- Returns exit code `0` on success.
+- Returns a non-zero exit code on failure.
+- Emits informative diagnostic messages to `stdout` and `stderr`.
+- Keeps project-specific deployment logic inside the project's own repository.
 
-- Be executable by the configured VPS SSH user.
-- Run without interactive prompts.
-- Return exit code `0` on success.
-- Return a non-zero exit code on failure.
-- Write useful output to stdout and stderr.
-- Keep project-specific deployment logic inside the project directory.
+#### Recommended `deploy.sh` Template (Docker Compose)
 
-Sentinel only calls this predefined script. It does not accept arbitrary commands from the web interface.
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-### 📡 status.sh Contract
+echo "==> [$(date -u +%T)] Starting deployment..."
 
-Each managed project should expose a status script at:
+# 1. Update source code
+git fetch origin master
+git reset --hard origin/master
+
+# 2. Pull and rebuild containers
+docker compose pull
+docker compose build --pull
+docker compose run --rm web bundle exec rails db:migrate || true
+docker compose up -d --remove-orphans
+
+# 3. Clean up dangling images
+docker image prune -f
+
+echo "==> [$(date -u +%T)] Deployment finished successfully."
+```
+
+### 📡 status.sh & cron-status.json Contract
+
+For projects with scheduled batch jobs, Sentinel inspects cron states without executing the batch jobs directly.
+
+The project publishes its status to:
+
+```bash
+/srv/apps/<project>/sentinel/cron-status.json
+```
+
+Or returns it via:
 
 ```bash
 /srv/apps/<project>/status.sh
 ```
 
-The script must:
-
-- Be executable by the configured VPS SSH user.
-- Run without interactive prompts.
-- Return exit code `0` when status data was collected.
-- Return a non-zero exit code when status collection failed.
-- Write valid JSON to stdout.
-- Keep project-specific cron inspection logic inside the project directory.
-
-Sentinel expects this JSON shape:
+#### Expected JSON Payload
 
 ```json
 {
@@ -238,27 +350,149 @@ Sentinel expects this JSON shape:
       "last_execution_at": "2026-05-06T02:00:12Z",
       "last_status": "success",
       "last_duration": 42,
-      "last_log": "Import completed"
+      "last_log": "Import completed successfully"
     }
   ]
 }
 ```
 
-Accepted statuses are normalized to `success` and `failed` when possible. For example, `ok` becomes `success`, and `error` becomes `failed`.
+Accepted statuses are normalized to `success` or `failed` (`ok` becomes `success`, `error` becomes `failed`).
 
-Sentinel stores the latest cron state on each cron job and creates one execution history entry per `last_execution_at` timestamp.
+#### Atomic Cron Wrapper Template (`cron-wrapper.sh`)
 
-Cron monitoring is opt-in at the project level. Set `cron_monitoring_enabled` only for projects that actually expose `status.sh` and a cron status payload. Projects without scheduled jobs should leave it disabled to avoid false-positive warnings and failed sync attempts.
-
-Runtime monitoring can also be disabled per project through `runtime_monitoring_enabled`. This is useful for bots, workers, or internal services that should not be treated like public websites and must not raise `offline` noise in the dashboard.
-
-### 🧪 Scripts
+To update the JSON payload safely without write collisions, wrap your cron jobs with this script:
 
 ```bash
-# Run the application stack
+#!/usr/bin/env bash
+set -u
+started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+started_seconds="$(date +%s)"
+log_file="$(mktemp)"
+
+if ./bin/daily-import > "$log_file" 2>&1; then
+  status="success"
+else
+  status="failed"
+fi
+
+duration="$(($(date +%s) - started_seconds))"
+last_log="$(tail -c 4000 "$log_file" | jq -Rs .)"
+
+mkdir -p sentinel
+cat > sentinel/cron-status.json.tmp <<JSON
+{
+  "cron_jobs": [
+    {
+      "name": "daily-import",
+      "command": "./bin/daily-import",
+      "schedule": "0 2 * * *",
+      "last_execution_at": "$started_at",
+      "last_status": "$status",
+      "last_duration": $duration,
+      "last_log": $last_log
+    }
+  ]
+}
+JSON
+mv sentinel/cron-status.json.tmp sentinel/cron-status.json
+rm -f "$log_file"
+```
+
+### 💻 Quick Terminal Security Model
+
+The interactive Quick Terminal on the project page connects to the project root `/srv/apps/<slug>` on the VPS via SSH. It is strictly constrained by `QuickCommandExecutionService`:
+
+- **Whitelisted Binaries**:
+  `cat`, `head`, `tail`, `grep`, `egrep`, `fgrep`, `wc`, `find`, `ls`, `diff`, `stat`, `file`, `uptime`, `df`, `free`, `ps`, `pwd`, `date`, `whoami`, `uname`, `git`, `docker`, `docker-compose`.
+- **Prohibited Patterns**:
+  - Privilege escalation or destructive operations (`sudo`, `su`, `rm`, `chmod`, `chown`, `kill`, `reboot`).
+  - Network utilities (`curl`, `wget`, `nc`, `telnet`).
+  - Interpreters (`python`, `ruby`, `node`, `php`, `sh`).
+  - Chaining and stream manipulation (`;`, `&&`, `|`, `>`, `<`, `\`, `` ` ``, `$()`).
+  - Access to secrets or directory traversals (`.env`, `*.key`, `*.pem`, `id_rsa`, `credentials*.enc`, `..`).
+- Execution is hard-limited to 10 seconds timeout and 64 KB maximum output.
+
+### 🛡️ Zero-Reload Maintenance Mode
+
+Sentinel creates or removes a flag file named `maintenance.on` in the project's VPS directory (`/srv/apps/<project>/maintenance.on`).
+
+By adding the following check to your Nginx virtual host, maintenance pages are served immediately without reloading Nginx:
+
+```nginx
+server {
+    server_name myapp.example.com;
+
+    # Instant Sentinel maintenance detection
+    if (-f /srv/apps/myapp/maintenance.on) {
+        return 503;
+    }
+
+    error_page 503 @maintenance;
+    location @maintenance {
+        root /srv/apps/myapp/public;
+        rewrite ^(.*)$ /503.html break;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+
+### 📊 Grafana & Loki Embed
+
+Sentinel embeds private Grafana dashboards within an iframe without passing authentication tokens in URLs:
+- The user must already have a valid session in the Grafana instance.
+- In your Grafana configuration (`grafana.ini`), enable embedding:
+  ```ini
+  [security]
+  allow_embedding = true
+  cookie_samesite = none
+  cookie_secure = true
+  ```
+- Sentinel dynamically appends `theme=dark` or `theme=light` and scopes metrics to `var-app=<grafana_app_value>`.
+
+### 📈 Umami Analytics v2 Integration
+
+- Works with self-hosted Umami instances.
+- Configure `UMAMI_BASE_URL` and `UMAMI_AUTH_TOKEN` in `.env`.
+- Automatically maps projects based on the domain of `production_url` or manual `umami_website_id`.
+- Synchronizes 30-day visitors and pageviews via `ProjectUmamiSyncService`.
+
+### 🔐 Authentik OIDC Single Sign-On
+
+- Authentik integration uses `omniauth_openid_connect`.
+- Create an OpenID Connect Provider and Application in Authentik.
+- Set redirect URI to: `https://<sentinel-domain>/users/auth/openid_connect/callback`.
+- Existing users can log in via both Authentik SSO and local Devise credentials.
+
+### 🔄 Solid Queue & Background Workers
+
+Sentinel leverages Solid Queue with persistent jobs and cron scheduling (`config/recurring.yml`):
+- `HealthcheckAllJob`: Runs every minute to audit HTTP availability.
+- `SyncGithubJob`: Runs every 5 minutes to synchronize commits, PRs, and branch drift.
+- `CronStatusJob`: Runs every 5 minutes to fetch VPS cron job states.
+- `SolidQueue::Job.clear_finished_in_batches`: Cleans finished job executions every hour.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+
+<!-- CLI & SCRIPTS -->
+# 🧪 CLI & Development Commands
+
+All development and test tasks run inside Docker Compose:
+
+```bash
+# Start the full development stack
 docker compose up
 
-# Run the full CI suite inside the Rails container
+# Run the complete test suite with RSpec
+docker compose exec sentinel-api bundle exec rspec
+
+# Run CI checks (RSpec, RuboCop, bundler-audit, Brakeman)
 docker compose exec sentinel-api bin/ci
 
 # Open a Rails console
@@ -267,53 +501,53 @@ docker compose exec sentinel-api bin/rails console
 # Run database migrations
 docker compose exec sentinel-api bin/rails db:migrate
 
-# Seed local data
+# Seed database with sample projects
 docker compose exec sentinel-api bin/rails db:seed
+
+# Format Ruby and ERB code
+docker compose exec sentinel-api bin/format
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
+---
 
 <!-- CONTRIBUTING -->
 # 🙌 Contributing
 
-This is a personal control panel, but improvements should stay aligned with the product goal: simple, stable, readable, and safe VPS project operations.
+Contributions are welcome! Please follow these steps:
 
-To contribute:
-1. 🍴 Fork the repo
+1. 🍴 Fork the repository
 2. 🔧 Create a feature branch (`git checkout -b feat/my-feature`)
 3. 💬 Commit your changes (`git commit -m "feat: add my feature"`)
 4. 🚀 Push to your fork (`git push origin feat/my-feature`)
-5. 📬 Open a pull request
+5. 📬 Open a Pull Request
+
+Please ensure that `docker compose exec sentinel-api bin/ci` passes before opening a pull request.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
+---
 
 <!-- LICENSE -->
 ### 📄 License
 
-No license file is currently committed.
-
-Add a `LICENSE.txt` file before distributing or opening the project for external reuse.
+Distributed under the MIT License. See `LICENSE` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
+---
 
 <!-- CONTACT -->
 ### 📬 Contact
 
-- 👤 [Linkedin][linkedin-url]
+- 👤 [LinkedIn][linkedin-url]
 - 🐦 [@Nabil](https://twitter.com/Nabil71405502)
 - 📧 na.labrazi@gmail.com
 - 🔗 [Portfolio](https://nabil-labrazi.fr)
 - 📁 [Project Repository](https://github.com/nlabrazi/sentinel)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [contributors-shield]: https://img.shields.io/github/contributors/nlabrazi/sentinel.svg?style=for-the-badge
