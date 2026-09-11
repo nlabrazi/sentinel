@@ -43,16 +43,16 @@ RSpec.describe "Dashboards", type: :request do
 
       get root_path
       expect(response).to have_http_status(:success)
-      expect(response.body).to include("Search projects")
-      expect(response.body).to include("Projects")
-      expect(response.body).to include("Online")
-      expect(response.body).to include("Behind")
-      expect(response.body).to include("Jobs issues")
+      expect(response.body).to include("Rechercher un projet...")
+      expect(response.body).to include("Projets")
+      expect(response.body).to include("En ligne")
+      expect(response.body).to include("En retard")
+      expect(response.body).to include("Problèmes crons")
       expect(response.body).to include("Maintenance")
       expect(response.body).not_to include("Add new project")
       expect(response.body).not_to include("Want to deploy a new project?")
-      expect(response.body).to include("Deployments")
-      expect(response.body).to include("Settings")
+      expect(response.body).to include("Déploiements")
+      expect(response.body).to include("Paramètres")
       expect(response.body).to include("Documentation")
       expect(response.body).to include("Docs")
       expect(response.body).to include("lg:flex")
@@ -67,6 +67,18 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).not_to include("News")
       expect(response.body).not_to include("Support")
       expect(response.body).not_to include("Mis à jour il y a quelques secondes")
+
+      # In English
+      get root_path(locale: :en)
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("Search projects")
+      expect(response.body).to include("Projects")
+      expect(response.body).to include("Online")
+      expect(response.body).to include("Behind")
+      expect(response.body).to include("Jobs issues")
+      expect(response.body).to include("Maintenance")
+      expect(response.body).to include("Deployments")
+      expect(response.body).to include("Settings")
     end
 
     it "renders the global Grafana embed when configured" do
@@ -76,7 +88,7 @@ RSpec.describe "Dashboards", type: :request do
       get root_path
 
       expect(response).to have_http_status(:success)
-      expect(response.body).to include("Global observability")
+      expect(response.body).to include("Observabilité globale")
       expect(response.body).to include('title="Global Grafana dashboard"')
       expect(response.body).to include(
         'src="https://grafana.example.com/d-solo/apps-overview/applications-overview?orgId=1&amp;from=now-6h&amp;to=now&amp;timezone=browser&amp;refresh=30s&amp;theme=dark&amp;panelId=panel-6&amp;var-app=All"'
@@ -90,6 +102,13 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include('data-collapsible-storage-key-value="sentinel_dashboard_grafana_open"')
       expect(response.body).to include("Masquer")
       expect(response.body).to include('data-collapsible-target="content"')
+
+      # In English
+      get root_path(locale: :en)
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("Global observability")
+      expect(response.body).to include("Sign in to Grafana")
+      expect(response.body).to include("Hide")
     end
 
     it "renders the latest deployment timestamp for each project" do
@@ -130,15 +149,23 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include("nlabrazi/sawt-ai")
       expect(response.body).to include("GitHub")
       expect(response.body).to include("a82f31c")
-      expect(response.body).to include("3 update(s)")
+      expect(response.body).to include("3 mises à jour")
       expect(response.body).to include("OK")
       expect(response.body).to include("Sync GitHub")
-      expect(response.body).to include("Check health")
-      expect(response.body).to include("Sync jobs")
+      expect(response.body).to include("Vérifier la santé")
+      expect(response.body).to include("Synchroniser les jobs")
       expect(response.body).to include("Runtime")
       expect(response.body).to include("HTTP")
       expect(response.body).to include("200")
       expect(response.body).to include("Jobs")
+      expect(response.body).to include("Déployer")
+      expect(response.body).to include("Ouvrir le site")
+
+      # In English
+      get root_path(locale: :en)
+      expect(response.body).to include("3 updates")
+      expect(response.body).to include("Sync jobs")
+      expect(response.body).to include("Check health")
       expect(response.body).to include("Deploy")
       expect(response.body).to include("Open site")
     end
@@ -150,9 +177,14 @@ RSpec.describe "Dashboards", type: :request do
       get root_path
 
       expect(response.body).to include("No Cron App")
+      expect(response.body).to include("Désactivé")
+      expect(response.body).to include("Aucun monitoring cron")
+      expect(response.body).not_to include("Sync jobs")
+
+      # In English
+      get root_path(locale: :en)
       expect(response.body).to include("Disabled")
       expect(response.body).to include("No cron monitoring")
-      expect(response.body).not_to include("Sync jobs")
     end
 
     it "silences offline status when runtime monitoring is disabled" do
@@ -162,9 +194,14 @@ RSpec.describe "Dashboards", type: :request do
       get root_path
 
       expect(response.body).to include("SJVTDM Bot")
+      expect(response.body).to include("Désactivé")
+      expect(response.body).to include("Monitoring désactivé")
+      expect(response.body).not_to include("Check health")
+
+      # In English
+      get root_path(locale: :en)
       expect(response.body).to include("Disabled")
       expect(response.body).to include("Monitoring disabled")
-      expect(response.body).not_to include("Check health")
     end
 
     it "renders a running state instead of the deploy action when a project is deploying" do
@@ -218,8 +255,13 @@ RSpec.describe "Dashboards", type: :request do
 
       get root_path
 
-      expect(response.body).to include("Staging sync")
+      expect(response.body).to include("Sync Staging")
       expect(response.body).to include("+3 commits (en avance)")
+
+      # In English
+      get root_path(locale: :en)
+      expect(response.body).to include("Staging sync")
+      expect(response.body).to include("+3 commits (ahead)")
     end
 
     it "renders cron project kind and batch script path" do

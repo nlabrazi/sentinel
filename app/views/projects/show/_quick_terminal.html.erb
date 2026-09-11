@@ -9,13 +9,13 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
         <div class="flex items-center gap-2">
-          <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">Quick commands</h2>
+          <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100"><%= t("projects.quick_terminal.title", default: "Quick commands") %></h2>
           <span class="rounded-full bg-cyan-100 dark:bg-cyan-900/40 text-cyan-800 dark:text-cyan-300 px-2.5 py-0.5 text-xs font-semibold">
-            Interactive
+            <%= t("projects.quick_terminal.badge", default: "Interactive") %>
           </span>
         </div>
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Console sécurisée connectée à <span class="font-mono text-xs text-gray-700 dark:text-gray-300"><%= project.vps_path %></span>
+          <%= t("projects.quick_terminal.connected_to", path: "<span class=\"font-mono text-xs text-gray-700 dark:text-gray-300\">#{project.vps_path}</span>", default: "Console sécurisée connectée à #{project.vps_path}").html_safe %>
         </p>
       </div>
 
@@ -24,16 +24,16 @@
           type="button"
           data-action="quick-terminal#clear"
           class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-2.5 py-1 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-          title="Vider le terminal (ou Ctrl+L)">
+          title="<%= t('projects.quick_terminal.clear_title', default: 'Vider le terminal (ou Ctrl+L)') %>">
           <%= fa_icon(:broom, class_name: "h-3.5 w-3.5 text-gray-500 dark:text-gray-400") %>
-          <span>Vider</span>
+          <span><%= t("projects.quick_terminal.clear", default: "Vider") %></span>
         </button>
       </div>
     </div>
 
     <!-- Quick Chips -->
     <div class="mt-3 flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-      <span class="text-gray-400 dark:text-gray-500 text-[11px] font-medium shrink-0 mr-1">Raccourcis :</span>
+      <span class="text-gray-400 dark:text-gray-500 text-[11px] font-medium shrink-0 mr-1"><%= t("projects.quick_terminal.shortcuts", default: "Raccourcis :") %></span>
       <button
         type="button"
         data-action="quick-terminal#runChip"
@@ -109,7 +109,7 @@
             data-quick-terminal-target="statusBadge"
             class="flex items-center gap-1.5 text-xs font-mono select-none">
             <span class="h-2 w-2 rounded-full bg-green-400"></span>
-            <span class="text-gray-400">Ready</span>
+            <span class="text-gray-400"><%= t("projects.quick_terminal.ready", default: "Ready") %></span>
           </div>
         </div>
       </div>
@@ -118,12 +118,12 @@
       <div class="max-h-96 min-h-[14rem] overflow-y-auto p-4 space-y-3 font-mono text-xs text-gray-200">
         <!-- Initial welcome -->
         <div class="text-gray-500 text-xs select-none space-y-1 pb-2 border-b border-gray-800/60">
-          <p class="text-gray-400 font-semibold">Sentinel Terminal v1.0 — VPS Shell Session</p>
+          <p class="text-gray-400 font-semibold"><%= t("projects.quick_terminal.session_title", default: "Sentinel Terminal v1.0 — VPS Shell Session") %></p>
           <p>
-            Commandes autorisées : <code class="text-gray-300">cat, ls, tail, grep, git, docker compose, ./*.sh, uptime...</code>
+            <%= t("projects.quick_terminal.allowed_commands", default: "Commandes autorisées :") %> <code class="text-gray-300">cat, ls, tail, grep, git, docker compose, ./*.sh, uptime...</code>
           </p>
           <p class="text-[11px] text-gray-500">
-            Tapez <code class="text-cyan-400">help</code> pour afficher les commandes autorisées, ou <code class="text-cyan-400">clear</code> pour réinitialiser.
+            <%= t("projects.quick_terminal.help_hint", help: '<code class="text-cyan-400">help</code>', clear: '<code class="text-cyan-400">clear</code>', default: "Tapez help pour afficher les commandes autorisées, ou clear pour réinitialiser.").html_safe %>
           </p>
         </div>
 
@@ -144,7 +144,7 @@
           autocorrect="off"
           autocapitalize="off"
           spellcheck="false"
-          placeholder="Entrez une commande (ex: cat Dockerfile, ./status.sh, git status)..."
+          placeholder="<%= t('projects.quick_terminal.input_placeholder', default: 'Entrez une commande (ex: cat Dockerfile, ./status.sh, git status)...') %>"
           class="flex-1 border-0 bg-transparent p-0 font-mono text-xs text-gray-100 placeholder:text-gray-600 focus:outline-none focus:ring-0">
 
         <!-- Loading spinner -->
@@ -160,8 +160,8 @@
 
     <!-- Safety notice footer -->
     <div class="mt-3 flex items-center justify-between text-[11px] text-gray-400 dark:text-gray-500 px-1">
-      <span>🔒 Safe sandbox active : exécution cloisonnée dans <code class="font-mono"><%= project.vps_path %></code></span>
-      <span class="font-mono">Timeout : 10s</span>
+      <span>🔒 <%= t("projects.quick_terminal.safe_sandbox", path: "<code class=\"font-mono\">#{project.vps_path}</code>", default: "Safe sandbox active : exécution cloisonnée dans #{project.vps_path}").html_safe %></span>
+      <span class="font-mono"><%= t("projects.quick_terminal.timeout", default: "Timeout : 10s") %></span>
     </div>
   </div>
 </section>

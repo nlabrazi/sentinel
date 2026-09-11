@@ -61,13 +61,13 @@ class Project < ApplicationRecord
   def runtime_status_label
     case runtime_status
     when "online"
-      "Online"
+      I18n.t("projects.runtime_status.online", default: "Online")
     when "offline"
-      "Offline"
+      I18n.t("projects.runtime_status.offline", default: "Offline")
     when "disabled"
-      "Disabled"
+      I18n.t("projects.runtime_status.disabled", default: "Disabled")
     else
-      "Unknown"
+      I18n.t("projects.runtime_status.unknown", default: "Unknown")
     end
   end
 
@@ -117,19 +117,19 @@ class Project < ApplicationRecord
     return nil unless status_changed_at
 
     seconds = status_duration_seconds
-    return "à l'instant" if seconds < 60
+    return I18n.t("projects.status_duration.just_now", default: "à l'instant") if seconds < 60
 
     minutes = seconds / 60
-    return "depuis #{minutes} min" if minutes < 60
+    return I18n.t("projects.status_duration.minutes", count: minutes, default: "depuis #{minutes} min") if minutes < 60
 
     hours = minutes / 60
-    return "depuis #{hours} h" if hours < 24
+    return I18n.t("projects.status_duration.hours", count: hours, default: "depuis #{hours} h") if hours < 24
 
     days = hours / 24
-    return "depuis #{days} j" if days < 30
+    return I18n.t("projects.status_duration.days", count: days, default: "depuis #{days} j") if days < 30
 
     months = days / 30
-    "depuis #{months} mois"
+    I18n.t("projects.status_duration.months", count: months, default: "depuis #{months} mois")
   end
 
   def staging_sync_status
@@ -144,13 +144,13 @@ class Project < ApplicationRecord
   def staging_sync_label
     case staging_sync_status
     when :not_configured
-      "Non configuré"
+      I18n.t("projects.staging_sync.not_configured", default: "Non configuré")
     when :synced
-      "Synchronisé avec #{effective_production_branch}"
+      I18n.t("projects.staging_sync.synced", branch: effective_production_branch, default: "Synchronisé avec #{effective_production_branch}")
     when :ahead
-      "+#{staging_commits_ahead} commit#{'s' if staging_commits_ahead > 1} (en avance)"
+      I18n.t("projects.staging_sync.ahead", count: staging_commits_ahead, s: ("s" if staging_commits_ahead > 1), default: "+#{staging_commits_ahead} commit#{'s' if staging_commits_ahead > 1} (en avance)")
     when :behind
-      "-#{staging_commits_behind} commit#{'s' if staging_commits_behind > 1} (en retard)"
+      I18n.t("projects.staging_sync.behind", count: staging_commits_behind, s: ("s" if staging_commits_behind > 1), default: "-#{staging_commits_behind} commit#{'s' if staging_commits_behind > 1} (en retard)")
     when :diverged
       "+#{staging_commits_ahead} / -#{staging_commits_behind}"
     end
@@ -207,17 +207,17 @@ class Project < ApplicationRecord
   def cron_summary_label
     case cron_summary_status
     when "disabled"
-      "Disabled"
+      I18n.t("projects.cron_summary.disabled", default: "Disabled")
     when "ok"
-      "OK"
+      I18n.t("projects.cron_summary.ok", default: "OK")
     when "failed"
-      "Failed"
+      I18n.t("projects.cron_summary.failed", default: "Failed")
     when "never_run"
-      "Never run"
+      I18n.t("projects.cron_summary.never_run", default: "Never run")
     when "not_reported"
-      "Not reported"
+      I18n.t("projects.cron_summary.not_reported", default: "Not reported")
     else
-      "Unknown"
+      I18n.t("projects.cron_summary.unknown", default: "Unknown")
     end
   end
 

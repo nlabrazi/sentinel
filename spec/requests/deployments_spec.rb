@@ -31,7 +31,7 @@ RSpec.describe 'Deployments', type: :request do
       get deployment_path(deployment)
 
       expect(response).to have_http_status(:success)
-      expect(response.body).to include('Deployment abc123d')
+      expect(response.body).to include('Déploiement abc123d')
       expect(response.body).to include('Sentinel API')
       expect(response.body).to include('failed')
       expect(response.body).to include('abc123def456')
@@ -44,6 +44,14 @@ RSpec.describe 'Deployments', type: :request do
       expect(response.body).to include('Redéployer')
       expect(response.body).to include('Copier')
       expect(response.body).to include('Télécharger')
+
+      # In English
+      get deployment_path(deployment, locale: :en)
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('Deployment abc123d')
+      expect(response.body).to include('Redeploy')
+      expect(response.body).to include('Copy')
+      expect(response.body).to include('Download')
     end
 
     it 'renders an empty log state when no log was recorded' do
@@ -52,6 +60,10 @@ RSpec.describe 'Deployments', type: :request do
 
       get deployment_path(deployment)
 
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('Aucun log enregistré pour ce déploiement.')
+
+      get deployment_path(deployment, locale: :en)
       expect(response).to have_http_status(:success)
       expect(response.body).to include('No logs recorded for this deployment.')
     end

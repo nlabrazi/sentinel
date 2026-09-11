@@ -20,4 +20,5 @@ Rails.application.routes.draw do
   post "/settings/trigger_sync_github", to: "pages#trigger_sync_github_all", as: :trigger_sync_github_settings
   post "/settings/trigger_sync_cron", to: "pages#trigger_sync_cron_all", as: :trigger_sync_cron_settings
   get "/documentation", to: "pages#documentation", as: :documentation
+  match "/locale/:locale", to: "locales#update", via: [ :get, :post ], as: :switch_locale
 end
