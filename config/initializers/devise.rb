@@ -272,9 +272,20 @@ Devise.setup do |config|
   config.sign_out_via = :delete
 
   # ==> OmniAuth
-  # Add a new OmniAuth provider. Check the wiki for more information on setting
-  # up on your models and hooks.
-  # config.omniauth :github, 'APP_ID', 'APP_SECRET', scope: 'user,public_repo'
+  # Authentik Single Sign-On via OpenID Connect
+  authentik_issuer = ENV["AUTHENTIK_ISSUER"].presence || "https://authentik.nabster.dev/application/o/sentinel/"
+  config.omniauth :openid_connect, {
+    name: :openid_connect,
+    scope: [ :openid, :email, :profile ],
+    response_type: :code,
+    issuer: authentik_issuer,
+    discovery: true,
+    client_options: {
+      identifier: ENV["AUTHENTIK_CLIENT_ID"].presence || "sentinel",
+      secret: ENV["AUTHENTIK_CLIENT_SECRET"].presence || "authentik-secret",
+      redirect_uri: ENV["AUTHENTIK_REDIRECT_URI"].presence
+    }
+  }
 
   # ==> Warden configuration
   # If you want to use other strategies, that are not supported by Devise, or

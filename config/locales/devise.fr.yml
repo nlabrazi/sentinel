@@ -14,7 +14,12 @@ fr:
       timeout: "Votre session a expiré. Veuillez vous reconnecter pour continuer."
       unauthenticated: "Vous devez vous connecter avant de continuer."
       unconfirmed: "Vous devez confirmer votre compte avant de continuer."
+    omniauth_callbacks:
+      failure: "Impossible de vous authentifier depuis %{kind} : %{reason}."
+      success: "Authentification réussie via %{kind}."
     sessions:
+      sign_in_with_authentik: "Se connecter avec Authentik"
+      or_local_account: "ou compte local"
       signed_in: "Connexion réussie."
       signed_out: "Déconnexion réussie."
       already_signed_out: "Déconnexion réussie."

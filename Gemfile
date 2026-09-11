@@ -91,3 +91,7 @@ gem "devise", "~> 5.0"
 
 # Image processing for Active Storage variants
 gem "image_processing", "~> 1.2"
+
+# Single Sign-On (Authentik / OpenID Connect)
+gem "omniauth_openid_connect", "~> 0.8.0"
+gem "omniauth-rails_csrf_protection", "~> 2.0"
