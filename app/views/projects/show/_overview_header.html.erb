@@ -67,38 +67,38 @@
                   dark:text-yellow-300
                 ">
                 <%= fa_icon(:rotate, class_name: "text-sm") %>
-                Running
+                <%= t("dashboard.actions.running", default: "Running") %>
               </span>
             <% else %>
               <%= button_to deploy_project_path(project),
               method: :post,
               class: "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md bg-cyan-300 px-4 py-2 text-sm font-bold text-gray-950 hover:bg-cyan-200",
-              title: "Déploie le dernier commit disponible pour ce projet",
-              aria: { label: "Déployer le dernier commit" } do %>
+              title: t("dashboard.actions.deploy_title", default: "Déploie le dernier commit disponible pour ce projet"),
+              aria: { label: t("projects.actions.deploy_latest", default: "Déployer le dernier commit") } do %>
                 <%= fa_icon(:play, class_name: "text-sm") %>
-                Deploy latest
+                <%= t("projects.actions.deploy_latest", default: "Deploy latest") %>
               <% end %>
             <% end %>
           <% end %>
 
           <%= render "shared/ui/button",
-          label: "Open site",
+          label: t("dashboard.actions.open_site", default: "Open site"),
           href: project.production_url,
           icon: :arrow_up_right_from_square,
           variant: :secondary,
           size: :md,
           target: "_blank",
           rel: "noopener",
-          title: "Ouvre le site en production" %>
+          title: t("dashboard.actions.open_site_title", default: "Ouvre le site en production") %>
 
           <% if project.runtime_monitoring_enabled? %>
             <%= button_to refresh_runtime_project_path(project),
             method: :post,
             class: "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:border-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800",
-            title: "Lance un healthcheck HTTP immédiat",
-            aria: { label: "Vérifier le health status" } do %>
+            title: t("dashboard.actions.check_health_title", default: "Lance un healthcheck HTTP immédiat"),
+            aria: { label: t("dashboard.actions.check_health", default: "Vérifier le health status") } do %>
               <%= fa_icon(:heart_pulse, class_name: "text-sm") %>
-              Check health
+              <%= t("dashboard.actions.check_health", default: "Check health") %>
             <% end %>
           <% end %>
 
@@ -108,7 +108,7 @@
               method: :post,
               class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100" do %>
                 <%= fa_icon(:rotate, class_name: "text-sm text-gray-500") %>
-                Sync GitHub
+                <%= t("dashboard.actions.sync_github", default: "Sync GitHub") %>
               <% end %>
             <% end %>
 
@@ -116,9 +116,9 @@
               <%= button_to refresh_cron_status_project_path(project),
               method: :post,
               class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100",
-              aria: { label: "Synchroniser les jobs" } do %>
+              aria: { label: t("dashboard.actions.sync_jobs", default: "Synchroniser les jobs") } do %>
                 <%= fa_icon(:clock, class_name: "text-sm text-gray-500") %>
-                Sync jobs
+                <%= t("dashboard.actions.sync_jobs", default: "Sync jobs") %>
               <% end %>
             <% end %>
 
@@ -126,7 +126,7 @@
             method: :post,
             class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100" do %>
               <%= fa_icon(:image, class_name: "text-sm text-gray-500") %>
-              Refresh preview
+              <%= t("projects.actions.refresh_preview", default: "Refresh preview") %>
             <% end %>
 
             <div class="border-t border-gray-200 dark:border-gray-800"></div>
@@ -135,7 +135,7 @@
             method: :patch,
             class: "flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-yellow-700 hover:bg-yellow-50 dark:text-yellow-300 dark:hover:bg-yellow-950/40" do %>
               <%= fa_icon(:wrench, class_name: "text-sm text-yellow-500") %>
-              <%= project.maintenance_mode? ? "Disable maintenance" : "Enable maintenance" %>
+              <%= project.maintenance_mode? ? t("projects.actions.disable_maintenance", default: "Disable maintenance") : t("projects.actions.enable_maintenance", default: "Enable maintenance") %>
             <% end %>
           <% end %>
         </div>
@@ -144,20 +144,20 @@
       <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <% if project.app? %>
           <%= render "shared/ui/status_metric",
-          label: "Version",
-          value: behind_count.positive? ? "#{behind_count} update(s)" : "Up to date",
+          label: t("dashboard.card.version", default: "Version"),
+          value: behind_count.positive? ? t("dashboard.card.updates", count: behind_count, default: "#{behind_count} update(s)") : t("dashboard.card.up_to_date", default: "Up to date"),
           icon: :code_branch,
           tone: behind_count.positive? ? :warning : :success %>
         <% else %>
           <%= render "shared/ui/status_metric",
-          label: "Type",
-          value: "Service",
+          label: t("dashboard.card.type", default: "Type"),
+          value: t("dashboard.card.service", default: "Service"),
           icon: :server,
           tone: :info %>
         <% end %>
 
         <%= render "shared/ui/status_metric",
-        label: "Jobs",
+        label: t("dashboard.card.jobs", default: "Jobs"),
         value: project.cron_summary_label,
         icon: project.cron_summary_icon,
         tone: project.cron_summary_tone %>
@@ -168,7 +168,7 @@
           value:
             (
               if latest_deployment
-                "#{time_ago_in_words(latest_deployment.created_at)} ago"
+                "#{time_ago_in_words(latest_deployment.created_at)} #{I18n.locale.to_s == 'en' ? 'ago' : ''}".strip
               else
                 "Never"
               end

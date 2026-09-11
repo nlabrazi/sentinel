@@ -83,7 +83,7 @@
             ) %>
             <%= form.search_field :q,
                               value: params[:q],
-                              placeholder: "Search Sentinel...",
+                              placeholder: t("layout.search_sentinel", default: "Search Sentinel..."),
                               class:
                                 "w-full rounded-md border border-gray-200 bg-white px-10 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100" %>
             <span
@@ -113,19 +113,19 @@
           ">
           <%= link_to root_path, data: { action: "mobile-nav#close", sidebar_target: "navItem" }, class: "flex items-center gap-3 rounded-md px-3 py-2 #{current_page?(root_path) ? 'border-l-4 border-cyan-300 bg-cyan-50 text-cyan-700 dark:bg-gray-800 dark:text-cyan-300' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100'}" do %>
             <%= fa_icon(:rocket, class_name: "h-4 w-4") %>
-            <span data-sidebar-target="full">Projects</span>
+            <span data-sidebar-target="full"><%= t("layout.projects", default: "Projects") %></span>
           <% end %>
           <%= link_to deploys_path, data: { action: "mobile-nav#close", sidebar_target: "navItem" }, class: "flex items-center gap-3 rounded-md px-3 py-2 #{current_page?(deploys_path) ? 'border-l-4 border-cyan-300 bg-cyan-50 text-cyan-700 dark:bg-gray-800 dark:text-cyan-300' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100'}" do %>
             <%= fa_icon(:rotate, class_name: "h-4 w-4") %>
-            <span data-sidebar-target="full">Deployments</span>
+            <span data-sidebar-target="full"><%= t("layout.deployments", default: "Deployments") %></span>
           <% end %>
           <%= link_to settings_path, data: { action: "mobile-nav#close", sidebar_target: "navItem" }, class: "flex items-center gap-3 rounded-md px-3 py-2 #{current_page?(settings_path) ? 'border-l-4 border-cyan-300 bg-cyan-50 text-cyan-700 dark:bg-gray-800 dark:text-cyan-300' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100'}" do %>
             <%= fa_icon(:gear, class_name: "h-4 w-4") %>
-            <span data-sidebar-target="full">Settings</span>
+            <span data-sidebar-target="full"><%= t("layout.settings", default: "Settings") %></span>
           <% end %>
           <%= link_to documentation_path, data: { action: "mobile-nav#close", sidebar_target: "navItem" }, class: "flex items-center gap-3 rounded-md px-3 py-2 #{current_page?(documentation_path) ? 'border-l-4 border-cyan-300 bg-cyan-50 text-cyan-700 dark:bg-gray-800 dark:text-cyan-300' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100'}" do %>
             <%= fa_icon(:magnifying_glass, class_name: "h-4 w-4") %>
-            <span data-sidebar-target="full">Documentation</span>
+            <span data-sidebar-target="full"><%= t("layout.documentation", default: "Documentation") %></span>
           <% end %>
         </nav>
 
@@ -134,9 +134,15 @@
             space-y-3 border-t border-gray-200 px-4 py-4 dark:border-gray-800
           "
           data-sidebar-target="full">
+          <div class="flex items-center justify-between pb-1 lg:hidden">
+            <span class="text-xs text-gray-500 dark:text-gray-400"><%= t("layout.language", default: "Langue") %></span>
+            <%= render "shared/locale_switcher" %>
+          </div>
           <button
             id="dark-mode-toggle"
             data-controller="dark-mode"
+            data-dark-mode-dark-text-value="<%= t('layout.enable_dark_mode', default: 'Activer Mode sombre') %>"
+            data-dark-mode-light-text-value="<%= t('layout.enable_light_mode', default: 'Activer Mode clair') %>"
             data-action="click->dark-mode#toggle"
             class="
               flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-sm
@@ -147,7 +153,7 @@
               data-dark-mode-target="icon"
               class="fa-solid fa-moon mr-2 text-sm"
               aria-hidden="true"></i>
-            <span data-dark-mode-target="text">Activer Mode sombre</span>
+            <span data-dark-mode-target="text"><%= t('layout.enable_dark_mode', default: 'Activer Mode sombre') %></span>
           </button>
           <% if user_signed_in? %>
             <div class="flex items-center gap-3 px-1">
@@ -158,12 +164,12 @@
                 "><%= current_user.username.first.upcase %></div>
               <div class="min-w-0 flex-1">
                 <p class="truncate text-sm font-semibold text-gray-900 dark:text-gray-100"><%= current_user.username %></p>
-                <p class="truncate text-xs text-gray-500">Compte administrateur</p>
+                <p class="truncate text-xs text-gray-500"><%= t('layout.admin_account', default: 'Compte administrateur') %></p>
               </div>
             </div>
             <%= button_to destroy_user_session_path, method: :delete, class: "flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100" do %>
               <%= fa_icon(:right_from_bracket, class_name: "mr-2 h-4 w-4") %>
-              Déconnexion
+              <%= t('layout.sign_out', default: 'Déconnexion') %>
             <% end %>
           <% end %>
         </div>
@@ -191,15 +197,16 @@
                 aria-label="Ouvrir le menu">
                 <%= fa_icon(:bars, class_name: "h-5 w-5") %>
               </button>
-              <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-300"><%= @page_title || "Projects" %></h1>
+              <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-300"><%= @page_title || t("layout.projects", default: "Projects") %></h1>
             </div>
             <div
               class="
-                flex items-center gap-5 text-sm font-semibold text-gray-500 dark:text-gray-400
+                flex items-center gap-3 sm:gap-5 text-sm font-semibold text-gray-500 dark:text-gray-400
               ">
+              <%= render "shared/locale_switcher" %>
               <%= link_to documentation_path, class: "hidden items-center gap-2 hover:text-gray-900 dark:hover:text-gray-200 sm:inline-flex" do %>
                 <%= fa_icon(:magnifying_glass, class_name: "h-4 w-4") %>
-                Documentation
+                <%= t("layout.documentation", default: "Documentation") %>
               <% end %>
             </div>
           </div>

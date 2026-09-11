@@ -1,31 +1,277 @@
-# Files in the config/locales directory are used for internationalization and
-# are automatically loaded by Rails. If you want to use locales other than
-# English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t "hello"
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t("hello") %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# To learn more about the API, please read the Rails Internationalization guide
-# at https://guides.rubyonrails.org/i18n.html.
-#
-# Be aware that YAML interprets the following case-insensitive strings as
-# booleans: `true`, `false`, `on`, `off`, `yes`, `no`. Therefore, these strings
-# must be quoted to be interpreted as strings. For example:
-#
-#     en:
-#       "yes": yup
-#       enabled: "ON"
-
 en:
-  hello: "Hello world"
+  date:
+    formats:
+      default: "%Y-%m-%d"
+      short: "%b %d"
+      long: "%B %d, %Y"
+    day_names: [Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday]
+    abbr_day_names: [Sun, Mon, Tue, Wed, Thu, Fri, Sat]
+    month_names: [~, January, February, March, April, May, June, July, August, September, October, November, December]
+    abbr_month_names: [~, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec]
+
+  time:
+    formats:
+      default: "%a, %d %b %Y %H:%M:%S %z"
+      short: "%b %d %H:%M"
+      long: "%B %d, %Y %H:%M"
+    am: "am"
+    pm: "pm"
+
+  layout:
+    projects: "Projects"
+    deployments: "Deployments"
+    settings: "Settings"
+    documentation: "Documentation"
+    docs: "Docs"
+    search_sentinel: "Search Sentinel..."
+    search_shortcut: "CtrlK"
+    admin_account: "Administrator account"
+    sign_out: "Log out"
+    enable_dark_mode: "Enable dark mode"
+    enable_light_mode: "Enable light mode"
+    close_menu: "Close menu"
+    open_menu: "Open menu"
+    toggle_menu: "Collapse or expand menu"
+    language: "Language"
+    switch_to_fr: "Passer en Français"
+    switch_to_en: "Switch to English"
+
+  dashboard:
+    eyebrow: "Sentinel overview"
+    title: "Projects cockpit"
+    description: "Quick overview of projects requiring your attention: site status, version, jobs and maintenance."
+    search_placeholder: "Search projects"
+    metrics:
+      projects: "Projects"
+      online: "Online"
+      offline: "Offline"
+      behind: "Behind"
+      staging_sync: "Staging sync"
+      jobs_issues: "Jobs issues"
+      maintenance: "Maintenance"
+    grafana:
+      title: "Global observability"
+      live: "Live"
+      description: "Global Grafana view of applications (click to expand or collapse)."
+      hide: "Hide"
+      show: "Show"
+      connect: "Sign in to Grafana"
+      toggle_title: "Collapse or expand Grafana panel"
+    actions:
+      running: "Running"
+      deploy: "Deploy"
+      deploy_title: "Deploys the latest known commit of the tracked branch"
+      open_project: "Open project"
+      open_project_title: "Opens detailed project page"
+      open_site: "Open site"
+      open_site_title: "Opens site in production"
+      sync_github: "Sync GitHub"
+      sync_github_title: "Syncs GitHub commits and pull requests for this project"
+      check_health: "Check health"
+      check_health_title: "Runs an immediate HTTP healthcheck for this project"
+      sync_jobs: "Sync jobs"
+      sync_jobs_title: "Syncs cron statuses published by the project"
+    badges:
+      needs_attention: "Needs attention"
+      maintenance: "Maintenance"
+      service: "Service"
+      cron: "Cron"
+    card:
+      no_preview: "No preview"
+      preview_alt: "Preview of %{name}"
+      job_batch_vps: "VPS batch job (%{path})"
+      infra_service: "Infra service"
+      deploy_time_ago: "Deploy %{time} ago"
+      runtime: "Runtime"
+      no_http_code: "No HTTP code"
+      never_checked: "Never checked"
+      monitoring_disabled: "Monitoring disabled"
+      version: "Version"
+      type: "Type"
+      service: "Service"
+      updates:
+        one: "1 update"
+        other: "%{count} updates"
+      up_to_date: "Up to date"
+      infra_monitored: "Infra monitored"
+      unknown: "Unknown"
+      jobs: "Jobs"
+      never_synced: "Never synced"
+      no_cron_monitoring: "No cron monitoring"
+    empty:
+      title: "No project matches this search."
+      description: "Try another project name or clear the search."
+
+  projects:
+    overview: "Project overview"
+    deploys: "Deploys"
+    monitoring: "Monitoring"
+    healthcheck: "Healthcheck"
+    commits: "Commits"
+    pull_requests: "Pull requests"
+    quick_terminal:
+      title: "Quick commands"
+      badge: "Interactive"
+      connected_to: "Secure console connected to %{path}"
+      clear: "Clear"
+      clear_title: "Clear terminal (or Ctrl+L)"
+      shortcuts: "Shortcuts:"
+      session_title: "Sentinel Terminal v1.0 — VPS Shell Session"
+      allowed_commands: "Allowed commands:"
+      help_hint: "Type %{help} to display allowed commands, or %{clear} to reset."
+      input_placeholder: "Enter a command (e.g. cat Dockerfile, ./status.sh, git status)..."
+      safe_sandbox: "Safe sandbox active: execution restricted to %{path}"
+      timeout: "Timeout: 10s"
+      ready: "Ready"
+    status_duration:
+      just_now: "just now"
+      minutes: "%{count} min ago"
+      hours: "%{count}h ago"
+      days: "%{count}d ago"
+      months: "%{count} mo ago"
+    staging_sync:
+      not_configured: "Not configured"
+      synced: "Synced with %{branch}"
+      ahead: "+%{count} commit%{s} (ahead)"
+      behind: "-%{count} commit%{s} (behind)"
+      diverged: "+%{ahead} / -%{behind}"
+    runtime_status:
+      online: "Online"
+      offline: "Offline"
+      disabled: "Disabled"
+      unknown: "Unknown"
+    cron_summary:
+      disabled: "Disabled"
+      ok: "OK"
+      failed: "Failed"
+      never_run: "Never run"
+      not_reported: "Not reported"
+      unknown: "Unknown"
+    actions:
+      deploy_latest: "Deploy latest"
+      refresh_preview: "Refresh preview"
+      enable_maintenance: "Enable maintenance"
+      disable_maintenance: "Disable maintenance"
+    monitoring_settings:
+      title: "Monitoring settings"
+      http_title: "HTTP Healthcheck"
+      http_desc: "Regular checks of URL %{url}"
+      cron_title: "Cron monitoring"
+      cron_desc: "Tracks execution of batch jobs defined in %{path}"
+      maintenance_title: "Maintenance mode"
+      maintenance_desc: "Displays maintenance page on %{url}"
+    analytics:
+      title: "Analytics"
+      subtitle: "Umami audience metrics (last 24 hours)."
+      visitors_24h: "Visitors (24h)"
+      pageviews_24h: "Page views"
+      bounce_rate: "Bounce rate"
+      last_update: "Last update: %{time} ago"
+      never_synced: "Never synced"
+      sync_button: "Sync Umami"
+      sync_button_title: "Synchronize Umami metrics for this project"
+      open_umami_title: "Open in Umami console"
+      sync_success: "Umami metrics synchronized."
+      sync_failed: "Umami synchronization failed: %{error}"
+
+  deployments:
+    title: "Deployments"
+    subtitle: "Latest deployment activity across managed projects."
+    running_banner:
+      one: "1 deployment running"
+      other: "%{count} deployments running"
+    view_logs: "View logs →"
+    stats:
+      total: "Total"
+      success: "Success"
+      failed: "Failed"
+      success_rate: "Success rate"
+    filters:
+      search_placeholder: "Search by commit SHA or project..."
+      all_projects: "All projects"
+      all_statuses: "All statuses"
+      per_page: "%{count} per page"
+      submit: "Filter"
+      reset: "Reset"
+    table:
+      project: "Project"
+      commit: "Commit"
+      status: "Status"
+      duration: "Duration"
+      triggered_by: "Triggered by"
+      date: "Date"
+      actions: "Actions"
+      running: "running"
+      success: "success"
+      failed: "failed"
+      pending: "pending"
+    show:
+      deployment_title: "Deployment %{sha}"
+      triggered_on: "Triggered by %{user} on %{date}."
+      redeploy: "Redeploy"
+      redeploy_confirm: "Do you want to re-run a deployment for %{name}?"
+      logs: "Logs"
+      copy: "Copy"
+      copied: "Copied!"
+      download: "Download"
+      no_logs: "No logs recorded for this deployment."
+      details: "Details"
+      project: "Project"
+      commit: "Commit"
+      branch: "Branch"
+      duration: "Duration"
+      triggered_by: "Triggered by"
+      started: "Started"
+      updated: "Updated"
+      vps: "VPS"
+      path: "Path"
+      deploy_script: "Deploy script"
+    empty:
+      title: "No deployments found"
+      search_desc: "No deployments match your search criteria."
+      history_desc: "No deployment history at the moment."
+      reset_filters: "Reset filters"
+
+  settings:
+    title: "Settings for %{name}"
+    subtitle: "Supervision of VPS infrastructure, background worker status and operational triggers."
+    projects_managed: "%{count} managed project(s)"
+    global_actions: "Global operational actions"
+    global_actions_desc: "Execute on-demand audit and synchronization background tasks for all projects."
+    healthcheck_title: "Global healthcheck"
+    healthcheck_desc: "Checks HTTP availability for all monitored projects."
+    trigger_audit: "Trigger audit"
+    healthcheck_confirm: "Launch an immediate HTTP healthcheck on all active projects?"
+    sync_github_title: "Global GitHub sync"
+    sync_github_desc: "Queries GitHub API to update recent commits and open pull requests."
+    sync_github_confirm: "Synchronize GitHub commits and PRs immediately for all projects?"
+    sync_button: "Synchronize"
+    sync_crons_title: "Sync VPS Crons"
+    sync_crons_desc: "Reads status file on VPS to record scheduled jobs history."
+    sync_crons_confirm: "Synchronize cron statuses on VPS for all projects?"
+    sync_umami_title: "Global Umami sync"
+    sync_umami_desc: "Queries Umami API to update traffic metrics for all projects."
+    sync_umami_confirm: "Synchronize Umami metrics immediately for all projects?"
+    workers_title: "Workers & Background jobs"
+    solid_queue_active: "Solid Queue active"
+    active_processes: "Active processes"
+    failed_jobs: "Failed jobs"
+    recurring_task: "Recurring task"
+    frequency: "Frequency"
+    job: "Job"
+    card_general: "General app settings"
+    card_app_details: "Application details • Application information"
+    card_env_vars: "Environment variables"
+    card_env_vars_desc: "Runtime configuration status. Secret values are never exposed."
+    card_access: "Access & security"
+    card_access_policy: "Access policy"
+    card_access_policy_desc: "The application requires authentication before exposing project or deployment data."
+    first_project: "First project"
+    none: "None"
+    configured: "Configured"
+    missing: "Missing"
+
+  documentation:
+    title: "Sentinel documentation"
+    overview_title: "Sentinel product overview"
+    faq_title: "Frequently Asked Questions"

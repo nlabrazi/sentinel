@@ -2,6 +2,10 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["icon", "text"]
+  static values = {
+    darkText: { type: String, default: "Activer Mode sombre" },
+    lightText: { type: String, default: "Activer Mode clair" }
+  }
 
   connect() {
     const isDark = localStorage.getItem("darkMode") === "true"
@@ -22,7 +26,7 @@ export default class extends Controller {
     this.iconTarget.classList.add(isDark ? "fa-sun" : "fa-moon")
 
     this.textTarget.textContent = isDark
-      ? "Activer Mode clair"
-      : "Activer Mode sombre"
+      ? (this.lightTextValue || "Activer Mode clair")
+      : (this.darkTextValue || "Activer Mode sombre")
   }
 }

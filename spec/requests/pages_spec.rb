@@ -37,6 +37,7 @@ RSpec.describe 'Pages', type: :request do
       expect(response.body).to include('Healthcheck global')
       expect(response.body).to include('Sync GitHub global')
       expect(response.body).to include('Sync Crons VPS')
+      expect(response.body).to include('Sync Umami global')
       expect(response.body).to include("Workers &amp; Tâches d'arrière-plan")
       expect(response.body).to include('Solid Queue actif')
     end
@@ -93,6 +94,19 @@ RSpec.describe 'Pages', type: :request do
     end
   end
 
+  describe 'POST /settings/trigger_sync_umami' do
+    it 'enqueues a SyncUmamiJob and redirects with notice' do
+      sign_in create(:user)
+      expect {
+        post trigger_sync_umami_settings_path
+      }.to have_enqueued_job(SyncUmamiJob)
+
+      expect(response).to redirect_to(settings_path)
+      follow_redirect!
+      expect(response.body).to include('Synchronisation Umami déclenchée')
+    end
+  end
+
   describe 'GET /deploys' do
     it 'renders the latest deployments newest first' do
       sign_in create(:user)
@@ -103,16 +117,24 @@ RSpec.describe 'Pages', type: :request do
       get deploys_path
 
       expect(response).to have_http_status(:success)
+      expect(response.body).to include('Déploiements')
+      expect(response.body).to include('Historique récent des déploiements sur les projets gérés.')
+      expect(response.body).to include('Total')
+      expect(response.body).to include('Succès')
+      expect(response.body).to include('Échecs')
+      expect(response.body).to include('Deployable')
+      expect(response.body.index('newcomm')).to be < response.body.index('oldcomm')
+      expect(response.body).to include(deployment_path(new_deployment))
+      expect(response.body).to include(deployment_path(old_deployment))
+
+      # In English
+      get deploys_path(locale: :en)
+      expect(response).to have_http_status(:success)
       expect(response.body).to include('Deployments')
       expect(response.body).to include('Latest deployment activity across managed projects.')
       expect(response.body).to include('Total')
       expect(response.body).to include('Success')
       expect(response.body).to include('Failed')
-      expect(response.body).to include('Deployable')
-      expect(response.body.index('newcomm')).to be < response.body.index('oldcomm')
-      expect(response.body).to include(deployment_path(new_deployment))
-      expect(response.body).to include(deployment_path(old_deployment))
-      expect(response.body).not_to include('Derniers déploiements')
     end
 
     it 'limits the global deployment history to the 20 newest records' do

@@ -1,0 +1,43 @@
+<div
+  class="inline-flex items-center rounded-lg border border-gray-200 bg-gray-100/80 p-0.5 text-xs dark:border-gray-800 dark:bg-gray-900/90"
+  role="group"
+  aria-label="<%= t('layout.language', default: 'Langue') %>">
+
+  <%= button_to switch_locale_path(locale: :fr),
+        method: :post,
+        form: { class: "inline-flex" },
+        class: "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition cursor-pointer #{I18n.locale.to_s == 'fr' ? 'bg-white font-semibold text-gray-900 shadow-xs border border-gray-200/60 dark:bg-gray-800 dark:text-white dark:border-gray-700' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white opacity-75 hover:opacity-100'}",
+        title: t('layout.switch_to_fr', default: "Passer en Français"),
+        aria: { label: t('layout.switch_to_fr', default: "Passer en Français"), current: (I18n.locale.to_s == 'fr' ? 'true' : nil) } do %>
+    <span class="inline-block h-3 w-4 overflow-hidden rounded-xs border border-gray-300/40 dark:border-gray-600/40 shadow-2xs shrink-0">
+      <svg viewBox="0 0 640 480" class="h-full w-full object-cover">
+        <path fill="#fff" d="M0 0h640v480H0z" />
+        <path fill="#002395" d="M0 0h213.3v480H0z" />
+        <path fill="#ed2939" d="M426.7 0H640v480H426.7z" />
+      </svg>
+    </span>
+    <span class="text-[11px] font-medium tracking-wider">FR</span>
+  <% end %>
+
+  <%= button_to switch_locale_path(locale: :en),
+        method: :post,
+        form: { class: "inline-flex" },
+        class: "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition cursor-pointer #{I18n.locale.to_s == 'en' ? 'bg-white font-semibold text-gray-900 shadow-xs border border-gray-200/60 dark:bg-gray-800 dark:text-white dark:border-gray-700' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white opacity-75 hover:opacity-100'}",
+        title: t('layout.switch_to_en', default: "Switch to English"),
+        aria: { label: t('layout.switch_to_en', default: "Switch to English"), current: (I18n.locale.to_s == 'en' ? 'true' : nil) } do %>
+    <span class="inline-block h-3 w-4 overflow-hidden rounded-xs border border-gray-300/40 dark:border-gray-600/40 shadow-2xs shrink-0">
+      <svg viewBox="0 0 60 30" class="h-full w-full object-cover">
+        <clipPath id="uk-flag-clip"><path d="M0,0 v30 h60 v-30 z" /></clipPath>
+        <clipPath id="uk-flag-diag"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z" /></clipPath>
+        <g clip-path="url(#uk-flag-clip)">
+          <path d="M0,0 v30 h60 v-30 z" fill="#012169" />
+          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6" />
+          <path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#uk-flag-diag)" stroke="#C8102E" stroke-width="4" />
+          <path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10" />
+          <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6" />
+        </g>
+      </svg>
+    </span>
+    <span class="text-[11px] font-medium tracking-wider">EN</span>
+  <% end %>
+</div>

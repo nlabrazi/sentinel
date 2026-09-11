@@ -24,4 +24,8 @@ module ApplicationHelper
       "aria-hidden": title.present? ? nil : "true"
     )
   end
+
+  def authentik_sso_enabled?
+    ENV.fetch("AUTHENTIK_ENABLED", "true") != "false"
+  end
 end
