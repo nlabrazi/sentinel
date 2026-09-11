@@ -15,10 +15,13 @@ class Project < ApplicationRecord
   has_one_attached :screenshot
 
   enum :status, { online: 0, offline: 1, unknown: 2 }, default: :unknown
-  enum :kind, { app: "app", service: "service" }, default: :app
+  enum :kind, { app: "app", service: "service", cron: "cron" }, default: :app
 
-  validates :name, :slug, :production_url, :vps_path, presence: true
-  validates :repo_url, :branch, presence: true, if: :app?
+  before_validation :sync_production_branch
+  before_save :update_status_changed_at, if: :status_changed?
+
+  validates :name, :slug, :vps_path, presence: true
+  validates :production_url, :repo_url, :branch, presence: true, if: :app?
 
   validates :slug, uniqueness: true
   validates :status, inclusion: { in: %w[online offline unknown] }
@@ -94,6 +97,88 @@ class Project < ApplicationRecord
 
   def runtime_needs_attention?
     runtime_monitoring_enabled? && offline?
+  end
+
+  def effective_production_branch
+    production_branch.presence || branch.presence || "master"
+  end
+
+  def prod_needs_deploy?
+    commits_behind.to_i.positive?
+  end
+
+  def status_duration_seconds
+    return nil unless status_changed_at
+
+    (Time.current - status_changed_at).to_i
+  end
+
+  def status_duration_human
+    return nil unless status_changed_at
+
+    seconds = status_duration_seconds
+    return "à l'instant" if seconds < 60
+
+    minutes = seconds / 60
+    return "depuis #{minutes} min" if minutes < 60
+
+    hours = minutes / 60
+    return "depuis #{hours} h" if hours < 24
+
+    days = hours / 24
+    return "depuis #{days} j" if days < 30
+
+    months = days / 30
+    "depuis #{months} mois"
+  end
+
+  def staging_sync_status
+    return :not_configured if staging_branch.blank?
+    return :synced if staging_commits_ahead.to_i.zero? && staging_commits_behind.to_i.zero?
+    return :ahead if staging_commits_ahead.to_i.positive? && staging_commits_behind.to_i.zero?
+    return :behind if staging_commits_ahead.to_i.zero? && staging_commits_behind.to_i.positive?
+
+    :diverged
+  end
+
+  def staging_sync_label
+    case staging_sync_status
+    when :not_configured
+      "Non configuré"
+    when :synced
+      "Synchronisé avec #{effective_production_branch}"
+    when :ahead
+      "+#{staging_commits_ahead} commit#{'s' if staging_commits_ahead > 1} (en avance)"
+    when :behind
+      "-#{staging_commits_behind} commit#{'s' if staging_commits_behind > 1} (en retard)"
+    when :diverged
+      "+#{staging_commits_ahead} / -#{staging_commits_behind}"
+    end
+  end
+
+  def staging_sync_tone
+    case staging_sync_status
+    when :synced
+      :success
+    when :ahead
+      :info
+    when :behind, :diverged
+      :warning
+    else
+      :neutral
+    end
+  end
+
+  def github_compare_staging_url
+    return nil if repo_url.blank? || staging_branch.blank? || github_repo.include?(" ")
+
+    "https://github.com/#{github_repo}/compare/#{effective_production_branch}...#{staging_branch}"
+  end
+
+  def github_compare_deploy_url
+    return nil if repo_url.blank? || last_commit_deployed.blank? || github_repo.include?(" ")
+
+    "https://github.com/#{github_repo}/compare/#{last_commit_deployed}...#{effective_production_branch}"
   end
 
   def maintenance_command(enabled)
@@ -185,7 +270,7 @@ class Project < ApplicationRecord
   end
 
   def fresh_screenshot_url
-    return nil unless ENV["APIFLASH_ACCESS_KEY"].present?
+    return nil unless ENV["APIFLASH_ACCESS_KEY"].present? && production_url.present?
 
     apiflash_screenshot_url(width: 1280, height: 720)
   end
@@ -279,5 +364,13 @@ class Project < ApplicationRecord
 
   def loaded_or_query_cron_jobs
     cron_jobs.to_a
+  end
+
+  def sync_production_branch
+    self.production_branch = branch if branch.present? && (production_branch.blank? || (!production_branch_changed? && branch_changed?))
+  end
+
+  def update_status_changed_at
+    self.status_changed_at = Time.current unless status_changed_at_changed?
   end
 end

@@ -6,6 +6,7 @@ class ProjectsController < ApplicationController
     :refresh_github_commits,
     :refresh_runtime,
     :refresh_cron_status,
+    :quick_command,
     :update_monitoring,
     :toggle_maintenance
   ]
@@ -58,12 +59,14 @@ class ProjectsController < ApplicationController
   end
 
   def refresh_github_commits
-    synced_commits_count = GithubCommitsSyncService.new(@project).call
-    synced_pull_requests_count = GithubPullRequestsSyncService.new(@project).call
-    @project.update!(github_synced_at: Time.current)
+    service = SyncProjectGithubService.new(@project)
 
-    redirect_back fallback_location: @project,
-                notice: "#{synced_commits_count} commit(s) et #{synced_pull_requests_count} pull request(s) synchronisé(s) depuis GitHub."
+    if service.call
+      redirect_back fallback_location: @project,
+                    notice: "#{service.synced_commits_count} commit(s) et #{service.synced_pull_requests_count} pull request(s) synchronisé(s) depuis GitHub."
+    else
+      redirect_back fallback_location: @project, alert: "Synchronisation GitHub impossible pour le moment."
+    end
   rescue StandardError => e
     Rails.logger.error "GitHub refresh failed for #{@project.slug}: #{e.message}"
     redirect_back fallback_location: @project, alert: "Synchronisation GitHub impossible pour le moment."
@@ -100,6 +103,20 @@ class ProjectsController < ApplicationController
   rescue StandardError => e
     Rails.logger.error "Cron status refresh failed for #{@project.slug}: #{e.message}"
     redirect_back fallback_location: @project, alert: "Synchronisation cron impossible pour le moment."
+  end
+
+  def quick_command
+    command = params[:command]
+    result = QuickCommandExecutionService.new(@project, command).call
+
+    render json: {
+      success: result[:success],
+      command: command,
+      stdout: result[:stdout],
+      stderr: result[:stderr],
+      exit_code: result[:exit_code],
+      duration: result[:duration]
+    }
   end
 
   def update_monitoring

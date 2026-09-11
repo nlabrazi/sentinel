@@ -15,10 +15,9 @@ RSpec.describe Project, type: :model do
     it { is_expected.to validate_uniqueness_of(:slug) }
     it { is_expected.to validate_presence_of(:repo_url) }
     it { is_expected.to validate_presence_of(:branch) }
-    it { is_expected.to validate_presence_of(:production_url) }
     it { is_expected.to validate_presence_of(:vps_path) }
     it { is_expected.to define_enum_for(:status).with_values(online: 0, offline: 1, unknown: 2).backed_by_column_of_type(:integer) }
-    it { is_expected.to define_enum_for(:kind).with_values(app: 'app', service: 'service').backed_by_column_of_type(:string) }
+    it { is_expected.to define_enum_for(:kind).with_values(app: 'app', service: 'service', cron: 'cron').backed_by_column_of_type(:string) }
 
     it 'requires a repository URL and branch for apps' do
       project = build(:project, kind: :app, repo_url: nil, branch: nil)
@@ -28,8 +27,27 @@ RSpec.describe Project, type: :model do
       expect(project.errors[:branch]).to be_present
     end
 
+    it 'requires a production URL for apps' do
+      project = build(:project, kind: :app, production_url: nil)
+
+      expect(project).not_to be_valid
+      expect(project.errors[:production_url]).to be_present
+    end
+
     it 'allows services without a repository URL or branch' do
       project = build(:project, kind: :service, repo_url: nil, branch: nil)
+
+      expect(project).to be_valid
+    end
+
+    it 'allows crons without a production URL' do
+      project = build(:project, kind: :cron, production_url: nil)
+
+      expect(project).to be_valid
+    end
+
+    it 'allows services without a production URL' do
+      project = build(:project, kind: :service, production_url: nil, repo_url: nil, branch: nil)
 
       expect(project).to be_valid
     end
@@ -261,6 +279,113 @@ RSpec.describe Project, type: :model do
 
       expect(project.latest_ping).to eq(new_ping)
       expect(project.latest_ping).not_to eq(old_ping)
+    end
+  end
+
+  describe '#status_duration_human' do
+    it 'returns nil when status_changed_at is blank' do
+      project = build(:project, status_changed_at: nil)
+      expect(project.status_duration_human).to be_nil
+    end
+
+    it 'returns "à l\'instant" when changed less than 60 seconds ago' do
+      project = build(:project, status_changed_at: 30.seconds.ago)
+      expect(project.status_duration_human).to eq("à l'instant")
+    end
+
+    it 'returns minutes when changed less than an hour ago' do
+      project = build(:project, status_changed_at: 25.minutes.ago)
+      expect(project.status_duration_human).to eq("depuis 25 min")
+    end
+
+    it 'returns hours when changed less than a day ago' do
+      project = build(:project, status_changed_at: 4.hours.ago)
+      expect(project.status_duration_human).to eq("depuis 4 h")
+    end
+
+    it 'returns days when changed more than a day ago' do
+      project = build(:project, status_changed_at: 12.days.ago)
+      expect(project.status_duration_human).to eq("depuis 12 j")
+    end
+  end
+
+  describe '#staging_sync_status and #staging_sync_label' do
+    it 'returns not_configured when staging_branch is blank' do
+      project = build(:project, staging_branch: nil)
+      expect(project.staging_sync_status).to eq(:not_configured)
+      expect(project.staging_sync_label).to eq("Non configuré")
+      expect(project.staging_sync_tone).to eq(:neutral)
+    end
+
+    it 'returns synced when ahead and behind are 0' do
+      project = build(:project, staging_branch: 'staging', staging_commits_ahead: 0, staging_commits_behind: 0)
+      expect(project.staging_sync_status).to eq(:synced)
+      expect(project.staging_sync_label).to eq("Synchronisé avec master")
+      expect(project.staging_sync_tone).to eq(:success)
+    end
+
+    it 'returns ahead when staging has unmerged commits' do
+      project = build(:project, staging_branch: 'staging', staging_commits_ahead: 3, staging_commits_behind: 0)
+      expect(project.staging_sync_status).to eq(:ahead)
+      expect(project.staging_sync_label).to eq("+3 commits (en avance)")
+      expect(project.staging_sync_tone).to eq(:info)
+    end
+
+    it 'returns behind when master has advanced' do
+      project = build(:project, staging_branch: 'staging', staging_commits_ahead: 0, staging_commits_behind: 2)
+      expect(project.staging_sync_status).to eq(:behind)
+      expect(project.staging_sync_label).to eq("-2 commits (en retard)")
+      expect(project.staging_sync_tone).to eq(:warning)
+    end
+
+    it 'returns diverged when both ahead and behind are positive' do
+      project = build(:project, staging_branch: 'staging', staging_commits_ahead: 4, staging_commits_behind: 1)
+      expect(project.staging_sync_status).to eq(:diverged)
+      expect(project.staging_sync_label).to eq("+4 / -1")
+      expect(project.staging_sync_tone).to eq(:warning)
+    end
+  end
+
+  describe '#prod_needs_deploy?' do
+    it 'returns true when commits_behind is positive' do
+      project = build(:project, commits_behind: 2)
+      expect(project.prod_needs_deploy?).to be(true)
+    end
+
+    it 'returns false when commits_behind is zero' do
+      project = build(:project, commits_behind: 0)
+      expect(project.prod_needs_deploy?).to be(false)
+    end
+  end
+
+  describe 'status_changed_at callback' do
+    it 'automatically records the timestamp when status changes' do
+      project = create(:project, status: :unknown)
+      old_time = 1.hour.ago.change(usec: 0)
+      project.update_column(:status_changed_at, old_time)
+
+      expect {
+        project.update!(status: :online)
+      }.to change { project.status_changed_at }
+
+      expect(project.status_changed_at).to be > old_time
+    end
+  end
+
+  describe '#github_compare_staging_url and #github_compare_deploy_url' do
+    it 'returns the correct compare URL between production and staging' do
+      project = build(:project, repo_url: 'https://github.com/nlabrazi/sentinel.git', production_branch: 'master', staging_branch: 'staging')
+      expect(project.github_compare_staging_url).to eq('https://github.com/nlabrazi/sentinel/compare/master...staging')
+    end
+
+    it 'returns nil when staging branch or repo url is blank' do
+      project = build(:project, repo_url: nil, staging_branch: 'staging')
+      expect(project.github_compare_staging_url).to be_nil
+    end
+
+    it 'returns the correct compare URL for deployed commit vs production branch' do
+      project = build(:project, repo_url: 'https://github.com/nlabrazi/sentinel.git', production_branch: 'master', last_commit_deployed: 'abc1234')
+      expect(project.github_compare_deploy_url).to eq('https://github.com/nlabrazi/sentinel/compare/abc1234...master')
     end
   end
 end

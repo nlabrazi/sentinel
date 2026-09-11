@@ -86,6 +86,10 @@ RSpec.describe "Dashboards", type: :request do
       expect(response.body).to include('target="_blank"')
       expect(response.body).to include('rel="noopener"')
       expect(response.body).to include('sandbox="allow-scripts allow-same-origin allow-forms allow-popups"')
+      expect(response.body).to include('data-controller="collapsible"')
+      expect(response.body).to include('data-collapsible-storage-key-value="sentinel_dashboard_grafana_open"')
+      expect(response.body).to include("Masquer")
+      expect(response.body).to include('data-collapsible-target="content"')
     end
 
     it "renders the latest deployment timestamp for each project" do
@@ -184,6 +188,56 @@ RSpec.describe "Dashboards", type: :request do
 
       expect(response.body).to include("Searchable Alpha")
       expect(response.body).not_to include("Hidden Beta")
+    end
+
+    it "renders the status duration indicator when status_changed_at is present" do
+      sign_in create(:user)
+      create(
+        :project,
+        name: "Duration Project",
+        status: :online,
+        status_changed_at: 2.hours.ago
+      )
+
+      get root_path
+
+      expect(response.body).to include("Duration Project")
+      expect(response.body).to include("depuis 2 h")
+    end
+
+    it "renders staging drift indicators and staging sync count" do
+      sign_in create(:user)
+      create(
+        :project,
+        name: "Staged App",
+        production_branch: "master",
+        staging_branch: "staging",
+        staging_commits_ahead: 3,
+        staging_commits_behind: 0
+      )
+
+      get root_path
+
+      expect(response.body).to include("Staging sync")
+      expect(response.body).to include("+3 commits (en avance)")
+    end
+
+    it "renders cron project kind and batch script path" do
+      sign_in create(:user)
+      create(
+        :project,
+        name: "Batch Worker",
+        kind: :cron,
+        production_url: nil,
+        vps_path: "/srv/apps/worker"
+      )
+
+      get root_path
+
+      expect(response.body).to include("Batch Worker")
+      expect(response.body).to include("Cron")
+      expect(response.body).to include("Job batch VPS (/srv/apps/worker)")
+      expect(response.body).not_to include("Open site")
     end
   end
 

@@ -1,0 +1,167 @@
+<section
+  id="quick-commands"
+  class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow"
+  data-controller="quick-terminal"
+  data-quick-terminal-url-value="<%= quick_command_project_path(project) %>"
+  data-quick-terminal-prompt-prefix-value="sentinel@vps:<%= project.slug %>$">
+
+  <div class="border-b border-gray-200 dark:border-gray-800 px-5 py-4">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <div class="flex items-center gap-2">
+          <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">Quick commands</h2>
+          <span class="rounded-full bg-cyan-100 dark:bg-cyan-900/40 text-cyan-800 dark:text-cyan-300 px-2.5 py-0.5 text-xs font-semibold">
+            Interactive
+          </span>
+        </div>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Console sécurisée connectée à <span class="font-mono text-xs text-gray-700 dark:text-gray-300"><%= project.vps_path %></span>
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          data-action="quick-terminal#clear"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-2.5 py-1 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          title="Vider le terminal (ou Ctrl+L)">
+          <%= fa_icon(:broom, class_name: "h-3.5 w-3.5 text-gray-500 dark:text-gray-400") %>
+          <span>Vider</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Chips -->
+    <div class="mt-3 flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+      <span class="text-gray-400 dark:text-gray-500 text-[11px] font-medium shrink-0 mr-1">Raccourcis :</span>
+      <button
+        type="button"
+        data-action="quick-terminal#runChip"
+        data-command="./status.sh"
+        class="inline-flex items-center gap-1 rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-2 py-1 font-mono text-xs text-gray-700 dark:text-gray-300 hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors shrink-0">
+        <%= fa_icon(:play, class_name: "h-2.5 w-2.5 text-cyan-500") %>
+        <span>./status.sh</span>
+      </button>
+
+      <button
+        type="button"
+        data-action="quick-terminal#runChip"
+        data-command="git status"
+        class="inline-flex items-center gap-1 rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-2 py-1 font-mono text-xs text-gray-700 dark:text-gray-300 hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors shrink-0">
+        <%= fa_icon(:code_branch, class_name: "h-2.5 w-2.5 text-purple-500") %>
+        <span>git status</span>
+      </button>
+
+      <button
+        type="button"
+        data-action="quick-terminal#runChip"
+        data-command="docker compose ps"
+        class="inline-flex items-center gap-1 rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-2 py-1 font-mono text-xs text-gray-700 dark:text-gray-300 hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors shrink-0">
+        <%= fa_icon(:cubes, class_name: "h-2.5 w-2.5 text-blue-500") %>
+        <span>docker compose ps</span>
+      </button>
+
+      <button
+        type="button"
+        data-action="quick-terminal#runChip"
+        data-command="tail -n 20 deploy.log"
+        class="inline-flex items-center gap-1 rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-2 py-1 font-mono text-xs text-gray-700 dark:text-gray-300 hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors shrink-0">
+        <%= fa_icon(:file_lines, class_name: "h-2.5 w-2.5 text-amber-500") %>
+        <span>tail deploy.log</span>
+      </button>
+
+      <button
+        type="button"
+        data-action="quick-terminal#runChip"
+        data-command="ls -la"
+        class="inline-flex items-center gap-1 rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-2 py-1 font-mono text-xs text-gray-700 dark:text-gray-300 hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors shrink-0">
+        <%= fa_icon(:folder_open, class_name: "h-2.5 w-2.5 text-emerald-500") %>
+        <span>ls -la</span>
+      </button>
+
+      <button
+        type="button"
+        data-action="quick-terminal#runChip"
+        data-command="uptime"
+        class="inline-flex items-center gap-1 rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 px-2 py-1 font-mono text-xs text-gray-700 dark:text-gray-300 hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors shrink-0">
+        <%= fa_icon(:clock, class_name: "h-2.5 w-2.5 text-gray-400") %>
+        <span>uptime</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Terminal Window -->
+  <div class="p-4 sm:p-5">
+    <div class="overflow-hidden rounded-xl border border-gray-800 bg-gray-950 shadow-2xl">
+      <!-- Terminal macOS/Linux Titlebar -->
+      <div class="flex items-center justify-between border-b border-gray-800/80 bg-gray-900/90 px-4 py-2.5">
+        <div class="flex items-center gap-2">
+          <span class="h-3 w-3 rounded-full bg-rose-500/80 inline-block"></span>
+          <span class="h-3 w-3 rounded-full bg-amber-500/80 inline-block"></span>
+          <span class="h-3 w-3 rounded-full bg-emerald-500/80 inline-block"></span>
+          <span class="ml-2 font-mono text-xs text-gray-400 select-none">
+            sentinel@vps:<%= project.vps_path %>
+          </span>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div
+            data-quick-terminal-target="statusBadge"
+            class="flex items-center gap-1.5 text-xs font-mono select-none">
+            <span class="h-2 w-2 rounded-full bg-green-400"></span>
+            <span class="text-gray-400">Ready</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Output Screen -->
+      <div class="max-h-96 min-h-[14rem] overflow-y-auto p-4 space-y-3 font-mono text-xs text-gray-200">
+        <!-- Initial welcome -->
+        <div class="text-gray-500 text-xs select-none space-y-1 pb-2 border-b border-gray-800/60">
+          <p class="text-gray-400 font-semibold">Sentinel Terminal v1.0 — VPS Shell Session</p>
+          <p>
+            Commandes autorisées : <code class="text-gray-300">cat, ls, tail, grep, git, docker compose, ./*.sh, uptime...</code>
+          </p>
+          <p class="text-[11px] text-gray-500">
+            Tapez <code class="text-cyan-400">help</code> pour afficher les commandes autorisées, ou <code class="text-cyan-400">clear</code> pour réinitialiser.
+          </p>
+        </div>
+
+        <div data-quick-terminal-target="output" class="space-y-3"></div>
+      </div>
+
+      <!-- Prompt Input Line -->
+      <div class="flex items-center gap-2 border-t border-gray-800/80 bg-gray-900/60 px-4 py-3">
+        <span class="font-mono text-xs font-semibold text-cyan-400 select-none shrink-0">
+          sentinel@vps:<%= project.slug %>$
+        </span>
+
+        <input
+          type="text"
+          data-quick-terminal-target="input"
+          data-action="keydown->quick-terminal#handleKeydown"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          placeholder="Entrez une commande (ex: cat Dockerfile, ./status.sh, git status)..."
+          class="flex-1 border-0 bg-transparent p-0 font-mono text-xs text-gray-100 placeholder:text-gray-600 focus:outline-none focus:ring-0">
+
+        <!-- Loading spinner -->
+        <div data-quick-terminal-target="spinner" class="hidden shrink-0">
+          <%= fa_icon(:arrow_rotate_right, class_name: "h-3.5 w-3.5 animate-spin text-cyan-400") %>
+        </div>
+
+        <kbd class="hidden sm:inline-block rounded border border-gray-700 bg-gray-800/80 px-1.5 py-0.5 font-mono text-[10px] text-gray-400 select-none">
+          ↵ Enter
+        </kbd>
+      </div>
+    </div>
+
+    <!-- Safety notice footer -->
+    <div class="mt-3 flex items-center justify-between text-[11px] text-gray-400 dark:text-gray-500 px-1">
+      <span>🔒 Safe sandbox active : exécution cloisonnée dans <code class="font-mono"><%= project.vps_path %></code></span>
+      <span class="font-mono">Timeout : 10s</span>
+    </div>
+  </div>
+</section>

@@ -23,12 +23,25 @@
       <div class="flex flex-wrap items-center gap-2">
         <span
           class="
-            inline-flex w-fit items-center rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1 text-xs
-            font-semibold text-gray-600 dark:text-gray-300
+            inline-flex w-fit items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold
+            text-gray-600 dark:bg-gray-800 dark:text-gray-300
           ">
           <%= cron_jobs.size %>
           job<%= "s" unless cron_jobs.size == 1 %>
         </span>
+        <% if project.cron_monitoring_enabled? && cron_jobs.any? %>
+          <% if cron_jobs.any?(&:failed?) %>
+            <span class="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">
+              <%= fa_icon(:circle_xmark, class_name: "text-[10px]") %>
+              <%= cron_jobs.count(&:failed?) %> failed
+            </span>
+          <% else %>
+            <span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/40 dark:text-green-300">
+              <%= fa_icon(:circle_check, class_name: "text-[10px]") %>
+              All passing
+            </span>
+          <% end %>
+        <% end %>
         <% if project.cron_monitoring_enabled? %>
           <%= button_to refresh_cron_status_project_path(project),
           method: :post,
@@ -51,8 +64,8 @@
     icon: :clock %>
   <% elsif cron_jobs.any? %>
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-left text-sm">
-        <thead class="bg-gray-50 dark:bg-gray-950/70 text-xs uppercase text-gray-500">
+      <table class="min-w-full divide-y divide-gray-200 text-left text-sm dark:divide-gray-800">
+        <thead class="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-950/70">
           <tr>
             <th scope="col" class="px-5 py-3 font-semibold">Name</th>
             <th scope="col" class="px-5 py-3 font-semibold">Schedule</th>
@@ -65,7 +78,7 @@
         <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
           <% cron_jobs.each do |cron_job| %>
             <% last_log = cron_job.last_log_excerpt %>
-            <tr class="align-top">
+            <tr class="align-top <%= 'bg-rose-50/40 dark:bg-rose-950/10' if cron_job.failed? %>">
               <td class="px-5 py-4">
                 <p class="font-semibold text-gray-900 dark:text-gray-100"><%= cron_job.name %></p>
                 <p class="mt-1 max-w-xs truncate font-mono text-xs text-gray-500"><%= cron_job.command %></p>
@@ -91,8 +104,12 @@
                 <%= cron_job.display_duration %>
               </td>
               <td class="px-5 py-4 text-gray-600 dark:text-gray-300">
-                <% if last_log.present? %>
-                  <p class="max-w-xl truncate"><%= last_log %></p>
+                <% if cron_job.failed? %>
+                  <div class="rounded border border-rose-200 bg-rose-50 px-2.5 py-1.5 font-mono text-xs text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300">
+                    <span class="font-semibold">Exit error:</span> <%= last_log.presence || "Command exited with non-zero status" %>
+                  </div>
+                <% elsif last_log.present? %>
+                  <p class="max-w-xl truncate font-mono text-xs text-gray-600 dark:text-gray-400"><%= last_log %></p>
                 <% else %>
                   <span class="text-gray-500">No log reported</span>
                 <% end %>
