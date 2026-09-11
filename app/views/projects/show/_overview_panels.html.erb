@@ -124,43 +124,83 @@
         dark:bg-gray-900
       ">
       <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-800">
-        <div class="flex items-center justify-between gap-4">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">Analytics</h2>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Préparation métriques de visites Umami.</p>
+            <div class="flex items-center gap-2">
+              <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100"><%= t("projects.analytics.title", default: "Analytics") %></h2>
+              <% if project.umami_website_id.present? %>
+                <span class="inline-flex items-center gap-1 rounded-full bg-cyan-100 px-2 py-0.5 text-xs font-semibold text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300">
+                  Umami
+                </span>
+              <% end %>
+            </div>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400"><%= t("projects.analytics.subtitle", default: "Métriques d'audience Umami (dernières 24h).") %></p>
           </div>
 
-          <span
-            class="
-              rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-500 dark:bg-gray-800
-              dark:text-gray-400
-            ">V2.1</span>
+          <div class="flex items-center gap-2">
+            <%= button_to refresh_umami_project_path(project),
+                method: :post,
+                class: "inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 transition-colors",
+                title: t("projects.analytics.sync_button_title", default: "Synchroniser les métriques Umami pour ce projet"),
+                aria: { label: t("projects.analytics.sync_button", default: "Sync Umami") } do %>
+              <%= fa_icon(:rotate, class_name: "h-3.5 w-3.5 text-cyan-500") %>
+              <span><%= t("projects.analytics.sync_button", default: "Sync Umami") %></span>
+            <% end %>
+
+            <% umami_url = project.umami_website_id.present? ? "#{ENV.fetch('UMAMI_BASE_URL', 'https://umami.nabster.dev')}/websites/#{project.umami_website_id}" : ENV.fetch('UMAMI_BASE_URL', 'https://umami.nabster.dev') %>
+            <%= link_to umami_url,
+                target: "_blank",
+                rel: "noopener",
+                class: "inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 transition-colors",
+                title: t("projects.analytics.open_umami_title", default: "Ouvrir dans la console Umami") do %>
+              <%= fa_icon(:arrow_up_right_from_square, class_name: "h-3.5 w-3.5 text-gray-400") %>
+              <span>Umami</span>
+            <% end %>
+          </div>
         </div>
       </div>
 
       <div class="space-y-4 p-5">
         <div class="grid grid-cols-3 gap-3 text-sm">
           <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800 dark:bg-gray-950">
-            <p class="text-xs text-gray-500">Visiteurs (24h)</p>
-            <p class="mt-1 font-semibold text-gray-400 dark:text-gray-600">—</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400"><%= t("projects.analytics.visitors_24h", default: "Visiteurs (24h)") %></p>
+            <p class="mt-1 font-semibold text-gray-900 dark:text-gray-100">
+              <%= project.umami_synced_at.present? ? number_with_delimiter(project.umami_visitors_24h || 0) : "—" %>
+            </p>
           </div>
 
           <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800 dark:bg-gray-950">
-            <p class="text-xs text-gray-500">Pages vues</p>
-            <p class="mt-1 font-semibold text-gray-400 dark:text-gray-600">—</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400"><%= t("projects.analytics.pageviews_24h", default: "Pages vues") %></p>
+            <p class="mt-1 font-semibold text-gray-900 dark:text-gray-100">
+              <%= project.umami_synced_at.present? ? number_with_delimiter(project.umami_pageviews_24h || 0) : "—" %>
+            </p>
           </div>
 
           <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 dark:border-gray-800 dark:bg-gray-950">
-            <p class="text-xs text-gray-500">Taux de rebond</p>
-            <p class="mt-1 font-semibold text-gray-400 dark:text-gray-600">—</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400"><%= t("projects.analytics.bounce_rate", default: "Taux de rebond") %></p>
+            <p class="mt-1 font-semibold text-gray-900 dark:text-gray-100">
+              <%= project.umami_synced_at.present? ? "#{project.umami_bounce_rate || 0}%" : "—" %>
+            </p>
           </div>
         </div>
 
-        <div class="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-950/60">
-          <p class="text-xs font-semibold text-gray-700 dark:text-gray-200">Connecteur Umami</p>
-          <p class="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
-            Prêt pour l'intégration de l'API Umami auto-hébergée. Les métriques apparaîtront automatiquement une fois le tracking ID associé.
-          </p>
+        <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-xs text-gray-500 dark:border-gray-800 dark:bg-gray-950/60 dark:text-gray-400">
+          <div class="flex items-center gap-2">
+            <%= fa_icon(:clock, class_name: "h-3.5 w-3.5 text-gray-400") %>
+            <span>
+              <% if project.umami_synced_at.present? %>
+                <%= t("projects.analytics.last_update", time: time_ago_in_words(project.umami_synced_at), default: "Dernière mise à jour : il y a %{time}") %>
+              <% else %>
+                <%= t("projects.analytics.never_synced", default: "Jamais synchronisé") %>
+              <% end %>
+            </span>
+          </div>
+
+          <% if project.umami_sync_error.present? %>
+            <span class="truncate text-red-500 dark:text-red-400 max-w-xs" title="<%= project.umami_sync_error %>">
+              <%= project.umami_sync_error %>
+            </span>
+          <% end %>
         </div>
       </div>
     </section>

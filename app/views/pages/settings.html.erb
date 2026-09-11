@@ -47,7 +47,7 @@
       </p>
     </div>
 
-    <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <div class="flex flex-col justify-between rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950/60">
         <div>
           <div class="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -104,6 +104,26 @@
               data: { turbo_confirm: "Synchroniser les statuts cron sur le VPS pour tous les projets ?" },
               class: "w-full cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-bold text-gray-900 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
             Synchroniser
+          <% end %>
+        </div>
+      </div>
+
+      <div class="flex flex-col justify-between rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950/60">
+        <div>
+          <div class="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+            <%= fa_icon(:chart_simple, class_name: "h-4 w-4 text-cyan-500") %>
+            <span><%= t("settings.sync_umami_title", default: "Sync Umami global") %></span>
+          </div>
+          <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+            <%= t("settings.sync_umami_desc", default: "Interroge l'API Umami pour mettre à jour les métriques de trafic de tous les projets.") %>
+          </p>
+        </div>
+        <div class="mt-4">
+          <%= button_to trigger_sync_umami_settings_path,
+              method: :post,
+              data: { turbo_confirm: t("settings.sync_umami_confirm", default: "Synchroniser immédiatement les métriques Umami de tous les projets ?") },
+              class: "w-full cursor-pointer rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-bold text-gray-900 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+            <%= t("settings.sync_button", default: "Synchroniser") %>
           <% end %>
         </div>
       </div>

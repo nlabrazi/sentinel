@@ -317,17 +317,40 @@ RSpec.describe 'Projects', type: :request do
       expect(response.body).to include('Import failed on row 12')
     end
 
-    it 'renders Umami analytics preparation panel' do
+    it 'renders Umami analytics panel with metrics and sync action' do
       sign_in create(:user)
-      project = create(:project)
+      project = create(
+        :project,
+        umami_website_id: 'site-uuid-1',
+        umami_visitors_24h: 350,
+        umami_pageviews_24h: 1200,
+        umami_bounce_rate: 28,
+        umami_synced_at: 10.minutes.ago
+      )
 
       get project_path(project)
 
       expect(response).to have_http_status(:success)
       expect(response.body).to include('Analytics')
-      expect(response.body).to include('Préparation métriques de visites Umami.')
-      expect(response.body).to include('Connecteur Umami')
       expect(response.body).to include('Visiteurs (24h)')
+      expect(response.body).to include('350')
+      expect(response.body).to include('1,200')
+      expect(response.body).to include('28%')
+      expect(response.body).to include('Sync Umami')
+      expect(response.body).to include('Dernière mise à jour')
+      expect(response.body).to include(refresh_umami_project_path(project))
+      expect(response.body).to include('/websites/site-uuid-1')
+    end
+
+    it 'renders Umami analytics empty state when never synced' do
+      sign_in create(:user)
+      project = create(:project, umami_synced_at: nil)
+
+      get project_path(project)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include('Analytics')
+      expect(response.body).to include('Jamais synchronisé')
     end
 
     it 'renders cron monitoring as disabled when the project has no cron integration' do
@@ -577,6 +600,38 @@ RSpec.describe 'Projects', type: :request do
 
       expect(response).to redirect_to(project_path(disabled_project))
       expect(flash[:notice]).to eq('Monitoring cron désactivé pour ce projet.')
+    end
+  end
+
+  describe 'POST /projects/:id/refresh_umami' do
+    let(:user) { create(:user) }
+    let(:project) { create(:project, umami_website_id: 'site-uuid-1') }
+
+    before do
+      sign_in user
+    end
+
+    it 'syncs Umami metrics immediately and redirects back with notice' do
+      allow(ProjectUmamiSyncService).to receive(:call).with(project).and_return(
+        ProjectUmamiSyncService::Result.new(success?: true, message: 'OK')
+      )
+
+      post refresh_umami_project_path(project), headers: { 'HTTP_REFERER' => project_path(project) }
+
+      expect(ProjectUmamiSyncService).to have_received(:call).with(project)
+      expect(response).to redirect_to(project_path(project))
+      expect(flash[:notice]).to eq('Métriques Umami synchronisées.')
+    end
+
+    it 'displays alert when sync fails' do
+      allow(ProjectUmamiSyncService).to receive(:call).with(project).and_return(
+        ProjectUmamiSyncService::Result.new(success?: false, message: 'API connection refused')
+      )
+
+      post refresh_umami_project_path(project)
+
+      expect(response).to redirect_to(project_path(project))
+      expect(flash[:alert]).to include('API connection refused')
     end
   end
 

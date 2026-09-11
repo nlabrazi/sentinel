@@ -37,6 +37,7 @@ RSpec.describe 'Pages', type: :request do
       expect(response.body).to include('Healthcheck global')
       expect(response.body).to include('Sync GitHub global')
       expect(response.body).to include('Sync Crons VPS')
+      expect(response.body).to include('Sync Umami global')
       expect(response.body).to include("Workers &amp; Tâches d'arrière-plan")
       expect(response.body).to include('Solid Queue actif')
     end
@@ -90,6 +91,19 @@ RSpec.describe 'Pages', type: :request do
       expect(response).to redirect_to(settings_path)
       follow_redirect!
       expect(response.body).to include('Synchronisation des statuts cron déclenchée')
+    end
+  end
+
+  describe 'POST /settings/trigger_sync_umami' do
+    it 'enqueues a SyncUmamiJob and redirects with notice' do
+      sign_in create(:user)
+      expect {
+        post trigger_sync_umami_settings_path
+      }.to have_enqueued_job(SyncUmamiJob)
+
+      expect(response).to redirect_to(settings_path)
+      follow_redirect!
+      expect(response.body).to include('Synchronisation Umami déclenchée')
     end
   end
 

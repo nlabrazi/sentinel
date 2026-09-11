@@ -6,6 +6,7 @@ class ProjectsController < ApplicationController
     :refresh_github_commits,
     :refresh_runtime,
     :refresh_cron_status,
+    :refresh_umami,
     :quick_command,
     :update_monitoring,
     :toggle_maintenance
@@ -103,6 +104,22 @@ class ProjectsController < ApplicationController
   rescue StandardError => e
     Rails.logger.error "Cron status refresh failed for #{@project.slug}: #{e.message}"
     redirect_back fallback_location: @project, alert: "Synchronisation cron impossible pour le moment."
+  end
+
+  def refresh_umami
+    result = ProjectUmamiSyncService.call(@project)
+
+    if result.success?
+      redirect_back fallback_location: @project,
+                    notice: t("projects.analytics.sync_success", default: "Métriques Umami synchronisées.")
+    else
+      redirect_back fallback_location: @project,
+                    alert: t("projects.analytics.sync_failed", error: result.message, default: "Synchronisation Umami : #{result.message}")
+    end
+  rescue StandardError => e
+    Rails.logger.error "Umami refresh failed for #{@project.slug}: #{e.message}"
+    redirect_back fallback_location: @project,
+                  alert: t("projects.analytics.sync_failed", error: e.message, default: "Synchronisation Umami impossible pour le moment.")
   end
 
   def quick_command

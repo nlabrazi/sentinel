@@ -36,6 +36,11 @@ class PagesController < ApplicationController
     redirect_to settings_path, notice: "Synchronisation des statuts cron déclenchée pour tous les projets."
   end
 
+  def trigger_sync_umami_all
+    SyncUmamiJob.perform_later
+    redirect_to settings_path, notice: "Synchronisation Umami déclenchée pour tous les projets."
+  end
+
   def documentation
     @page_title = "Documentation"
   end

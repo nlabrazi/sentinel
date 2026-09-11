@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_10_180000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_11_073420) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -155,10 +155,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_10_180000) do
     t.integer "staging_commits_behind", default: 0, null: false
     t.integer "status"
     t.datetime "status_changed_at"
+    t.integer "umami_bounce_rate"
+    t.integer "umami_pageviews_24h", default: 0
+    t.string "umami_sync_error"
+    t.datetime "umami_synced_at"
+    t.integer "umami_visitors_24h", default: 0
+    t.string "umami_website_id"
     t.datetime "updated_at", null: false
     t.string "vps_path"
     t.index ["kind"], name: "index_projects_on_kind"
     t.index ["slug"], name: "index_projects_on_slug", unique: true
+    t.index ["umami_website_id"], name: "index_projects_on_umami_website_id"
   end
 
   create_table "solid_queue_blocked_executions", force: :cascade do |t|
