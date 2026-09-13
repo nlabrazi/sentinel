@@ -77,7 +77,7 @@ group :development, :test do
   gem "rspec-rails", "~> 8.0"                    # Compatible Rails 8
   gem "factory_bot_rails", "~> 6.4"
   gem "shoulda-matchers", "~> 8.0"
-  gem "webmock", "~> 3.24"                       # Pour stubber les appels HTTP/SSH en test
+  gem "webmock", "~> 3.26"                       # Pour stubber les appels HTTP/SSH en test
   gem "simplecov", "~> 1.1", require: false      # Couverture de test (optionnel)
 end
 
