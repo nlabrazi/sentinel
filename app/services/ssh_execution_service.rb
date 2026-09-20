@@ -7,6 +7,7 @@ class SshExecutionService
   SSH_KNOWN_HOSTS_PATH = ENV.fetch("SSH_KNOWN_HOSTS_PATH", File.join(File.dirname(SSH_KEY_PATH), "known_hosts"))
   SSH_USER = ENV.fetch("VPS_USER", "control-panel")
   VPS_HOST = ENV.fetch("VPS_HOST", "vps.example.com")
+  SSH_VERIFY_HOST_KEY = ENV.fetch("SSH_VERIFY_HOST_KEY", "always").to_sym
 
   def initialize(project)
     @project = project
@@ -54,7 +55,17 @@ class SshExecutionService
       non_interactive: true,
       timeout: CONNECT_TIMEOUT_SECONDS,
       user_known_hosts_file: SSH_KNOWN_HOSTS_PATH,
-      verify_host_key: :always
+      verify_host_key: verify_host_key_option
     }
+  end
+
+  def verify_host_key_option
+    raw_value = ENV["SSH_VERIFY_HOST_KEY"].presence || SSH_VERIFY_HOST_KEY.to_s
+    case raw_value.strip.downcase
+    when "never", "false" then :never
+    when "accept_new" then :accept_new
+    when "accept_new_or_local_tunnel", "true" then :accept_new_or_local_tunnel
+    else :always
+    end
   end
 end
