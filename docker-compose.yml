@@ -21,6 +21,7 @@ x-rails-app: &rails-app
     VPS_USER: ${VPS_USER:-control-panel}
     SSH_KEY_PATH: ${SSH_KEY_PATH:-/app/config/ssh_key/id_rsa}
     SSH_KNOWN_HOSTS_PATH: ${SSH_KNOWN_HOSTS_PATH:-/app/config/ssh_key/known_hosts}
+    SSH_VERIFY_HOST_KEY: ${SSH_VERIFY_HOST_KEY:-always}
   volumes:
     - .:/app
     - sentinel-bundle:/bundle
@@ -49,6 +50,7 @@ services:
       VPS_USER: ${VPS_USER:-control-panel}
       SSH_KEY_PATH: ${SSH_KEY_PATH:-/app/config/ssh_key/id_rsa}
       SSH_KNOWN_HOSTS_PATH: ${SSH_KNOWN_HOSTS_PATH:-/app/config/ssh_key/known_hosts}
+      SSH_VERIFY_HOST_KEY: ${SSH_VERIFY_HOST_KEY:-always}
     volumes:
       - .:/app
       - sentinel-bundle:/bundle

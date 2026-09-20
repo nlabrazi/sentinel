@@ -91,6 +91,23 @@ RSpec.describe SshExecutionService, type: :service do
     )
   end
 
+  it 'allows configuring verify_host_key via SSH_VERIFY_HOST_KEY environment variable' do
+    allow(ENV).to receive(:[]).and_call_original
+    allow(ENV).to receive(:[]).with('SSH_VERIFY_HOST_KEY').and_return('accept_new')
+
+    channel = FakeSshChannel.new(success: true, exit_code: 0)
+    ssh = FakeSshSession.new(channel)
+    allow(Net::SSH).to receive(:start).and_yield(ssh)
+
+    service.execute('uptime')
+
+    expect(Net::SSH).to have_received(:start).with(
+      SshExecutionService::VPS_HOST,
+      SshExecutionService::SSH_USER,
+      hash_including(verify_host_key: :accept_new)
+    )
+  end
+
   it 'returns a failure when the remote command cannot be opened' do
     channel = FakeSshChannel.new(success: false, exit_code: 0)
     ssh = FakeSshSession.new(channel)

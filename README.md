@@ -246,6 +246,7 @@ Navigate to `http://localhost:3000` and sign in.
 | | `VPS_USER` | SSH user on the VPS (must belong to the `docker` group). |
 | | `SSH_KEY_PATH` | Path to the private SSH key inside the container (`/app/config/ssh_key/id_rsa`). |
 | | `SSH_KNOWN_HOSTS_PATH` | Path to the known_hosts file (`/app/config/ssh_key/known_hosts`). |
+| | `SSH_VERIFY_HOST_KEY` | Host key verification mode (`always`, `accept_new`, `never`). Default: `always`. |
 | | `SSH_CONNECT_TIMEOUT_SECONDS` | Maximum seconds allowed to establish SSH connection. Default: `10`. |
 | | `SSH_COMMAND_TIMEOUT_SECONDS` | Maximum seconds allowed for deploy command execution. Default: `600`. |
 | **Seeded Admin** | `ADMIN_USERNAME` | Default seeded administrator username. Default: `admin`. |
