@@ -27,20 +27,20 @@ pipeline {
         }
 
         stage('Gem audit') {
-          steps {
-            sh '''
-                export HOME="$WORKSPACE"
-                export XDG_DATA_HOME="$WORKSPACE/.local/share"
+            steps {
+                sh '''
+                    export BUNDLER_AUDIT_DB="$WORKSPACE/.bundler-audit/ruby-advisory-db"
 
-                mkdir -p "$XDG_DATA_HOME"
+                    mkdir -p "$WORKSPACE/.bundler-audit"
 
-                bin/bundler-audit
-            '''
-          }
+                    bin/bundler-audit
+                '''
+            }
         }
 
         stage('Importmap audit') {
             steps {
+                sh 'bin/importmap audit'
             }
         }
 
