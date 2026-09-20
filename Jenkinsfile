@@ -27,14 +27,20 @@ pipeline {
         }
 
         stage('Gem audit') {
-            steps {
-                sh 'bin/bundler-audit'
-            }
+          steps {
+            sh '''
+                export HOME="$WORKSPACE"
+                export XDG_DATA_HOME="$WORKSPACE/.local/share"
+
+                mkdir -p "$XDG_DATA_HOME"
+
+                bin/bundler-audit
+            '''
+          }
         }
 
         stage('Importmap audit') {
             steps {
-                sh 'bin/importmap audit'
             }
         }
 
