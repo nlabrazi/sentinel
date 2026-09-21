@@ -4,7 +4,7 @@ pipeline {
     agent {
         dockerfile {
             filename 'Dockerfile'
-            args '--network sentinel_default'
+            args '--network sentinel_sentinel-internal'
         }
     }
 
