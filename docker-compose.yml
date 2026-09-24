@@ -59,6 +59,12 @@ services:
     depends_on:
       sentinel-db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/users/sign_in || exit 1"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
 
   sentinel-ui:
     <<: *rails-app
@@ -84,6 +90,21 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.63.0-noble
+    container_name: sentinel-playwright
+    working_dir: /app
+    ipc: host
+    volumes:
+      - .:/app
+    environment:
+      PLAYWRIGHT_BASE_URL: ${PLAYWRIGHT_BASE_URL:-http://sentinel-api:3000}
+      CI: ${CI:-true}
+    depends_on:
+      sentinel-api:
+        condition: service_healthy
+    command: npx playwright test
 
 volumes:
   sentinel-postgres-data:

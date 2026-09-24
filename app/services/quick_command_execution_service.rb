@@ -131,6 +131,13 @@ class QuickCommandExecutionService
     exit_code = result[:exit_code].to_i
     success = exit_code.zero?
 
+    unless success
+      Rails.logger.error(
+        "event=quick_command_failed project=#{@project.slug} " \
+        "exit_code=#{exit_code} duration=#{duration} error=#{result[:stderr].to_s.inspect}"
+      )
+    end
+
     {
       success: success,
       exit_code: exit_code,
@@ -139,19 +146,30 @@ class QuickCommandExecutionService
       duration: duration
     }
   rescue Timeout::Error
+    duration = COMMAND_TIMEOUT_SECONDS.to_f
+    error_msg = "Command timed out after #{COMMAND_TIMEOUT_SECONDS}s."
+    Rails.logger.error(
+      "event=quick_command_failed project=#{@project.slug} " \
+      "exit_code=124 duration=#{duration} error=#{error_msg.inspect}"
+    )
     {
       success: false,
       exit_code: 124,
       stdout: "",
-      stderr: "Command timed out after #{COMMAND_TIMEOUT_SECONDS}s.",
-      duration: COMMAND_TIMEOUT_SECONDS.to_f
+      stderr: error_msg,
+      duration: duration
     }
   rescue StandardError => e
+    error_msg = "SSH Execution Error: #{e.message}"
+    Rails.logger.error(
+      "event=quick_command_failed project=#{@project.slug} " \
+      "exit_code=1 duration=0.0 error=#{error_msg.inspect}"
+    )
     {
       success: false,
       exit_code: 1,
       stdout: "",
-      stderr: "SSH Execution Error: #{e.message}",
+      stderr: error_msg,
       duration: 0.0
     }
   end

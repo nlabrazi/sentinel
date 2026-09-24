@@ -137,12 +137,91 @@ pipeline {
                 }
             }
         }
+
+        stage('E2E tests (Playwright Headless)') {
+            stages {
+                stage('Start test web server') {
+                    steps {
+                        sh '''
+                            # Nettoyage d'un éventuel ancien conteneur web de test
+                            docker rm -f sentinel-ci-web >/dev/null 2>&1 || true
+
+                            # Construire l'image applicative Rails pour le serveur de test
+                            docker build -t sentinel-ci-app:latest .
+
+                            # Peupler la base de test avec les données et le compte admin pour les parcours E2E
+                            docker run --rm \
+                                --network sentinel-ci \
+                                -e RAILS_ENV=test \
+                                -e POSTGRES_HOST=sentinel-ci-db \
+                                -e POSTGRES_USER=sentinel_ci \
+                                -e POSTGRES_PASSWORD=sentinel_ci \
+                                -e ADMIN_PASSWORD=sentinelpassword \
+                                sentinel-ci-app:latest \
+                                bin/rails db:seed
+
+                            # Lancer le serveur Rails en mode test sur le réseau sentinel-ci
+                            docker run -d \
+                                --name sentinel-ci-web \
+                                --network sentinel-ci \
+                                -e RAILS_ENV=test \
+                                -e POSTGRES_HOST=sentinel-ci-db \
+                                -e POSTGRES_USER=sentinel_ci \
+                                -e POSTGRES_PASSWORD=sentinel_ci \
+                                -e SECRET_KEY_BASE=ci-secret-key-base-for-sentinel-test-32bytes-long \
+                                sentinel-ci-app:latest \
+                                bin/rails server -b 0.0.0.0 -p 3000
+
+                            # Attendre que le serveur Rails soit prêt à répondre
+                            for i in $(seq 1 30); do
+                                if docker exec sentinel-ci-web curl -s -f http://localhost:3000/users/sign_in >/dev/null 2>&1; then
+                                    echo "Sentinel web server is ready for E2E tests"
+                                    exit 0
+                                fi
+                                if [ "$i" -eq 30 ]; then
+                                    echo "Sentinel web server did not become ready in time"
+                                    docker logs sentinel-ci-web
+                                    exit 1
+                                fi
+                                sleep 1
+                            done
+                        '''
+                    }
+                }
+
+                stage('Run Playwright') {
+                    agent {
+                        docker {
+                            image 'mcr.microsoft.com/playwright:v1.63.0-noble'
+                            args '--network sentinel-ci --ipc=host'
+                            reuseNode true
+                        }
+                    }
+
+                    environment {
+                        PLAYWRIGHT_BASE_URL = 'http://sentinel-ci-web:3000'
+                        CI = 'true'
+                        ADMIN_USERNAME = 'admin'
+                        ADMIN_PASSWORD = 'sentinelpassword'
+                        HOME = '/tmp'
+                    }
+
+                    steps {
+                        sh '''
+                            npm ci
+                            npx playwright test
+                        '''
+                    }
+                }
+            }
+        }
     }
 
     post {
         always {
             sh '''
                 docker rm -f sentinel-ci-db >/dev/null 2>&1 || true
+                docker rm -f sentinel-ci-web >/dev/null 2>&1 || true
             '''
         }
 

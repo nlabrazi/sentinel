@@ -20,6 +20,7 @@ class ProjectUmamiSyncService
 
     if @project.umami_website_id.blank?
       msg = "Aucun site Umami trouvé pour le domaine #{@project.production_url.presence || '(sans URL de production)'}"
+      Rails.logger.error("event=umami_sync_failed project=#{@project.slug} error=#{msg.inspect}")
       @project.update_columns(umami_sync_error: msg)
       return Result.new(success?: false, message: msg)
     end
@@ -28,6 +29,7 @@ class ProjectUmamiSyncService
     stats = @client.stats_24h(@project.umami_website_id)
 
     if stats[:error]
+      Rails.logger.error("event=umami_sync_failed project=#{@project.slug} error=#{stats[:error].to_s.inspect}")
       @project.update_columns(umami_sync_error: stats[:error])
       Result.new(success?: false, message: stats[:error])
     else
@@ -41,7 +43,7 @@ class ProjectUmamiSyncService
       Result.new(success?: true, message: "Synchronisé avec succès", stats: stats)
     end
   rescue StandardError => e
-    Rails.logger.error("[ProjectUmamiSyncService] Exception for project #{@project.id}: #{e.message}")
+    Rails.logger.error("event=umami_sync_failed project=#{@project.slug} error=#{e.message.to_s.inspect}")
     @project.update_columns(umami_sync_error: e.message)
     Result.new(success?: false, message: e.message)
   end

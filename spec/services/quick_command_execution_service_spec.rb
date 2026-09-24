@@ -219,5 +219,22 @@ RSpec.describe QuickCommandExecutionService, type: :service do
       expect(result[:exit_code]).to eq(1)
       expect(result[:stderr]).to include("Connection refused")
     end
+
+    it 'logs an error when SSH execution fails' do
+      allow(ssh_service).to receive(:execute).and_return(
+        exit_code: 1, stdout: "", stderr: "Authentication failed..."
+      )
+      expect(Rails.logger).to receive(:error).with(
+        /event=quick_command_failed project=#{project.slug} exit_code=1 duration=.* error="Authentication failed\.\.\."/
+      )
+
+      described_class.new(project, "ls").call
+    end
+
+    it 'does not log an SSH failure when command is rejected by whitelist' do
+      expect(Rails.logger).not_to receive(:error).with(/event=quick_command_failed/)
+
+      described_class.new(project, "sudo rm -rf /").call
+    end
   end
 end

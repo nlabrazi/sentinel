@@ -30,6 +30,11 @@ class DeployProjectService
     duration = (Time.current - start_time).to_i
     success = result[:exit_code].zero?
 
+    unless success
+      error_message = result[:stderr].presence || result[:stdout].presence || "Command failed with exit code #{result[:exit_code]}"
+      Rails.logger.error("event=deploy_failed project=#{@project.slug} exit_code=#{result[:exit_code]} error=#{error_message.to_s.inspect}")
+    end
+
     deployment.update!(
       status: success ? :success : :failed,
       duration: duration,
@@ -47,6 +52,7 @@ class DeployProjectService
 
     success
   rescue StandardError => e
+    Rails.logger.error("event=deploy_exception project=#{@project.slug} error_class=#{e.class} error=#{e.message.to_s.inspect}")
     deployment&.update!(status: :failed, log: truncate_log(e.message)) if deployment
     false
   end

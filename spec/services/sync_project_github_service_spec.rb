@@ -78,7 +78,7 @@ RSpec.describe SyncProjectGithubService, type: :service do
       service = described_class.new(project)
 
       expect(service.call).to be false
-      expect(Rails.logger).to have_received(:error).with(/GitHub sync failed for #{project.slug}: StandardError: GitHub timeout/)
+      expect(Rails.logger).to have_received(:error).with(/event=github_sync_failed GitHub sync failed for #{project.slug}: StandardError: GitHub timeout/)
     end
 
     it 'allows injecting custom services and custom limits' do

@@ -43,6 +43,7 @@
       </ul>
     </li>
     <li><a href="#-cli--development-commands">CLI & Development Commands</a></li>
+    <li><a href="#-testing--quality-assurance">Testing & Quality Assurance</a></li>
     <li><a href="#-contributing">Contributing</a></li>
     <li><a href="#-license">License</a></li>
     <li><a href="#-contact">Contact</a></li>
@@ -175,6 +176,7 @@ It is not built to replace Prometheus, Grafana, Loki, or direct SSH access. Rath
 * [![TailwindCSS][TailwindCSS.js]][TailwindCSS-url]
 * [![Docker][Docker.io]][Docker-url]
 * [![Caddy][Caddy.js]][Caddy-url]
+* [![Playwright][Playwright.js]][Playwright-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -490,10 +492,16 @@ All development and test tasks run inside Docker Compose:
 # Start the full development stack
 docker compose up
 
-# Run the complete test suite with RSpec
+# Run unit and integration tests with RSpec (SimpleCov report generated in coverage/)
 docker compose exec sentinel-api bundle exec rspec
 
-# Run CI checks (RSpec, RuboCop, bundler-audit, Brakeman)
+# Run RSpec with a minimum coverage threshold enforcement
+docker compose exec -e MINIMUM_COVERAGE=85 sentinel-api bundle exec rspec
+
+# Run Playwright End-to-End tests headless via official Docker image
+docker compose run --rm playwright
+
+# Run full CI suite locally (RSpec, RuboCop, ERB Lint, bundler-audit, Brakeman)
 docker compose exec sentinel-api bin/ci
 
 # Open a Rails console
@@ -502,12 +510,71 @@ docker compose exec sentinel-api bin/rails console
 # Run database migrations
 docker compose exec sentinel-api bin/rails db:migrate
 
-# Seed database with sample projects
+# Seed database with sample projects & admin account
 docker compose exec sentinel-api bin/rails db:seed
 
 # Format Ruby and ERB code
 docker compose exec sentinel-api bin/format
 ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+
+<!-- TESTING & QUALITY ASSURANCE -->
+# 🛡️ Testing & Quality Assurance
+
+Sentinel employs a two-tiered testing strategy with comprehensive unit/integration test coverage and headless end-to-end browser journeys.
+
+### 🔬 1. Unit & Integration Testing (RSpec)
+All architectural layers are tested under `spec/`:
+- **Models (`spec/models`)**: Active Record validations, associations, status transitions, callbacks, and enum behaviors.
+- **Services (`spec/services`)**: Business logic, SSH executions, GitHub API queries, and Umami sync services (stubbed with WebMock).
+- **Background Jobs (`spec/jobs`)**: Solid Queue scheduled jobs and asynchronous workers.
+- **Requests (`spec/requests`)**: HTTP endpoints, session handling, authentication redirects, and UI template rendering.
+
+```bash
+# Run RSpec test suite inside Docker
+docker compose exec sentinel-api bundle exec rspec
+```
+
+### 📊 2. Code Coverage (SimpleCov)
+[SimpleCov](https://github.com/simplecov-ruby/simplecov) is loaded automatically in `spec/spec_helper.rb` on every RSpec run:
+- **Coverage**: **>91%** across the entire application codebase (305 passing tests).
+- **Reports**: An interactive HTML report is generated at `coverage/index.html`.
+- **Threshold Enforcement**: A minimum coverage percentage can be required dynamically:
+
+```bash
+# Enforce minimum coverage threshold (e.g. 85%)
+docker compose exec -e MINIMUM_COVERAGE=85 sentinel-api bundle exec rspec
+```
+
+### 🎭 3. End-to-End Testing (Playwright)
+End-to-End tests run with [Playwright](https://playwright.dev/) using the official Microsoft Docker image (`mcr.microsoft.com/playwright:v1.63.0-noble`):
+- **Core User Journeys Tested**:
+  - **Authentication** (`e2e/auth.spec.ts`): Unauthorized redirects, invalid credentials feedback, administrator login, and sign out.
+  - **Dashboard Cockpit** (`e2e/dashboard.spec.ts`): KPI metrics cards, project listing, and live search filtering.
+  - **Project Details** (`e2e/projects.spec.ts`): Header status badges, breadcrumbs navigation, section anchors, and monitoring panels.
+  - **Global Navigation & UI** (`e2e/navigation.spec.ts`): Deployments, Settings, Documentation views, and Stimulus dark mode toggle.
+- **Headless Execution**: Configured with `headless: true` to avoid graphical overhead and minimize CI resource consumption (CPU/RAM).
+
+```bash
+# Run all E2E tests headless via Docker Compose (official Playwright container)
+docker compose run --rm playwright
+
+# Optional: Run locally via npm (if Node.js is installed on the host)
+npm run test:e2e          # Headless test run
+npm run test:e2e:headed   # Run with a visible browser window
+npm run test:e2e:ui       # Launch the interactive Playwright UI
+npm run test:e2e:report   # View the HTML test report
+```
+
+### 🚀 4. Continuous Integration Pipeline (Jenkins)
+The pipeline defined in `Jenkinsfile` runs on an isolated network (`sentinel-ci`):
+1. **Test DB**: Starts an ephemeral PostgreSQL 16 container.
+2. **Rails CI**: Loads schema, runs RSpec unit & integration tests, compiles Tailwind CSS, executes RuboCop, ERB Lint, Bundler Audit, Importmap Audit, and Brakeman.
+3. **Headless E2E Tests**: Boots a test Rails web server, seeds test data, and runs Playwright headless with the official image.
+4. **Cleanup**: Automatically tears down all test containers on build completion.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -579,3 +646,5 @@ Distributed under the MIT License. See `LICENSE` for more information.
 [Docker-url]: https://www.docker.com/
 [Caddy.js]: https://img.shields.io/badge/caddy-1F88C0?style=for-the-badge&logo=caddy&logoColor=white
 [Caddy-url]: https://caddyserver.com/
+[Playwright.js]: https://img.shields.io/badge/playwright-2EAD33?style=for-the-badge&logo=playwright&logoColor=white
+[Playwright-url]: https://playwright.dev/

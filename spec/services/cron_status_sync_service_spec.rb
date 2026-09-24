@@ -143,6 +143,6 @@ RSpec.describe CronStatusSyncService, type: :service do
     allow(ssh).to receive(:execute).and_return({ exit_code: 0, stdout: 'not json', stderr: '' })
 
     expect(service.call).to eq(false)
-    expect(Rails.logger).to have_received(:error).with(/Cron status JSON invalid/)
+    expect(Rails.logger).to have_received(:error).with(/event=cron_sync_failed Cron status JSON invalid/)
   end
 end

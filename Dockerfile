@@ -22,6 +22,9 @@ RUN chmod -R a+rwX /bundle
 
 COPY . .
 
+# Précompilation des assets Tailwind pour rendre l'image autonome et prête à l'exécution
+RUN SECRET_KEY_BASE=dummy-key-for-assets bin/rails tailwindcss:build
+
 EXPOSE 3000
 
 CMD ["bin/rails", "server", "-b", "0.0.0.0"]

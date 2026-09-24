@@ -29,7 +29,7 @@ class SyncProjectGithubService
 
     true
   rescue StandardError => e
-    Rails.logger.error "GitHub sync failed for #{@project.slug}: #{e.class}: #{e.message}"
+    Rails.logger.error "event=github_sync_failed GitHub sync failed for #{@project.slug}: #{e.class}: #{e.message}"
     false
   end
 

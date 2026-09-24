@@ -19,7 +19,7 @@ class CronStatusSyncService
 
     unless result[:exit_code].zero?
       Rails.logger.error(
-        "Cron status command failed for #{@project.slug}: " \
+        "event=cron_sync_failed Cron status command failed for #{@project.slug}: " \
         "exit_code=#{result[:exit_code]} stderr=#{result[:stderr].to_s.squish}"
       )
 
@@ -33,13 +33,13 @@ class CronStatusSyncService
 
     true
   rescue JSON::ParserError => e
-    Rails.logger.error "Cron status JSON invalid for #{@project.slug}: #{e.message}"
+    Rails.logger.error "event=cron_sync_failed Cron status JSON invalid for #{@project.slug}: #{e.message}"
     false
   rescue ActiveRecord::RecordInvalid => e
-    Rails.logger.error "Cron status sync invalid for #{@project.slug}: #{e.record.errors.full_messages.join(', ')}"
+    Rails.logger.error "event=cron_sync_failed Cron status sync invalid for #{@project.slug}: #{e.record.errors.full_messages.join(', ')}"
     false
   rescue StandardError => e
-    Rails.logger.error "Cron status sync failed for #{@project.slug}: #{e.class}: #{e.message}"
+    Rails.logger.error "event=cron_sync_failed Cron status sync failed for #{@project.slug}: #{e.class}: #{e.message}"
     false
   end
 
