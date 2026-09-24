@@ -984,7 +984,12 @@
             class="
               rounded bg-white dark:bg-gray-900 px-1.5 py-0.5 text-gray-900 dark:text-gray-100
               font-mono
-            ">docker compose exec sentinel-api bundle exec rspec</code>. Pour tout valider avant commit, utilisez
+            ">docker compose exec sentinel-api bundle exec rspec</code> (la couverture SimpleCov est générée automatiquement dans <code class="rounded bg-white dark:bg-gray-900 px-1.5 py-0.5 text-gray-900 dark:text-gray-100 font-mono">coverage/</code>). Pour jouer la suite de tests E2E Playwright en mode headless, lancez
+          <code
+            class="
+              rounded bg-white dark:bg-gray-900 px-1.5 py-0.5 text-gray-900 dark:text-gray-100
+              font-mono
+            ">docker compose run --rm playwright</code>. Pour tout valider avant commit, utilisez
           <code
             class="
               rounded bg-white dark:bg-gray-900 px-1.5 py-0.5 text-gray-900 dark:text-gray-100
