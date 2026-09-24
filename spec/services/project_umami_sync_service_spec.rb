@@ -59,6 +59,9 @@ RSpec.describe ProjectUmamiSyncService, type: :service do
       project.update!(umami_website_id: nil, production_url: "https://unknown.example.com")
 
       expect(client).to receive(:find_website_by_domain).with(project.production_url).and_return(nil)
+      expect(Rails.logger).to receive(:error).with(
+        /event=umami_sync_failed project=#{project.slug} error="Aucun site Umami trouvé.*/
+      )
 
       result = described_class.call(project, client: client)
 
@@ -71,12 +74,28 @@ RSpec.describe ProjectUmamiSyncService, type: :service do
       expect(client).to receive(:stats_24h).with("site-uuid-1").and_return(
         error: "HTTP 500: Internal Server Error"
       )
+      expect(Rails.logger).to receive(:error).with(
+        /event=umami_sync_failed project=#{project.slug} error="HTTP 500: Internal Server Error"/
+      )
 
       result = described_class.call(project, client: client)
 
       expect(result.success?).to be false
       project.reload
       expect(project.umami_sync_error).to eq("HTTP 500: Internal Server Error")
+    end
+
+    it "logs error when an unexpected exception occurs" do
+      expect(client).to receive(:stats_24h).with("site-uuid-1").and_raise(StandardError, "Network failure")
+      expect(Rails.logger).to receive(:error).with(
+        /event=umami_sync_failed project=#{project.slug} error="Network failure"/
+      )
+
+      result = described_class.call(project, client: client)
+
+      expect(result.success?).to be false
+      project.reload
+      expect(project.umami_sync_error).to eq("Network failure")
     end
   end
 end
