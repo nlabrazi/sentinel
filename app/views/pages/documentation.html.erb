@@ -1,1002 +1,1206 @@
-<section class="mx-auto max-w-7xl space-y-10">
-  <header
-    class="
-      overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white
-      dark:bg-gray-900 shadow
-    ">
-    <div
-      class="
-        grid grid-cols-1 gap-8 p-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:p-8
-      ">
-      <div class="max-w-3xl">
-        <p
-          class="
-            text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-300
-          ">
-          Sentinel product overview &bull; Runbook v2.0
-        </p>
-        <h1
-          class="
-            mt-3 text-3xl font-bold leading-tight text-gray-900 dark:text-gray-100
-            sm:text-4xl
-          ">
-          Une console simple pour suivre, vérifier et déployer vos projets.
-        </h1>
-        <p class="mt-4 text-base leading-7 text-gray-600 dark:text-gray-300">
-          Sentinel centralise les signaux critiques avant et après une mise en
-          production : état de santé HTTP, dérive de commits GitHub, exécution
-          de scripts de déploiement sur votre VPS, console interactive
-          sécurisée, métriques de trafic Umami, bascule de mode maintenance et
-          surveillance des tâches planifiées.
-        </p>
-
-        <div class="mt-6 flex flex-wrap gap-2 text-xs">
-          <a
-            href="#onboarding"
-            class="
-              rounded-md bg-gray-100 dark:bg-gray-800 px-3 py-1.5 font-medium text-gray-800
-              dark:text-gray-200 hover:bg-cyan-100 dark:hover:bg-cyan-900/40
-              hover:text-cyan-800 dark:hover:text-cyan-300 transition-colors
-            ">
-            🚀 Onboarding &amp; deploy.sh
-          </a>
-          <a
-            href="#cron-contract"
-            class="
-              rounded-md bg-gray-100 dark:bg-gray-800 px-3 py-1.5 font-medium text-gray-800
-              dark:text-gray-200 hover:bg-cyan-100 dark:hover:bg-cyan-900/40
-              hover:text-cyan-800 dark:hover:text-cyan-300 transition-colors
-            ">
-            ⏱️ Standard Cron &amp; status.sh
-          </a>
-          <a
-            href="#maintenance"
-            class="
-              rounded-md bg-gray-100 dark:bg-gray-800 px-3 py-1.5 font-medium text-gray-800
-              dark:text-gray-200 hover:bg-cyan-100 dark:hover:bg-cyan-900/40
-              hover:text-cyan-800 dark:hover:text-cyan-300 transition-colors
-            ">
-            🛡️ Mode Maintenance
-          </a>
-          <a
-            href="#observability"
-            class="
-              rounded-md bg-gray-100 dark:bg-gray-800 px-3 py-1.5 font-medium text-gray-800
-              dark:text-gray-200 hover:bg-cyan-100 dark:hover:bg-cyan-900/40
-              hover:text-cyan-800 dark:hover:text-cyan-300 transition-colors
-            ">
-            📊 Grafana &amp; Métriques
-          </a>
-          <a
-            href="#quick-terminal"
-            class="
-              rounded-md bg-gray-100 dark:bg-gray-800 px-3 py-1.5 font-medium text-gray-800
-              dark:text-gray-200 hover:bg-cyan-100 dark:hover:bg-cyan-900/40
-              hover:text-cyan-800 dark:hover:text-cyan-300 transition-colors
-            ">
-            💻 Quick Terminal SSH
-          </a>
-          <a
-            href="#umami"
-            class="
-              rounded-md bg-gray-100 dark:bg-gray-800 px-3 py-1.5 font-medium text-gray-800
-              dark:text-gray-200 hover:bg-cyan-100 dark:hover:bg-cyan-900/40
-              hover:text-cyan-800 dark:hover:text-cyan-300 transition-colors
-            ">
-            📈 Analytics Umami
-          </a>
-          <a
-            href="#authentik"
-            class="
-              rounded-md bg-gray-100 dark:bg-gray-800 px-3 py-1.5 font-medium text-gray-800
-              dark:text-gray-200 hover:bg-cyan-100 dark:hover:bg-cyan-900/40
-              hover:text-cyan-800 dark:hover:text-cyan-300 transition-colors
-            ">
-            🔐 SSO Authentik &amp; Auth
-          </a>
-          <a
-            href="#ops-center"
-            class="
-              rounded-md bg-gray-100 dark:bg-gray-800 px-3 py-1.5 font-medium text-gray-800
-              dark:text-gray-200 hover:bg-cyan-100 dark:hover:bg-cyan-900/40
-              hover:text-cyan-800 dark:hover:text-cyan-300 transition-colors
-            ">
-            ⚙️ Ops Control Center
-          </a>
-          <a
-            href="#faq"
-            class="
-              rounded-md bg-gray-100 dark:bg-gray-800 px-3 py-1.5 font-medium text-gray-800
-              dark:text-gray-200 hover:bg-cyan-100 dark:hover:bg-cyan-900/40
-              hover:text-cyan-800 dark:hover:text-cyan-300 transition-colors
-            ">
-            ❓ FAQ &amp; Dépannage
-          </a>
-        </div>
+<div data-controller="docs" class="mx-auto max-w-6xl space-y-6">
+  <!-- Hero & Command Search Header (Mise en avant centrale) -->
+  <header class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8">
+    <div class="mx-auto max-w-3xl text-center">
+      <div class="inline-flex items-center gap-2 rounded-full bg-cyan-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">
+        <span>Sentinel product overview &bull; Runbook v2.0</span>
       </div>
 
-      <aside
-        class="
-          rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50
-          dark:bg-gray-950 p-5
-        ">
-        <h2 class="text-base font-bold text-gray-900 dark:text-gray-100">Principes d'architecture</h2>
-        <dl class="mt-4 space-y-3 text-sm">
-          <div>
-            <dt class="text-xs text-gray-500">Sécurité SSH &amp; Terminal</dt>
-            <dd class="mt-0.5 font-medium text-gray-900 dark:text-gray-100">Commandes pré-définies et whitelist stricte de binaires non
-              destructifs.</dd>
+      <h1 class="mt-3 text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl lg:text-4xl">
+        Une console simple pour suivre, vérifier et déployer vos projets.
+      </h1>
+
+      <p class="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-400 sm:text-base">
+        Sentinel centralise les signaux critiques avant et après une mise en production :
+        état de santé HTTP, dérive de commits GitHub, exécution de scripts de déploiement sur votre VPS,
+        console interactive sécurisée, métriques de trafic Umami, bascule de mode maintenance et surveillance des tâches planifiées.
+      </p>
+
+      <!-- Barre de recherche Command Palette / Spot-search -->
+      <div class="mt-6 sm:mt-8">
+        <div class="relative mx-auto max-w-2xl">
+          <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-cyan-600 dark:text-cyan-400">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
-          <div>
-            <dt class="text-xs text-gray-500">Emplacement VPS</dt>
-            <dd class="mt-0.5 font-mono text-xs text-gray-900 dark:text-gray-100">/srv/apps/&lt;project&gt;/</dd>
+          <input
+            type="search"
+            autocomplete="off"
+            data-docs-target="searchInput"
+            data-action="input->docs#search"
+            placeholder="Rechercher une commande, un sujet, un code... (ex: deploy.sh, cron, nginx, ssh, rspec, umami, sudo...)"
+            class="w-full rounded-xl border-2 border-gray-200 bg-gray-50 py-3.5 pl-12 pr-24 text-sm text-gray-900 placeholder:text-gray-400 focus:border-cyan-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-cyan-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:bg-gray-900 transition-all shadow-sm">
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 gap-2">
+            <button
+              type="button"
+              data-docs-target="clearButton"
+              data-action="click->docs#clearSearch"
+              class="hidden rounded-md p-1.5 text-gray-400 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+              title="Effacer la recherche">
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <kbd class="hidden sm:inline-flex items-center gap-1 rounded border border-gray-200 bg-white px-2 py-1 text-[11px] font-mono font-medium text-gray-500 shadow-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400" title="Raccourci clavier">
+              /
+            </kbd>
           </div>
-          <div>
-            <dt class="text-xs text-gray-500">Concurrence</dt>
-            <dd class="mt-0.5 font-medium text-gray-900 dark:text-gray-100">Verrou atomique pour interdire deux déploiements simultanés.</dd>
-          </div>
-          <div>
-            <dt class="text-xs text-gray-500">Observabilité globale</dt>
-            <dd class="mt-0.5 font-medium text-gray-900 dark:text-gray-100">Intégration transparente avec Grafana, Loki et Umami Analytics
-              v2.</dd>
-          </div>
-          <div>
-            <dt class="text-xs text-gray-500">Authentification</dt>
-            <dd class="mt-0.5 font-medium text-gray-900 dark:text-gray-100">Double login (Devise durci avec lockable + Authentik OIDC
-              1-clic).</dd>
-          </div>
-        </dl>
-      </aside>
+        </div>
+
+        <!-- Mots-clés / Filtres rapides -->
+        <div class="mt-3 flex flex-wrap items-center justify-center gap-1.5 text-xs">
+          <span class="text-gray-400 dark:text-gray-500 font-medium mr-1 text-[11px]">Accès rapide :</span>
+          <button
+            type="button"
+            data-action="click->docs#filterTag"
+            data-tag="deploy.sh"
+            class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 transition-colors hover:bg-cyan-100 hover:text-cyan-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-cyan-950 dark:hover:text-cyan-300">
+            🚀 deploy.sh
+          </button>
+          <button
+            type="button"
+            data-action="click->docs#filterTag"
+            data-tag="cron"
+            class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 transition-colors hover:bg-cyan-100 hover:text-cyan-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-cyan-950 dark:hover:text-cyan-300">
+            ⏱️ cron-status.json
+          </button>
+          <button
+            type="button"
+            data-action="click->docs#filterTag"
+            data-tag="maintenance"
+            class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 transition-colors hover:bg-cyan-100 hover:text-cyan-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-cyan-950 dark:hover:text-cyan-300">
+            🛡️ 503 maintenance
+          </button>
+          <button
+            type="button"
+            data-action="click->docs#filterTag"
+            data-tag="terminal"
+            class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 transition-colors hover:bg-cyan-100 hover:text-cyan-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-cyan-950 dark:hover:text-cyan-300">
+            💻 SSH whitelist
+          </button>
+          <button
+            type="button"
+            data-action="click->docs#filterTag"
+            data-tag="grafana"
+            class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 transition-colors hover:bg-cyan-100 hover:text-cyan-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-cyan-950 dark:hover:text-cyan-300">
+            📊 Grafana
+          </button>
+          <button
+            type="button"
+            data-action="click->docs#filterTag"
+            data-tag="authentik"
+            class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 transition-colors hover:bg-cyan-100 hover:text-cyan-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-cyan-950 dark:hover:text-cyan-300">
+            🔐 Authentik SSO
+          </button>
+          <button
+            type="button"
+            data-action="click->docs#filterTag"
+            data-tag="rspec"
+            class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 transition-colors hover:bg-cyan-100 hover:text-cyan-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-cyan-950 dark:hover:text-cyan-300">
+            ❓ FAQ &amp; Tests
+          </button>
+        </div>
+      </div>
     </div>
   </header>
-  <!-- Section 1: Onboarding d'un projet & deploy.sh -->
+
+  <!-- Navigation horizontale par Onglets (Zéro deuxième sidebar !) -->
+  <nav
+    id="docs-content-area"
+    class="sticky top-16 z-20 -mx-4 border-y border-gray-200 bg-white/95 px-4 py-2.5 backdrop-blur dark:border-gray-800 dark:bg-gray-950/95 sm:-mx-8 sm:px-8 shadow-xs"
+    aria-label="Navigation des guides">
+    <div class="flex items-center justify-between gap-3 overflow-x-auto no-scrollbar">
+      <div class="flex items-center gap-1.5 flex-nowrap py-1">
+        <button
+          type="button"
+          data-docs-target="tabButton"
+          data-tab-id="overview"
+          data-action="click->docs#switchTab"
+          class="flex items-center gap-2 whitespace-nowrap rounded-lg bg-cyan-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-all dark:bg-cyan-500 dark:text-gray-950 ring-1 ring-cyan-500">
+          <span>📋 Vue d'ensemble</span>
+        </button>
+
+        <button
+          type="button"
+          data-docs-target="tabButton"
+          data-tab-id="onboarding"
+          data-action="click->docs#switchTab"
+          class="flex items-center gap-2 whitespace-nowrap rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-3.5 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/80 hover:text-gray-900 dark:hover:text-white transition-all shadow-xs">
+          <span>🚀 Deploy.sh</span>
+        </button>
+
+        <button
+          type="button"
+          data-docs-target="tabButton"
+          data-tab-id="cron-contract"
+          data-action="click->docs#switchTab"
+          class="flex items-center gap-2 whitespace-nowrap rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-3.5 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/80 hover:text-gray-900 dark:hover:text-white transition-all shadow-xs">
+          <span>⏱️ Crons VPS</span>
+        </button>
+
+        <button
+          type="button"
+          data-docs-target="tabButton"
+          data-tab-id="maintenance"
+          data-action="click->docs#switchTab"
+          class="flex items-center gap-2 whitespace-nowrap rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-3.5 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/80 hover:text-gray-900 dark:hover:text-white transition-all shadow-xs">
+          <span>🛡️ Maintenance</span>
+        </button>
+
+        <button
+          type="button"
+          data-docs-target="tabButton"
+          data-tab-id="observability"
+          data-action="click->docs#switchTab"
+          class="flex items-center gap-2 whitespace-nowrap rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-3.5 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/80 hover:text-gray-900 dark:hover:text-white transition-all shadow-xs">
+          <span>📊 Grafana</span>
+        </button>
+
+        <button
+          type="button"
+          data-docs-target="tabButton"
+          data-tab-id="quick-terminal"
+          data-action="click->docs#switchTab"
+          class="flex items-center gap-2 whitespace-nowrap rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-3.5 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/80 hover:text-gray-900 dark:hover:text-white transition-all shadow-xs">
+          <span>💻 Terminal SSH</span>
+        </button>
+
+        <button
+          type="button"
+          data-docs-target="tabButton"
+          data-tab-id="umami"
+          data-action="click->docs#switchTab"
+          class="flex items-center gap-2 whitespace-nowrap rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-3.5 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/80 hover:text-gray-900 dark:hover:text-white transition-all shadow-xs">
+          <span>📈 Umami</span>
+        </button>
+
+        <button
+          type="button"
+          data-docs-target="tabButton"
+          data-tab-id="authentik"
+          data-action="click->docs#switchTab"
+          class="flex items-center gap-2 whitespace-nowrap rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-3.5 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/80 hover:text-gray-900 dark:hover:text-white transition-all shadow-xs">
+          <span>🔐 SSO Authentik</span>
+        </button>
+
+        <button
+          type="button"
+          data-docs-target="tabButton"
+          data-tab-id="ops-center"
+          data-action="click->docs#switchTab"
+          class="flex items-center gap-2 whitespace-nowrap rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-3.5 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/80 hover:text-gray-900 dark:hover:text-white transition-all shadow-xs">
+          <span>⚙️ Ops Center</span>
+        </button>
+
+        <button
+          type="button"
+          data-docs-target="tabButton"
+          data-tab-id="faq"
+          data-action="click->docs#switchTab"
+          class="flex items-center gap-2 whitespace-nowrap rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 px-3.5 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/80 hover:text-gray-900 dark:hover:text-white transition-all shadow-xs">
+          <span>❓ FAQ</span>
+        </button>
+
+        <button
+          type="button"
+          data-docs-target="tabButton"
+          data-tab-id="all"
+          data-action="click->docs#switchTab"
+          class="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-dashed border-gray-300 px-3 py-2 text-xs font-medium text-gray-500 hover:border-gray-400 hover:text-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-200 transition-all">
+          <span>📑 Tout afficher</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Bandeau Résultats de Recherche (affiché lors de la recherche active) -->
+  <div
+    data-docs-target="searchResultsBanner"
+    class="hidden flex items-center justify-between rounded-xl border border-cyan-200 bg-cyan-50/80 p-4 dark:border-cyan-900/60 dark:bg-cyan-950/40">
+    <div class="flex items-center gap-2 text-sm font-semibold text-cyan-900 dark:text-cyan-200">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <span data-docs-target="searchCount">Résultats</span>
+    </div>
+    <button
+      type="button"
+      data-action="click->docs#clearSearch"
+      class="text-xs font-medium text-cyan-700 hover:text-cyan-900 dark:text-cyan-300 dark:hover:text-cyan-100 underline">
+      Effacer la recherche
+    </button>
+  </div>
+
+  <!-- État Vide de Recherche -->
+  <div
+    data-docs-target="emptyState"
+    class="hidden rounded-2xl border border-gray-200 bg-white p-10 text-center shadow-sm dark:border-gray-800 dark:bg-gray-900">
+    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    </div>
+    <h3 class="mt-4 text-base font-bold text-gray-900 dark:text-gray-100">Aucun résultat trouvé</h3>
+    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+      Aucun guide ne correspond à « <span data-docs-target="emptyQueryText" class="font-semibold text-cyan-600 dark:text-cyan-400"></span> ».
+    </p>
+    <div class="mt-5">
+      <button
+        type="button"
+        data-action="click->docs#clearSearch"
+        class="inline-flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-cyan-500">
+        Réinitialiser la recherche
+      </button>
+    </div>
+  </div>
+
+  <!-- PANELS DES GUIDES -->
+
+  <!-- Panel 0: VUE D'ENSEMBLE (Hub visuel & Principes d'architecture) -->
+  <div
+    data-docs-target="tabPanel"
+    data-panel-id="overview"
+    class="space-y-8">
+
+    <!-- Grille des 9 Sujets Principaux (Cartes cliquables instantanées) -->
+    <div>
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">Parcourir les guides par sujet</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Cliquez sur un guide pour y accéder directement sans défilement fastidieux.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <!-- Carte 1: Deploy.sh -->
+        <div
+          data-action="click->docs#quickJump"
+          data-tab-id="onboarding"
+          class="group cursor-pointer rounded-xl border border-gray-200 bg-white p-5 shadow-xs transition-all hover:border-cyan-400 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-cyan-500 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="rounded bg-cyan-50 px-2 py-0.5 font-mono text-[10px] font-bold text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">Runbook #1</span>
+              <span class="text-xl">🚀</span>
+            </div>
+            <h3 class="mt-3 text-sm font-bold text-gray-900 group-hover:text-cyan-600 dark:text-gray-100 dark:group-hover:text-cyan-400">Onboarding &amp; deploy.sh</h3>
+            <p class="mt-1.5 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+              Emplacement sous <code class="font-mono text-[11px]">/srv/apps/&lt;slug&gt;</code>, droits SSH de l'utilisateur sentinel et template Docker Compose.
+            </p>
+          </div>
+          <div class="mt-4 flex items-center text-xs font-semibold text-cyan-600 dark:text-cyan-400">
+            <span>Consulter le guide &rarr;</span>
+          </div>
+        </div>
+
+        <!-- Carte 2: Cron contract -->
+        <div
+          data-action="click->docs#quickJump"
+          data-tab-id="cron-contract"
+          class="group cursor-pointer rounded-xl border border-gray-200 bg-white p-5 shadow-xs transition-all hover:border-cyan-400 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-cyan-500 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="rounded bg-cyan-50 px-2 py-0.5 font-mono text-[10px] font-bold text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">Runbook #2</span>
+              <span class="text-xl">⏱️</span>
+            </div>
+            <h3 class="mt-3 text-sm font-bold text-gray-900 group-hover:text-cyan-600 dark:text-gray-100 dark:group-hover:text-cyan-400">Standard Cron &amp; status.sh</h3>
+            <p class="mt-1.5 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+              Format attendu du fichier cron-status.json, sonde read-only status.sh et wrapper atomique de cron.
+            </p>
+          </div>
+          <div class="mt-4 flex items-center text-xs font-semibold text-cyan-600 dark:text-cyan-400">
+            <span>Consulter le guide &rarr;</span>
+          </div>
+        </div>
+
+        <!-- Carte 3: Maintenance -->
+        <div
+          data-action="click->docs#quickJump"
+          data-tab-id="maintenance"
+          class="group cursor-pointer rounded-xl border border-gray-200 bg-white p-5 shadow-xs transition-all hover:border-cyan-400 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-cyan-500 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="rounded bg-cyan-50 px-2 py-0.5 font-mono text-[10px] font-bold text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">Runbook #3</span>
+              <span class="text-xl">🛡️</span>
+            </div>
+            <h3 class="mt-3 text-sm font-bold text-gray-900 group-hover:text-cyan-600 dark:text-gray-100 dark:group-hover:text-cyan-400">Mode Maintenance Nginx</h3>
+            <p class="mt-1.5 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+              Bascule zéro reload via le drapeau maintenance.on et renvoi HTTP 503 instantané avec page d'erreur.
+            </p>
+          </div>
+          <div class="mt-4 flex items-center text-xs font-semibold text-cyan-600 dark:text-cyan-400">
+            <span>Consulter le guide &rarr;</span>
+          </div>
+        </div>
+
+        <!-- Carte 4: Grafana -->
+        <div
+          data-action="click->docs#quickJump"
+          data-tab-id="observability"
+          class="group cursor-pointer rounded-xl border border-gray-200 bg-white p-5 shadow-xs transition-all hover:border-cyan-400 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-cyan-500 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="rounded bg-cyan-50 px-2 py-0.5 font-mono text-[10px] font-bold text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">Runbook #4</span>
+              <span class="text-xl">📊</span>
+            </div>
+            <h3 class="mt-3 text-sm font-bold text-gray-900 group-hover:text-cyan-600 dark:text-gray-100 dark:group-hover:text-cyan-400">Grafana &amp; Métriques</h3>
+            <p class="mt-1.5 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+              Intégration d'iframes sécurisées, variable globale de filtrage applicatif et gestion du Dark Mode.
+            </p>
+          </div>
+          <div class="mt-4 flex items-center text-xs font-semibold text-cyan-600 dark:text-cyan-400">
+            <span>Consulter le guide &rarr;</span>
+          </div>
+        </div>
+
+        <!-- Carte 5: Terminal SSH -->
+        <div
+          data-action="click->docs#quickJump"
+          data-tab-id="quick-terminal"
+          class="group cursor-pointer rounded-xl border border-gray-200 bg-white p-5 shadow-xs transition-all hover:border-cyan-400 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-cyan-500 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="rounded bg-cyan-50 px-2 py-0.5 font-mono text-[10px] font-bold text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">Runbook #5</span>
+              <span class="text-xl">💻</span>
+            </div>
+            <h3 class="mt-3 text-sm font-bold text-gray-900 group-hover:text-cyan-600 dark:text-gray-100 dark:group-hover:text-cyan-400">Quick Terminal SSH</h3>
+            <p class="mt-1.5 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+              Console interactive sécurisée, whitelist stricte de binaires non-destructifs et barrières de sécurité.
+            </p>
+          </div>
+          <div class="mt-4 flex items-center text-xs font-semibold text-cyan-600 dark:text-cyan-400">
+            <span>Consulter le guide &rarr;</span>
+          </div>
+        </div>
+
+        <!-- Carte 6: Umami -->
+        <div
+          data-action="click->docs#quickJump"
+          data-tab-id="umami"
+          class="group cursor-pointer rounded-xl border border-gray-200 bg-white p-5 shadow-xs transition-all hover:border-cyan-400 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-cyan-500 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="rounded bg-cyan-50 px-2 py-0.5 font-mono text-[10px] font-bold text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">Runbook #6</span>
+              <span class="text-xl">📈</span>
+            </div>
+            <h3 class="mt-3 text-sm font-bold text-gray-900 group-hover:text-cyan-600 dark:text-gray-100 dark:group-hover:text-cyan-400">Analytics Umami v2</h3>
+            <p class="mt-1.5 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+              Interrogation directe de l'API v2 Umami, statistiques sur 30 jours, jeton Bearer et synchronisation.
+            </p>
+          </div>
+          <div class="mt-4 flex items-center text-xs font-semibold text-cyan-600 dark:text-cyan-400">
+            <span>Consulter le guide &rarr;</span>
+          </div>
+        </div>
+
+        <!-- Carte 7: Authentik SSO -->
+        <div
+          data-action="click->docs#quickJump"
+          data-tab-id="authentik"
+          class="group cursor-pointer rounded-xl border border-gray-200 bg-white p-5 shadow-xs transition-all hover:border-cyan-400 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-cyan-500 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="rounded bg-cyan-50 px-2 py-0.5 font-mono text-[10px] font-bold text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">Runbook #7</span>
+              <span class="text-xl">🔐</span>
+            </div>
+            <h3 class="mt-3 text-sm font-bold text-gray-900 group-hover:text-cyan-600 dark:text-gray-100 dark:group-hover:text-cyan-400">SSO Authentik &amp; Auth</h3>
+            <p class="mt-1.5 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+              Connexion SSO 1-clic via OpenID Connect et durcissement Devise (mots de passe forts, module Lockable).
+            </p>
+          </div>
+          <div class="mt-4 flex items-center text-xs font-semibold text-cyan-600 dark:text-cyan-400">
+            <span>Consulter le guide &rarr;</span>
+          </div>
+        </div>
+
+        <!-- Carte 8: Ops Center -->
+        <div
+          data-action="click->docs#quickJump"
+          data-tab-id="ops-center"
+          class="group cursor-pointer rounded-xl border border-gray-200 bg-white p-5 shadow-xs transition-all hover:border-cyan-400 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-cyan-500 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="rounded bg-cyan-50 px-2 py-0.5 font-mono text-[10px] font-bold text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">Runbook #8</span>
+              <span class="text-xl">⚙️</span>
+            </div>
+            <h3 class="mt-3 text-sm font-bold text-gray-900 group-hover:text-cyan-600 dark:text-gray-100 dark:group-hover:text-cyan-400">Ops Control Center</h3>
+            <p class="mt-1.5 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+              Déclencheurs globaux sous /settings et supervision des workers et tâches récurrentes Solid Queue.
+            </p>
+          </div>
+          <div class="mt-4 flex items-center text-xs font-semibold text-cyan-600 dark:text-cyan-400">
+            <span>Consulter le guide &rarr;</span>
+          </div>
+        </div>
+
+        <!-- Carte 9: FAQ -->
+        <div
+          data-action="click->docs#quickJump"
+          data-tab-id="faq"
+          class="group cursor-pointer rounded-xl border border-gray-200 bg-white p-5 shadow-xs transition-all hover:border-cyan-400 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-cyan-500 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="rounded bg-cyan-50 px-2 py-0.5 font-mono text-[10px] font-bold text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">Support</span>
+              <span class="text-xl">❓</span>
+            </div>
+            <h3 class="mt-3 text-sm font-bold text-gray-900 group-hover:text-cyan-600 dark:text-gray-100 dark:group-hover:text-cyan-400">Questions fréquentes</h3>
+            <p class="mt-1.5 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+              Comparaison CI/CD, sécurité des flux SSH, gestion des secrets et commandes de tests RSpec / Playwright.
+            </p>
+          </div>
+          <div class="mt-4 flex items-center text-xs font-semibold text-cyan-600 dark:text-cyan-400">
+            <span>Consulter le guide &rarr;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Principes d'architecture système -->
+    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+      <h2 class="text-base font-bold text-gray-900 dark:text-gray-100">Principes d'architecture</h2>
+      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Règles fondatrices garantissant la stabilité et la sécurité opérationnelle de Sentinel.</p>
+
+      <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="rounded-lg border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+          <dt class="text-xs font-semibold text-gray-500 dark:text-gray-400">Sécurité SSH &amp; Terminal</dt>
+          <dd class="mt-1 text-xs font-medium text-gray-900 dark:text-gray-100">Commandes pré-définies et whitelist stricte de binaires non destructifs.</dd>
+        </div>
+
+        <div class="rounded-lg border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+          <dt class="text-xs font-semibold text-gray-500 dark:text-gray-400">Emplacement VPS</dt>
+          <dd class="mt-1 font-mono text-xs text-cyan-700 dark:text-cyan-300">/srv/apps/&lt;project&gt;/</dd>
+        </div>
+
+        <div class="rounded-lg border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+          <dt class="text-xs font-semibold text-gray-500 dark:text-gray-400">Concurrence</dt>
+          <dd class="mt-1 text-xs font-medium text-gray-900 dark:text-gray-100">Verrou atomique pour interdire deux déploiements simultanés.</dd>
+        </div>
+
+        <div class="rounded-lg border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+          <dt class="text-xs font-semibold text-gray-500 dark:text-gray-400">Observabilité globale</dt>
+          <dd class="mt-1 text-xs font-medium text-gray-900 dark:text-gray-100">Intégration transparente avec Grafana, Loki et Umami Analytics v2.</dd>
+        </div>
+
+        <div class="rounded-lg border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950 sm:col-span-2">
+          <dt class="text-xs font-semibold text-gray-500 dark:text-gray-400">Authentification</dt>
+          <dd class="mt-1 text-xs font-medium text-gray-900 dark:text-gray-100">Double login (Devise durci avec lockable + Authentik OIDC 1-clic).</dd>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel 1: Onboarding d'un projet & deploy.sh -->
   <section
     id="onboarding"
-    class="
-      overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white
-      dark:bg-gray-900 p-6 shadow
-    ">
-    <div class="max-w-3xl">
-      <p
-        class="
-          text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-300
-        ">Runbook #1</p>
-      <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">Onboarding d'un projet sur le VPS &amp; Contrat deploy.sh</h2>
-      <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
-        Chaque application ou service piloté par Sentinel réside dans son
-        propre répertoire sous
-        <code
-          class="
-            rounded bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 font-mono text-xs
-            text-gray-900 dark:text-gray-100
-          ">/srv/apps/&lt;slug&gt;</code>
-        et expose un point d'entrée de déploiement standardisé.
-      </p>
-    </div>
-
-    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <div class="space-y-4">
-        <div
-          class="
-            rounded-lg bg-gray-50 dark:bg-gray-950 p-4 border border-gray-200
-            dark:border-gray-800
-          ">
-          <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">1. Exigences du script deploy.sh</h3>
-          <ul class="mt-3 space-y-2 text-xs leading-5 text-gray-600 dark:text-gray-300">
-            <li class="flex gap-2"><span class="text-cyan-500 font-bold">&bull;</span><span>Exécutable sans invite interactive (<code class="font-mono">chmod +x deploy.sh</code>).</span></li>
-            <li class="flex gap-2"><span class="text-cyan-500 font-bold">&bull;</span><span>Code retour
-                <code class="font-mono">0</code>
-                en cas de succès, non-zéro en cas d'erreur.</span></li>
-            <li class="flex gap-2"><span class="text-cyan-500 font-bold">&bull;</span><span>Sorties
-                <code class="font-mono">stdout</code>
-                et
-                <code class="font-mono">stderr</code>
-                capturées et enregistrées dans l'historique Sentinel.</span></li>
-            <li class="flex gap-2"><span class="text-cyan-500 font-bold">&bull;</span><span>Tout le code spécifique au projet reste dans son propre dossier
-                VPS.</span></li>
-          </ul>
-        </div>
-
-        <div
-          class="
-            rounded-lg bg-gray-50 dark:bg-gray-950 p-4 border border-gray-200
-            dark:border-gray-800
-          ">
-          <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">2. Configuration des droits SSH</h3>
-          <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">
-            L'utilisateur VPS
-            <code class="font-mono text-cyan-700 dark:text-cyan-300">sentinel</code>
-            doit être membre du groupe Docker et propriétaire de son dossier :
+    data-docs-target="tabPanel"
+    data-panel-id="onboarding"
+    data-doc-keywords="onboarding deploy deployment vps script bash git docker compose migrate chmod chown permissions"
+    class="hidden space-y-6">
+    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <span class="rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">Runbook #1</span>
+          <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">Onboarding d'un projet sur le VPS &amp; Contrat deploy.sh</h2>
+          <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300 max-w-3xl">
+            Chaque application ou service piloté par Sentinel réside dans son propre répertoire sous
+            <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs text-gray-900 dark:bg-gray-800 dark:text-gray-100">/srv/apps/&lt;slug&gt;</code>
+            et expose un point d'entrée de déploiement standardisé.
           </p>
-          <pre
-            class="
-              mt-3 overflow-x-auto rounded bg-gray-900 p-3 text-xs font-mono text-gray-200
-            "><code>sudo chown -R sentinel:sentinel /srv/apps/&lt;mon-projet&gt;
-              chmod +x /srv/apps/&lt;mon-projet&gt;/deploy.sh</code></pre>
         </div>
+        <button
+          type="button"
+          data-action="click->docs#copyLink"
+          data-section-id="onboarding"
+          title="Copier le lien direct vers cette section"
+          class="text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-300 p-1">
+          <span class="font-mono text-lg font-bold">#</span>
+          <span class="link-copied-feedback hidden text-[10px] text-cyan-600 dark:text-cyan-400">Lien copié</span>
+        </button>
       </div>
 
-      <div
-        class="
-          rounded-lg bg-gray-50 dark:bg-gray-950 p-4 border border-gray-200
-          dark:border-gray-800
-        ">
-        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Template conseillé pour deploy.sh</h3>
-        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Modèle robuste prêt à l'emploi pour une application Docker Compose :</p>
-        <pre
-          class="
-            mt-3 overflow-x-auto rounded-md border border-gray-200 dark:border-gray-800
-            bg-gray-900 p-4 font-mono text-xs leading-5 text-gray-200
-          "><code>#!/usr/bin/env bash set -euo pipefail echo "==> [$(date -u +%T)]
-            Starting deployment..." # 1. Pull du code ou des images git fetch
-            origin master git reset --hard origin/master # 2. Re-création
-            propre des conteneurs docker compose pull docker compose build
-            --pull docker compose run --rm web bundle exec rails db:migrate ||
-            true docker compose up -d --remove-orphans # 3. Purge des images
-            obsolètes docker image prune -f echo "==> [$(date -u +%T)]
-            Deployment finished successfully."</code></pre>
+      <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div class="space-y-4">
+          <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+            <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">1. Exigences du script deploy.sh</h3>
+            <ul class="mt-3 space-y-2 text-xs leading-5 text-gray-600 dark:text-gray-300">
+              <li class="flex gap-2"><span class="font-bold text-cyan-500">&bull;</span><span>Exécutable sans invite interactive (<code class="font-mono">chmod +x deploy.sh</code>).</span></li>
+              <li class="flex gap-2"><span class="font-bold text-cyan-500">&bull;</span><span>Code retour <code class="font-mono">0</code> en cas de succès, non-zéro en cas d'erreur.</span></li>
+              <li class="flex gap-2"><span class="font-bold text-cyan-500">&bull;</span><span>Sorties <code class="font-mono">stdout</code> et <code class="font-mono">stderr</code> capturées et enregistrées dans l'historique Sentinel.</span></li>
+              <li class="flex gap-2"><span class="font-bold text-cyan-500">&bull;</span><span>Tout le code spécifique au projet reste dans son propre dossier VPS.</span></li>
+            </ul>
+          </div>
+
+          <div class="code-block-container rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">2. Configuration des droits SSH</h3>
+              <button
+                type="button"
+                data-action="click->docs#copySnippet"
+                class="inline-flex items-center gap-1 rounded bg-gray-200 px-2.5 py-1 text-[11px] font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                </svg>
+                Copier
+              </button>
+            </div>
+            <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">
+              L'utilisateur VPS <code class="font-mono text-cyan-700 dark:text-cyan-300">sentinel</code> doit être membre du groupe Docker et propriétaire de son dossier :
+            </p>
+            <pre class="mt-3 overflow-x-auto rounded bg-gray-900 p-3 font-mono text-xs text-gray-200 leading-relaxed"><code>sudo chown -R sentinel:sentinel /srv/apps/&lt;mon-projet&gt;
+chmod +x /srv/apps/&lt;mon-projet&gt;/deploy.sh</code></pre>
+          </div>
+        </div>
+
+        <div class="code-block-container flex flex-col rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Template conseillé pour deploy.sh</h3>
+              <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Modèle prêt à l'emploi pour une stack Docker Compose :</p>
+            </div>
+            <button
+              type="button"
+              data-action="click->docs#copySnippet"
+              class="inline-flex items-center gap-1 rounded bg-gray-200 px-2.5 py-1 text-[11px] font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+              <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+              </svg>
+              Copier
+            </button>
+          </div>
+          <pre class="mt-3 flex-1 overflow-x-auto rounded-md border border-gray-200 bg-gray-900 p-4 font-mono text-xs leading-5 text-gray-200 dark:border-gray-800"><code>#!/usr/bin/env bash
+set -euo pipefail
+echo "==> [$(date -u +%T)] Starting deployment..."
+
+# 1. Pull du code ou des images
+git fetch origin master
+git reset --hard origin/master
+
+# 2. Re-création propre des conteneurs
+docker compose pull
+docker compose build --pull
+docker compose run --rm web bundle exec rails db:migrate || true
+docker compose up -d --remove-orphans
+
+# 3. Purge des images obsolètes
+docker image prune -f
+echo "==> [$(date -u +%T)] Deployment finished successfully."</code></pre>
+        </div>
       </div>
     </div>
   </section>
-  <!-- Section 2: Standard Cron & status.sh -->
+
+  <!-- Panel 2: Standard Cron & status.sh -->
   <section
     id="cron-contract"
-    class="
-      overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white
-      dark:bg-gray-900 p-6 shadow
-    ">
-    <div class="max-w-3xl">
-      <p
-        class="
-          text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-300
-        ">Runbook #2 &bull; Cron visibility</p>
-      <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">Contrat standard pour remonter les tâches planifiées</h2>
-      <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
-        Sentinel ne lance pas vos cron jobs. Chaque projet publie simplement un
-        fichier JSON lu par
-        <code
-          class="
-            rounded bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 font-mono text-gray-900
-            dark:text-gray-100
-          ">status.sh</code>, puis l’interface synchronise cet état avec l’action
-        <span class="font-semibold text-gray-900 dark:text-gray-100">Sync cron</span>.
-      </p>
-      <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">
-        Ce monitoring est optionnel. Activez-le uniquement sur les projets qui
-        exposent réellement ce contrat, sinon laissez-le désactivé pour éviter
-        les faux positifs et les erreurs de synchronisation inutiles.
-      </p>
-    </div>
-
-    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <div
-        class="
-          rounded-lg bg-gray-50 dark:bg-gray-950 p-4 border border-gray-200
-          dark:border-gray-800
-        ">
-        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">1. Emplacement et format attendu</h3>
-        <p class="mt-2 text-xs leading-5 text-gray-600 dark:text-gray-300">
-          Chaque projet expose son état dans
-          <code
-            class="
-              rounded bg-gray-100 dark:bg-gray-800 px-1 py-0.5 font-mono text-gray-900
-              dark:text-gray-100
-            ">/srv/apps/&lt;project&gt;/sentinel/cron-status.json</code>.
-        </p>
-        <pre
-          class="
-            mt-3 overflow-x-auto rounded-md border border-gray-200 dark:border-gray-800
-            bg-gray-900 p-4 font-mono text-xs leading-5 text-gray-200
-          "><code>{ "cron_jobs": [ { "name": "daily-import", "command":
-            "./bin/daily-import", "schedule": "0 2 * * *", "last_execution_at":
-            "2026-05-06T02:00:12Z", "last_status": "success", "last_duration":
-            42, "last_log": "Import completed" } ] }</code></pre>
-      </div>
-
-      <div
-        class="
-          rounded-lg bg-gray-50 dark:bg-gray-950 p-4 border border-gray-200
-          dark:border-gray-800
-        ">
-        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">2. Wrapper atomique conseillé (cron-wrapper.sh)</h3>
-        <p class="mt-2 text-xs leading-5 text-gray-600 dark:text-gray-300">
-          Ce wrapper exécute le script réel, mesure la durée, capture les logs
-          et met à jour le JSON atomiquement via un fichier temporaire :
-        </p>
-        <pre
-          class="
-            mt-3 overflow-x-auto rounded-md border border-gray-200 dark:border-gray-800
-            bg-gray-900 p-4 font-mono text-xs leading-5 text-gray-200
-          "><code>#!/usr/bin/env bash set -u started_at="$(date -u
-            +%Y-%m-%dT%H:%M:%SZ)" started_seconds="$(date +%s)"
-            log_file="$(mktemp)" if ./bin/daily-import &gt; "$log_file"
-            2&gt;&amp;1; then status="success" else status="failed" fi
-            duration="$(($(date +%s) - started_seconds))" last_log="$(tail -c
-            4000 "$log_file" | jq -Rs .)" mkdir -p sentinel cat &gt;
-            sentinel/cron-status.json.tmp &lt;&lt;JSON { "cron_jobs": [ {
-            "name": "daily-import", "command": "./bin/daily-import",
-            "schedule": "0 2 * * *", "last_execution_at": "$started_at",
-            "last_status": "$status", "last_duration": $duration, "last_log":
-            $last_log } ] } JSON mv sentinel/cron-status.json.tmp
-            sentinel/cron-status.json rm -f "$log_file"</code></pre>
-      </div>
-    </div>
-
-    <div
-      class="
-        mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4
-        dark:border-yellow-900/60 dark:bg-yellow-950/30
-      ">
-      <h3 class="font-semibold text-yellow-800 dark:text-yellow-200 text-sm">Règles de sécurité pour status.sh</h3>
-      <ul
-        class="
-          mt-2 space-y-1.5 text-xs leading-5 text-yellow-800 dark:text-yellow-100/80
-        ">
-        <li>&bull; Le user SSH
-          <code
-            class="
-              rounded bg-yellow-100 px-1 py-0.5 text-yellow-900 dark:bg-yellow-950
-              dark:text-yellow-100 font-mono
-            ">sentinel</code>
-          lit seulement l’état existant.</li>
-        <li>&bull;
-          <code
-            class="
-              rounded bg-yellow-100 px-1 py-0.5 text-yellow-900 dark:bg-yellow-950
-              dark:text-yellow-100 font-mono
-            ">status.sh</code>
-          retourne uniquement du JSON et ne lance jamais les cron jobs.</li>
-        <li>&bull;
-          <strong>Aucun sudo</strong>
-          n’est nécessaire pour cette sonde.</li>
-        <li>&bull; Le chemin projet doit rester validé sous
-          <code
-            class="
-              rounded bg-yellow-100 px-1 py-0.5 text-yellow-900 dark:bg-yellow-950
-              dark:text-yellow-100 font-mono
-            ">/srv/apps</code>.</li>
-      </ul>
-    </div>
-  </section>
-  <!-- Section 3: Mode Maintenance & Nginx -->
-  <section
-    id="maintenance"
-    class="
-      overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white
-      dark:bg-gray-900 p-6 shadow
-    ">
-    <div class="max-w-3xl">
-      <p
-        class="
-          text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-300
-        ">Runbook #3</p>
-      <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">Bascule du mode maintenance (Zéro reload)</h2>
-      <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
-        Sentinel gère le mode maintenance en créant ou supprimant un fichier
-        drapeau
-        <code
-          class="
-            rounded bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 font-mono text-xs
-            text-gray-900 dark:text-gray-100
-          ">maintenance.on</code>
-        dans le répertoire du projet sur le VPS.
-      </p>
-    </div>
-
-    <div
-      class="
-        mt-6 rounded-lg bg-gray-50 dark:bg-gray-950 p-4 border border-gray-200
-        dark:border-gray-800
-      ">
-      <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Configuration Nginx recommandée</h3>
-      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-        Insérez cette vérification dans votre bloc serveur Nginx pour renvoyer
-        un statut HTTP 503 sans devoir recharger Nginx :
-      </p>
-      <pre
-        class="
-          mt-3 overflow-x-auto rounded-md border border-gray-200 dark:border-gray-800
-          bg-gray-900 p-4 font-mono text-xs leading-5 text-gray-200
-        "><code>server { server_name mon-app.example.com; # Détection immédiate du
-          mode maintenance de Sentinel if (-f /srv/apps/mon-app/maintenance.on)
-          { return 503; } error_page 503 @maintenance; location @maintenance {
-          root /srv/apps/mon-app/public; rewrite ^(.*)$ /503.html break; }
-          location / { proxy_pass http://127.0.0.1:3000; proxy_set_header Host
-          $host; proxy_set_header X-Real-IP $remote_addr; } }</code></pre>
-    </div>
-  </section>
-  <!-- Section 4: Observabilité & Grafana -->
-  <section
-    id="observability"
-    class="
-      overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white
-      dark:bg-gray-900 p-6 shadow
-    ">
-    <div class="max-w-3xl">
-      <p
-        class="
-          text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-300
-        ">Runbook #4</p>
-      <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">Observabilité &amp; Dashboards Grafana</h2>
-      <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
-        Sentinel s'intègre avec votre instance Grafana existante via des
-        iframes sécurisées. Chaque projet peut définir une valeur
-        <code
-          class="
-            rounded bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 font-mono text-xs
-            text-gray-900 dark:text-gray-100
-          ">grafana_app_value</code>
-        qui filtre automatiquement les métriques du dashboard central.
-      </p>
-    </div>
-
-    <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-      <div
-        class="
-          rounded-lg bg-gray-50 dark:bg-gray-950 p-4 border border-gray-200
-          dark:border-gray-800
-        ">
-        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">1. Variable globale</h3>
-        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          La variable d'application est définie par défaut sur
-          <code class="font-mono">var-app</code>
-          et peut filtrer métriques CPU, RAM et logs Loki.
-        </p>
-      </div>
-      <div
-        class="
-          rounded-lg bg-gray-50 dark:bg-gray-950 p-4 border border-gray-200
-          dark:border-gray-800
-        ">
-        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">2. Session sécurisée</h3>
-        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          Sentinel ne partage aucun token dans l'URL. Le navigateur utilise la
-          session de cookie Grafana déjà active pour l'utilisateur.
-        </p>
-      </div>
-      <div
-        class="
-          rounded-lg bg-gray-50 dark:bg-gray-950 p-4 border border-gray-200
-          dark:border-gray-800
-        ">
-        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">3. Support Dark Mode</h3>
-        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          Le paramètre de thème
-          <code class="font-mono">theme=dark</code>
-          est transmis dynamiquement pour correspondre au mode d'affichage
-          Sentinel.
-        </p>
-      </div>
-    </div>
-  </section>
-  <!-- Section 5: Quick Terminal & Sécurité SSH interactive -->
-  <section
-    id="quick-terminal"
-    class="
-      overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white
-      dark:bg-gray-900 p-6 shadow
-    ">
-    <div class="max-w-3xl">
-      <p
-        class="
-          text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-300
-        ">Runbook #5 &bull; Diagnostic SSH</p>
-      <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">Quick Terminal &amp; Console de diagnostic sécurisée</h2>
-      <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
-        Sur chaque page projet, Sentinel propose un terminal rapide interactif
-        pour inspecter l'état du service en temps réel sur le VPS, sans devoir
-        ouvrir manuellement une session SSH externe. L'exécution est soumise à
-        un modèle de sécurité strict avec liste blanche de commandes en lecture
-        seule et de diagnostic.
-      </p>
-    </div>
-
-    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <div class="space-y-4">
-        <div
-          class="
-            rounded-lg bg-gray-50 dark:bg-gray-950 p-4 border border-gray-200
-            dark:border-gray-800
-          ">
-          <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Binaires et commandes autorisés</h3>
-          <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">
-            Seuls les utilitaires d'inspection système et de conteneurs sont
-            acceptés :
+    data-docs-target="tabPanel"
+    data-panel-id="cron-contract"
+    data-doc-keywords="cron status tasks planifiees sync cron wrapper json atomique periodicite"
+    class="hidden space-y-6">
+    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <span class="rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">Runbook #2 &bull; Cron visibility</span>
+          <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">Contrat standard pour remonter les tâches planifiées</h2>
+          <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300 max-w-3xl">
+            Sentinel ne lance pas vos cron jobs. Chaque projet publie simplement un fichier JSON lu par
+            <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-gray-900 dark:bg-gray-800 dark:text-gray-100">status.sh</code>, puis l’interface synchronise cet état avec l’action
+            <span class="font-semibold text-gray-900 dark:text-gray-100">Sync cron</span>.
           </p>
-          <div class="mt-3 flex flex-wrap gap-1.5 font-mono text-xs">
-            <span
-              class="
-                rounded bg-cyan-100 px-2 py-0.5 text-cyan-900 dark:bg-cyan-950
-                dark:text-cyan-200
-              ">docker</span>
-            <span
-              class="
-                rounded bg-cyan-100 px-2 py-0.5 text-cyan-900 dark:bg-cyan-950
-                dark:text-cyan-200
-              ">docker-compose</span>
-            <span
-              class="
-                rounded bg-cyan-100 px-2 py-0.5 text-cyan-900 dark:bg-cyan-950
-                dark:text-cyan-200
-              ">git</span>
-            <span
-              class="
-                rounded bg-gray-200 px-2 py-0.5 text-gray-900 dark:bg-gray-800
-                dark:text-gray-200
-              ">tail</span>
-            <span
-              class="
-                rounded bg-gray-200 px-2 py-0.5 text-gray-900 dark:bg-gray-800
-                dark:text-gray-200
-              ">head</span>
-            <span
-              class="
-                rounded bg-gray-200 px-2 py-0.5 text-gray-900 dark:bg-gray-800
-                dark:text-gray-200
-              ">cat</span>
-            <span
-              class="
-                rounded bg-gray-200 px-2 py-0.5 text-gray-900 dark:bg-gray-800
-                dark:text-gray-200
-              ">grep / egrep</span>
-            <span
-              class="
-                rounded bg-gray-200 px-2 py-0.5 text-gray-900 dark:bg-gray-800
-                dark:text-gray-200
-              ">ls / find</span>
-            <span
-              class="
-                rounded bg-gray-200 px-2 py-0.5 text-gray-900 dark:bg-gray-800
-                dark:text-gray-200
-              ">df / free</span>
-            <span
-              class="
-                rounded bg-gray-200 px-2 py-0.5 text-gray-900 dark:bg-gray-800
-                dark:text-gray-200
-              ">ps / uptime</span>
-            <span
-              class="
-                rounded bg-gray-200 px-2 py-0.5 text-gray-900 dark:bg-gray-800
-                dark:text-gray-200
-              ">whoami / uname</span>
-          </div>
-          <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
-            Suggestions intégrées en 1 clic :
-            <code class="font-mono text-cyan-600 dark:text-cyan-400">docker compose ps</code>,
-            <code class="font-mono text-cyan-600 dark:text-cyan-400">git log -n 5 --oneline</code>,
-            <code class="font-mono text-cyan-600 dark:text-cyan-400">df -h</code>,
-            <code class="font-mono text-cyan-600 dark:text-cyan-400">free -m</code>.
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Ce monitoring est optionnel. Activez-le uniquement sur les projets qui exposent réellement ce contrat.
           </p>
         </div>
+        <button
+          type="button"
+          data-action="click->docs#copyLink"
+          data-section-id="cron-contract"
+          title="Copier le lien direct vers cette section"
+          class="text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-300 p-1">
+          <span class="font-mono text-lg font-bold">#</span>
+          <span class="link-copied-feedback hidden text-[10px] text-cyan-600 dark:text-cyan-400">Lien copié</span>
+        </button>
+      </div>
 
-        <div
-          class="
-            rounded-lg bg-gray-50 dark:bg-gray-950 p-4 border border-gray-200
-            dark:border-gray-800
-          ">
-          <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Contraintes opérationnelles</h3>
-          <ul class="mt-2 space-y-1.5 text-xs text-gray-600 dark:text-gray-300">
-            <li>&bull; Exécution systématiquement ancrée dans
-              <code class="font-mono text-cyan-700 dark:text-cyan-300">/srv/apps/&lt;slug&gt;</code>.</li>
-            <li>&bull; Timeout d'exécution strict fixé à
-              <strong>10 secondes</strong>.</li>
-            <li>&bull; Sortie bornée à
-              <strong>64 Ko</strong>
-              avec mention de troncature automatique.</li>
-            <li>&bull; Historique de navigation avec flèches haut/bas et copie
-              dans le presse-papier.</li>
+      <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div class="code-block-container rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">1. Emplacement et format attendu</h3>
+            <button
+              type="button"
+              data-action="click->docs#copySnippet"
+              class="inline-flex items-center gap-1 rounded bg-gray-200 px-2.5 py-1 text-[11px] font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+              <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+              </svg>
+              Copier
+            </button>
+          </div>
+          <p class="mt-2 text-xs leading-5 text-gray-600 dark:text-gray-300">
+            Chaque projet expose son état dans
+            <code class="rounded bg-gray-100 px-1 py-0.5 font-mono text-gray-900 dark:bg-gray-800 dark:text-gray-100">/srv/apps/&lt;project&gt;/sentinel/cron-status.json</code>.
+          </p>
+          <pre class="mt-3 overflow-x-auto rounded-md border border-gray-200 bg-gray-900 p-4 font-mono text-xs leading-5 text-gray-200 dark:border-gray-800"><code>{
+  "cron_jobs": [
+    {
+      "name": "daily-import",
+      "command": "./bin/daily-import",
+      "schedule": "0 2 * * *",
+      "last_execution_at": "2026-05-06T02:00:12Z",
+      "last_status": "success",
+      "last_duration": 42,
+      "last_log": "Import completed"
+    }
+  ]
+}</code></pre>
+        </div>
+
+        <div class="code-block-container rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">2. Wrapper atomique conseillé (cron-wrapper.sh)</h3>
+            <button
+              type="button"
+              data-action="click->docs#copySnippet"
+              class="inline-flex items-center gap-1 rounded bg-gray-200 px-2.5 py-1 text-[11px] font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+              <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+              </svg>
+              Copier
+            </button>
+          </div>
+          <p class="mt-2 text-xs leading-5 text-gray-600 dark:text-gray-300">
+            Ce wrapper exécute le script, mesure la durée, capture les logs et écrit le JSON atomiquement :
+          </p>
+          <pre class="mt-3 overflow-x-auto rounded-md border border-gray-200 bg-gray-900 p-4 font-mono text-xs leading-5 text-gray-200 dark:border-gray-800"><code>#!/usr/bin/env bash
+set -u
+started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+started_seconds="$(date +%s)"
+log_file="$(mktemp)"
+
+if ./bin/daily-import > "$log_file" 2>&1; then
+  status="success"
+else
+  status="failed"
+fi
+
+duration="$(($(date +%s) - started_seconds))"
+last_log="$(tail -c 4000 "$log_file" | jq -Rs .)"
+
+mkdir -p sentinel
+cat > sentinel/cron-status.json.tmp &lt;&lt;JSON
+{
+  "cron_jobs": [
+    {
+      "name": "daily-import",
+      "command": "./bin/daily-import",
+      "schedule": "0 2 * * *",
+      "last_execution_at": "$started_at",
+      "last_status": "$status",
+      "last_duration": $duration,
+      "last_log": $last_log
+    }
+  ]
+}
+JSON
+
+mv sentinel/cron-status.json.tmp sentinel/cron-status.json
+rm -f "$log_file"</code></pre>
+        </div>
+      </div>
+
+      <div class="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900/60 dark:bg-yellow-950/30">
+        <h3 class="text-sm font-semibold text-yellow-800 dark:text-yellow-200">Règles de sécurité pour status.sh</h3>
+        <ul class="mt-2 space-y-1.5 text-xs leading-5 text-yellow-800 dark:text-yellow-100/80">
+          <li>&bull; Le user SSH <code class="rounded bg-yellow-100 px-1 py-0.5 font-mono text-yellow-900 dark:bg-yellow-950 dark:text-yellow-100">sentinel</code> lit seulement l’état existant.</li>
+          <li>&bull; <code class="rounded bg-yellow-100 px-1 py-0.5 font-mono text-yellow-900 dark:bg-yellow-950 dark:text-yellow-100">status.sh</code> retourne uniquement du JSON et ne lance jamais les cron jobs.</li>
+          <li>&bull; <strong>Aucun sudo</strong> n’est nécessaire pour cette sonde.</li>
+          <li>&bull; Le chemin projet doit rester validé sous <code class="rounded bg-yellow-100 px-1 py-0.5 font-mono text-yellow-900 dark:bg-yellow-950 dark:text-yellow-100">/srv/apps</code>.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel 3: Mode Maintenance & Nginx -->
+  <section
+    id="maintenance"
+    data-docs-target="tabPanel"
+    data-panel-id="maintenance"
+    data-doc-keywords="maintenance nginx 503 maintenance.on reload zero reload coupure page d'erreur"
+    class="hidden space-y-6">
+    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <span class="rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">Runbook #3</span>
+          <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">Bascule du mode maintenance (Zéro reload)</h2>
+          <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300 max-w-3xl">
+            Sentinel gère le mode maintenance en créant ou supprimant un fichier drapeau
+            <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs text-gray-900 dark:bg-gray-800 dark:text-gray-100">maintenance.on</code>
+            dans le répertoire du projet sur le VPS.
+          </p>
+        </div>
+        <button
+          type="button"
+          data-action="click->docs#copyLink"
+          data-section-id="maintenance"
+          title="Copier le lien direct vers cette section"
+          class="text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-300 p-1">
+          <span class="font-mono text-lg font-bold">#</span>
+          <span class="link-copied-feedback hidden text-[10px] text-cyan-600 dark:text-cyan-400">Lien copié</span>
+        </button>
+      </div>
+
+      <div class="code-block-container mt-6 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Configuration Nginx recommandée</h3>
+          <button
+            type="button"
+            data-action="click->docs#copySnippet"
+            class="inline-flex items-center gap-1 rounded bg-gray-200 px-2.5 py-1 text-[11px] font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+            </svg>
+            Copier
+          </button>
+        </div>
+        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          Insérez cette vérification dans votre bloc serveur Nginx pour renvoyer un statut HTTP 503 sans devoir recharger Nginx :
+        </p>
+        <pre class="mt-3 overflow-x-auto rounded-md border border-gray-200 bg-gray-900 p-4 font-mono text-xs leading-5 text-gray-200 dark:border-gray-800"><code>server {
+    server_name mon-app.example.com;
+
+    # Détection immédiate du mode maintenance de Sentinel
+    if (-f /srv/apps/mon-app/maintenance.on) {
+        return 503;
+    }
+
+    error_page 503 @maintenance;
+    location @maintenance {
+        root /srv/apps/mon-app/public;
+        rewrite ^(.*)$ /503.html break;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel 4: Observabilité & Grafana -->
+  <section
+    id="observability"
+    data-docs-target="tabPanel"
+    data-panel-id="observability"
+    data-doc-keywords="observabilite grafana loki dashboards metriques iframe cpu ram theme dark"
+    class="hidden space-y-6">
+    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <span class="rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">Runbook #4</span>
+          <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">Observabilité &amp; Dashboards Grafana</h2>
+          <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300 max-w-3xl">
+            Sentinel s'intègre avec votre instance Grafana existante via des iframes sécurisées. Chaque projet peut définir une valeur
+            <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs text-gray-900 dark:bg-gray-800 dark:text-gray-100">grafana_app_value</code>
+            qui filtre automatiquement les métriques du dashboard central.
+          </p>
+        </div>
+        <button
+          type="button"
+          data-action="click->docs#copyLink"
+          data-section-id="observability"
+          title="Copier le lien direct vers cette section"
+          class="text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-300 p-1">
+          <span class="font-mono text-lg font-bold">#</span>
+          <span class="link-copied-feedback hidden text-[10px] text-cyan-600 dark:text-cyan-400">Lien copié</span>
+        </button>
+      </div>
+
+      <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+          <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">1. Variable globale</h3>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            La variable d'application est définie par défaut sur <code class="font-mono">var-app</code> et peut filtrer métriques CPU, RAM et logs Loki.
+          </p>
+        </div>
+        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+          <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">2. Session sécurisée</h3>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Sentinel ne partage aucun token dans l'URL. Le navigateur utilise la session cookie Grafana déjà active pour l'utilisateur.
+          </p>
+        </div>
+        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+          <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">3. Support Dark Mode</h3>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Le paramètre de thème <code class="font-mono">theme=dark</code> est transmis dynamiquement pour correspondre au mode d'affichage Sentinel.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel 5: Quick Terminal & Sécurité SSH -->
+  <section
+    id="quick-terminal"
+    data-docs-target="tabPanel"
+    data-panel-id="quick-terminal"
+    data-doc-keywords="quick terminal ssh securite console binaire whitelist docker ps git logs df free limitations restrictions"
+    class="hidden space-y-6">
+    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <span class="rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">Runbook #5 &bull; Diagnostic SSH</span>
+          <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">Quick Terminal &amp; Console de diagnostic sécurisée</h2>
+          <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300 max-w-3xl">
+            Sur chaque page projet, Sentinel propose un terminal rapide interactif pour inspecter l'état du service en temps réel sur le VPS.
+            L'exécution est soumise à un modèle de sécurité strict avec liste blanche de commandes non destructives.
+          </p>
+        </div>
+        <button
+          type="button"
+          data-action="click->docs#copyLink"
+          data-section-id="quick-terminal"
+          title="Copier le lien direct vers cette section"
+          class="text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-300 p-1">
+          <span class="font-mono text-lg font-bold">#</span>
+          <span class="link-copied-feedback hidden text-[10px] text-cyan-600 dark:text-cyan-400">Lien copié</span>
+        </button>
+      </div>
+
+      <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div class="space-y-4">
+          <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+            <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Binaires et commandes autorisés</h3>
+            <div class="mt-3 flex flex-wrap gap-1.5 font-mono text-xs">
+              <span class="rounded bg-cyan-100 px-2 py-0.5 text-cyan-900 dark:bg-cyan-950 dark:text-cyan-200">docker</span>
+              <span class="rounded bg-cyan-100 px-2 py-0.5 text-cyan-900 dark:bg-cyan-950 dark:text-cyan-200">docker-compose</span>
+              <span class="rounded bg-cyan-100 px-2 py-0.5 text-cyan-900 dark:bg-cyan-950 dark:text-cyan-200">git</span>
+              <span class="rounded bg-gray-200 px-2 py-0.5 text-gray-900 dark:bg-gray-800 dark:text-gray-200">tail</span>
+              <span class="rounded bg-gray-200 px-2 py-0.5 text-gray-900 dark:bg-gray-800 dark:text-gray-200">head</span>
+              <span class="rounded bg-gray-200 px-2 py-0.5 text-gray-900 dark:bg-gray-800 dark:text-gray-200">cat</span>
+              <span class="rounded bg-gray-200 px-2 py-0.5 text-gray-900 dark:bg-gray-800 dark:text-gray-200">grep / egrep</span>
+              <span class="rounded bg-gray-200 px-2 py-0.5 text-gray-900 dark:bg-gray-800 dark:text-gray-200">ls / find</span>
+              <span class="rounded bg-gray-200 px-2 py-0.5 text-gray-900 dark:bg-gray-800 dark:text-gray-200">df / free</span>
+              <span class="rounded bg-gray-200 px-2 py-0.5 text-gray-900 dark:bg-gray-800 dark:text-gray-200">ps / uptime</span>
+              <span class="rounded bg-gray-200 px-2 py-0.5 text-gray-900 dark:bg-gray-800 dark:text-gray-200">whoami / uname</span>
+            </div>
+            <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+              Suggestions en 1 clic : <code class="font-mono text-cyan-600 dark:text-cyan-400">docker compose ps</code>, <code class="font-mono text-cyan-600 dark:text-cyan-400">git log -n 5 --oneline</code>, <code class="font-mono text-cyan-600 dark:text-cyan-400">df -h</code>, <code class="font-mono text-cyan-600 dark:text-cyan-400">free -m</code>.
+            </p>
+          </div>
+
+          <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+            <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Contraintes opérationnelles</h3>
+            <ul class="mt-2 space-y-1.5 text-xs text-gray-600 dark:text-gray-300">
+              <li>&bull; Exécution systématiquement ancrée dans <code class="font-mono text-cyan-700 dark:text-cyan-300">/srv/apps/&lt;slug&gt;</code>.</li>
+              <li>&bull; Timeout d'exécution strict fixé à <strong>10 secondes</strong>.</li>
+              <li>&bull; Sortie bornée à <strong>64 Ko</strong> avec mention de troncature.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="space-y-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900/60 dark:bg-red-950/30">
+          <h3 class="text-sm font-semibold text-red-800 dark:text-red-200">Barrières de sécurité inviolables</h3>
+          <p class="text-xs text-red-700 dark:text-red-300">
+            Le service <code class="font-mono font-bold">QuickCommandExecutionService</code> rejette immédiatement :
+          </p>
+          <ul class="space-y-1.5 text-xs text-red-800 dark:text-red-200">
+            <li>&bull; <strong>Élévation &amp; altérations :</strong> <code class="font-mono">sudo</code>, <code class="font-mono">su</code>, <code class="font-mono">rm</code>, <code class="font-mono">chmod</code>, <code class="font-mono">chown</code>, <code class="font-mono">kill</code>, <code class="font-mono">reboot</code>.</li>
+            <li>&bull; <strong>Réseau externe :</strong> <code class="font-mono">curl</code>, <code class="font-mono">wget</code>, <code class="font-mono">nc</code>, <code class="font-mono">telnet</code>.</li>
+            <li>&bull; <strong>Interpréteurs arbitraires :</strong> <code class="font-mono">python</code>, <code class="font-mono">ruby</code>, <code class="font-mono">node</code>, <code class="font-mono">php</code>, <code class="font-mono">sh</code>.</li>
+            <li>&bull; <strong>Chaînage :</strong> <code class="font-mono">;</code>, <code class="font-mono">&amp;</code>, <code class="font-mono">&amp;&amp;</code>, <code class="font-mono">|</code>, <code class="font-mono">&gt;</code>, <code class="font-mono">&lt;</code>, <code class="font-mono">`</code>, <code class="font-mono">$(...)</code>.</li>
+            <li>&bull; <strong>Fuite de secrets :</strong> <code class="font-mono">.env</code>, <code class="font-mono">.key</code>, <code class="font-mono">.pem</code>, <code class="font-mono">id_rsa</code>, <code class="font-mono">credentials.enc</code>, <code class="font-mono">..</code>.</li>
           </ul>
         </div>
       </div>
-
-      <div
-        class="
-          rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900/60
-          dark:bg-red-950/30 space-y-3
-        ">
-        <h3
-          class="
-            font-semibold text-red-800 dark:text-red-200 text-sm flex items-center gap-2
-          ">
-          <span>Barrières de sécurité inviolables</span>
-        </h3>
-        <p class="text-xs text-red-700 dark:text-red-300">
-          Le service
-          <code class="font-mono font-bold">QuickCommandExecutionService</code>
-          rejette immédiatement toute commande contenant :
-        </p>
-        <ul class="space-y-1.5 text-xs text-red-800 dark:text-red-200">
-          <li>&bull;
-            <strong>Élévation de privilèges &amp; altérations :</strong>
-            <code class="font-mono">sudo</code>,
-            <code class="font-mono">su</code>,
-            <code class="font-mono">rm</code>,
-            <code class="font-mono">chmod</code>,
-            <code class="font-mono">chown</code>,
-            <code class="font-mono">kill</code>,
-            <code class="font-mono">reboot</code>.</li>
-          <li>&bull;
-            <strong>Accès réseau externe :</strong>
-            <code class="font-mono">curl</code>,
-            <code class="font-mono">wget</code>,
-            <code class="font-mono">nc</code>,
-            <code class="font-mono">telnet</code>.</li>
-          <li>&bull;
-            <strong>Interpréteurs arbitraires :</strong>
-            <code class="font-mono">python</code>,
-            <code class="font-mono">ruby</code>,
-            <code class="font-mono">node</code>,
-            <code class="font-mono">php</code>,
-            <code class="font-mono">sh</code>.</li>
-          <li>&bull;
-            <strong>Chaînage et injections de flux :</strong>
-            <code class="font-mono">;</code>,
-            <code class="font-mono">&amp;</code>,
-            <code class="font-mono">&amp;&amp;</code>,
-            <code class="font-mono">|</code>,
-            <code class="font-mono">&gt;</code>,
-            <code class="font-mono">&lt;</code>,
-            <code class="font-mono">`</code>,
-            <code class="font-mono">$(...)</code>.</li>
-          <li>&bull;
-            <strong>Fuite de secrets :</strong>
-            blocage total de l'accès aux motifs
-            <code class="font-mono">.env</code>,
-            <code class="font-mono">.key</code>,
-            <code class="font-mono">.pem</code>,
-            <code class="font-mono">id_rsa</code>,
-            <code class="font-mono">credentials.enc</code>
-            et traversal
-            <code class="font-mono">..</code>.</li>
-        </ul>
-      </div>
     </div>
   </section>
-  <!-- Section 6: Analytics & Umami -->
+
+  <!-- Panel 6: Umami Analytics -->
   <section
     id="umami"
-    class="
-      overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white
-      dark:bg-gray-900 p-6 shadow
-    ">
-    <div class="max-w-3xl">
-      <p
-        class="
-          text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-300
-        ">Runbook #6 &bull; Trafic &amp; Audience</p>
-      <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">Intégration Analytics Umami v2</h2>
-      <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
-        Sentinel interroge directement l'API v2 de votre instance Umami
-        auto-hébergée pour afficher en direct sur chaque fiche projet les
-        visiteurs uniques et pages vues sur les 30 derniers jours, ainsi qu'un
-        accès direct au tableau de bord public.
-      </p>
-    </div>
-
-    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-      <div
-        class="
-          rounded-lg bg-gray-50 dark:bg-gray-950 p-4 border border-gray-200
-          dark:border-gray-800
-        ">
-        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">1. Modes d'authentification</h3>
-        <p class="mt-2 text-xs text-gray-600 dark:text-gray-300">
-          Deux méthodes supportées via le fichier
-          <code class="font-mono">.env</code>
-          :
-        </p>
-        <ul class="mt-2 space-y-1 text-xs text-gray-600 dark:text-gray-300">
-          <li>&bull;
-            <strong>Jeton Bearer JWT (Recommandé) :</strong>
-            <code class="font-mono text-xs">UMAMI_AUTH_TOKEN</code>
-            (aucun mot de passe requis).</li>
-          <li>&bull;
-            <strong>Compte de service :</strong>
-            <code class="font-mono text-xs">UMAMI_USERNAME</code>
-            et
-            <code class="font-mono text-xs">UMAMI_PASSWORD</code>
-            pour générer dynamiquement le token.</li>
-        </ul>
+    data-docs-target="tabPanel"
+    data-panel-id="umami"
+    data-doc-keywords="umami analytics visites trafic pages vues tokens bearer api v2 sync stats"
+    class="hidden space-y-6">
+    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <span class="rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">Runbook #6 &bull; Trafic &amp; Audience</span>
+          <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">Intégration Analytics Umami v2</h2>
+          <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300 max-w-3xl">
+            Sentinel interroge directement l'API v2 de votre instance Umami auto-hébergée pour afficher en direct sur chaque fiche projet
+            les visiteurs uniques et pages vues sur les 30 derniers jours, ainsi qu'un accès direct au tableau de bord public.
+          </p>
+        </div>
+        <button
+          type="button"
+          data-action="click->docs#copyLink"
+          data-section-id="umami"
+          title="Copier le lien direct vers cette section"
+          class="text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-300 p-1">
+          <span class="font-mono text-lg font-bold">#</span>
+          <span class="link-copied-feedback hidden text-[10px] text-cyan-600 dark:text-cyan-400">Lien copié</span>
+        </button>
       </div>
 
-      <div
-        class="
-          rounded-lg bg-gray-50 dark:bg-gray-950 p-4 border border-gray-200
-          dark:border-gray-800
-        ">
-        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">2. Association de site automatique</h3>
-        <p class="mt-2 text-xs leading-5 text-gray-600 dark:text-gray-300">
-          Sentinel compare le domaine de l'URL de production (<code class="font-mono">production_url</code>) avec la liste des sites enregistrés sur Umami. Si trouvé, il stocke
-          l'identifiant
-          <code class="font-mono">umami_website_id</code>
-          et l'URL de partage public. Il est également possible de renseigner
-          manuellement cet identifiant en base.
-        </p>
-      </div>
+      <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+          <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">1. Modes d'authentification</h3>
+          <ul class="mt-3 space-y-1.5 text-xs text-gray-600 dark:text-gray-300">
+            <li>&bull; <strong>Jeton Bearer JWT :</strong> <code class="font-mono">UMAMI_AUTH_TOKEN</code> (recommandé).</li>
+            <li>&bull; <strong>Compte de service :</strong> <code class="font-mono">UMAMI_USERNAME</code> et <code class="font-mono">UMAMI_PASSWORD</code>.</li>
+          </ul>
+        </div>
 
-      <div
-        class="
-          rounded-lg bg-gray-50 dark:bg-gray-950 p-4 border border-gray-200
-          dark:border-gray-800
-        ">
-        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">3. Synchronisation &amp; Données</h3>
-        <p class="mt-2 text-xs leading-5 text-gray-600 dark:text-gray-300">
-          Les statistiques consolidées sur 30 jours (visiteurs uniques et pages
-          vues) sont synchronisées à la demande via le bouton
-          <span class="font-semibold text-gray-900 dark:text-gray-100">Sync Umami</span>
-          ou globalement pour tous les projets depuis l'Ops Control Center.
-        </p>
+        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+          <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">2. Association de site automatique</h3>
+          <p class="mt-2 text-xs leading-5 text-gray-600 dark:text-gray-300">
+            Sentinel compare le domaine de l'URL de production (<code class="font-mono">production_url</code>) avec les sites Umami et enregistre
+            l'identifiant <code class="font-mono">umami_website_id</code>.
+          </p>
+        </div>
+
+        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950">
+          <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">3. Synchronisation &amp; Données</h3>
+          <p class="mt-2 text-xs leading-5 text-gray-600 dark:text-gray-300">
+            Les statistiques consolidées sur 30 jours sont rafraîchies à la demande via le bouton
+            <span class="font-semibold text-gray-900 dark:text-gray-100">Sync Umami</span>.
+          </p>
+        </div>
       </div>
     </div>
   </section>
-  <!-- Section 7: Authentification & SSO Authentik -->
+
+  <!-- Panel 7: Authentik SSO -->
   <section
     id="authentik"
-    class="
-      overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white
-      dark:bg-gray-900 p-6 shadow
-    ">
-    <div class="max-w-3xl">
-      <p
-        class="
-          text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-300
-        ">Runbook #7 &bull; Contrôle d'accès</p>
-      <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">Authentification &amp; SSO Authentik (OIDC)</h2>
-      <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
-        L'accès à Sentinel est doublement protégé : par une authentification
-        locale Devise renforcée et par une intégration Single Sign-On avec
-        votre serveur Authentik d'infrastructure.
-      </p>
-    </div>
-
-    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <div
-        class="
-          rounded-lg bg-gray-50 dark:bg-gray-950 p-4 border border-gray-200
-          dark:border-gray-800 space-y-3
-        ">
-        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">1. Connexion SSO OpenID Connect</h3>
-        <p class="text-xs text-gray-600 dark:text-gray-300">
-          Permet la connexion en 1 clic sans saisie de mot de passe via le
-          protocole standard OIDC :
-        </p>
-        <pre
-          class="
-            overflow-x-auto rounded bg-gray-900 p-3 font-mono text-xs text-gray-200
-          "><code>AUTHENTIK_ENABLED=true
-            AUTHENTIK_ISSUER=https://auth.nabster.dev/application/o/sentinel/
-            AUTHENTIK_CLIENT_ID=&lt;client_id&gt;
-            AUTHENTIK_CLIENT_SECRET=&lt;client_secret&gt;
-            AUTHENTIK_REDIRECT_URI=https://sentinel.nabster.dev/users/auth/openid_connect/callback</code></pre>
-        <p class="text-xs text-gray-500 dark:text-gray-400">
-          À la première connexion, le compte Sentinel est automatiquement
-          provisionné et lié à l'email Authentik vérifié.
-        </p>
+    data-docs-target="tabPanel"
+    data-panel-id="authentik"
+    data-doc-keywords="authentik sso oidc devise securite mot de passe lockable openid connect login"
+    class="hidden space-y-6">
+    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <span class="rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">Runbook #7 &bull; Contrôle d'accès</span>
+          <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">Authentification &amp; SSO Authentik (OIDC)</h2>
+          <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300 max-w-3xl">
+            L'accès à Sentinel est doublement protégé : par une authentification locale Devise renforcée et par une intégration
+            Single Sign-On avec votre serveur Authentik d'infrastructure.
+          </p>
+        </div>
+        <button
+          type="button"
+          data-action="click->docs#copyLink"
+          data-section-id="authentik"
+          title="Copier le lien direct vers cette section"
+          class="text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-300 p-1">
+          <span class="font-mono text-lg font-bold">#</span>
+          <span class="link-copied-feedback hidden text-[10px] text-cyan-600 dark:text-cyan-400">Lien copié</span>
+        </button>
       </div>
 
-      <div
-        class="
-          rounded-lg bg-gray-50 dark:bg-gray-950 p-4 border border-gray-200
-          dark:border-gray-800 space-y-3
-        ">
-        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">2. Durcissement Devise (Compte local)</h3>
-        <p class="text-xs text-gray-600 dark:text-gray-300">
-          Le compte administrateur direct bénéficie des dernières règles de
-          sécurité :
-        </p>
-        <ul class="space-y-1.5 text-xs text-gray-600 dark:text-gray-300">
-          <li class="flex gap-2"><span class="text-cyan-500 font-bold">&bull;</span><span>Longueur minimale de mot de passe portée à
-              <strong>12 caractères</strong>.</span></li>
-          <li class="flex gap-2"><span class="text-cyan-500 font-bold">&bull;</span><span>Module
-              <strong>Lockable</strong>
-              actif : blocage automatique du compte en cas de tentatives
-              répétées infructueuses.</span></li>
-          <li class="flex gap-2"><span class="text-cyan-500 font-bold">&bull;</span><span>Authentification par nom d'utilisateur ou par email.</span></li>
-          <li class="flex gap-2"><span class="text-cyan-500 font-bold">&bull;</span><span>Inscription publique désactivée pour préserver l'accès privé.</span></li>
-        </ul>
+      <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div class="code-block-container rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">1. Connexion SSO OpenID Connect</h3>
+            <button
+              type="button"
+              data-action="click->docs#copySnippet"
+              class="inline-flex items-center gap-1 rounded bg-gray-200 px-2.5 py-1 text-[11px] font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+              <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+              </svg>
+              Copier
+            </button>
+          </div>
+          <p class="text-xs text-gray-600 dark:text-gray-300">
+            Connexion en 1 clic sans mot de passe via protocole OIDC :
+          </p>
+          <pre class="overflow-x-auto rounded bg-gray-900 p-3 font-mono text-xs text-gray-200 leading-relaxed"><code>AUTHENTIK_ENABLED=true
+AUTHENTIK_ISSUER=https://auth.nabster.dev/application/o/sentinel/
+AUTHENTIK_CLIENT_ID=&lt;client_id&gt;
+AUTHENTIK_CLIENT_SECRET=&lt;client_secret&gt;
+AUTHENTIK_REDIRECT_URI=https://sentinel.nabster.dev/users/auth/openid_connect/callback</code></pre>
+        </div>
+
+        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950 space-y-3">
+          <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">2. Durcissement Devise (Compte local)</h3>
+          <ul class="space-y-1.5 text-xs text-gray-600 dark:text-gray-300">
+            <li class="flex gap-2"><span class="font-bold text-cyan-500">&bull;</span><span>Longueur minimale de mot de passe à <strong>12 caractères</strong>.</span></li>
+            <li class="flex gap-2"><span class="font-bold text-cyan-500">&bull;</span><span>Module <strong>Lockable</strong> actif (blocage après échecs répétés).</span></li>
+            <li class="flex gap-2"><span class="font-bold text-cyan-500">&bull;</span><span>Inscription publique désactivée pour préserver l'accès privé.</span></li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
-  <!-- Section 8: Exploitation & Ops Control Center -->
+
+  <!-- Panel 8: Ops Control Center -->
   <section
     id="ops-center"
-    class="
-      overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white
-      dark:bg-gray-900 p-6 shadow
-    ">
-    <div class="max-w-3xl">
-      <p
-        class="
-          text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-300
-        ">Runbook #8 &bull; Exploitation &amp; Supervision</p>
-      <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">Centre de contrôle Ops &amp; Supervision Solid Queue</h2>
-      <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
-        Accessible sur
-        <code
-          class="
-            rounded bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 font-mono text-xs
-            text-gray-900 dark:text-gray-100
-          ">/settings</code>, le centre de contrôle unifié offre des déclencheurs globaux et une
-        supervision complète des tâches d'arrière-plan.
-      </p>
-    </div>
-
-    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <div
-        class="
-          rounded-lg bg-gray-50 dark:bg-gray-950 p-4 border border-gray-200
-          dark:border-gray-800 space-y-3
-        ">
-        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Déclencheurs d'exploitation globaux</h3>
-        <dl class="space-y-2 text-xs">
-          <div>
-            <dt class="font-bold text-gray-800 dark:text-gray-200">Healthcheck global :</dt>
-            <dd class="text-gray-600 dark:text-gray-400">Vérification immédiate de la disponibilité HTTP de tous les
-              projets avec monitoring actif.</dd>
-          </div>
-          <div>
-            <dt class="font-bold text-gray-800 dark:text-gray-200">Sync GitHub global :</dt>
-            <dd class="text-gray-600 dark:text-gray-400">Interroge l'API GitHub pour rafraîchir commits récents, statut de
-              drift et pull requests ouvertes.</dd>
-          </div>
-          <div>
-            <dt class="font-bold text-gray-800 dark:text-gray-200">Sync Crons VPS :</dt>
-            <dd class="text-gray-600 dark:text-gray-400">Lit
-              <code class="font-mono">status.sh</code>
-              sur le VPS pour consigner l'état et l'historique d'exécution des
-              cron jobs.</dd>
-          </div>
-          <div>
-            <dt class="font-bold text-gray-800 dark:text-gray-200">Sync Umami global :</dt>
-            <dd class="text-gray-600 dark:text-gray-400">Interroge l'API Umami v2 pour consolider le trafic et les
-              statistiques de visites de tous les projets.</dd>
-          </div>
-        </dl>
+    data-docs-target="tabPanel"
+    data-panel-id="ops-center"
+    data-doc-keywords="ops center settings supervision solid queue workers jobs healthcheck sync github cron recurring"
+    class="hidden space-y-6">
+    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <span class="rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">Runbook #8 &bull; Exploitation &amp; Supervision</span>
+          <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">Centre de contrôle Ops &amp; Supervision Solid Queue</h2>
+          <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300 max-w-3xl">
+            Accessible sur
+            <code class="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs text-gray-900 dark:bg-gray-800 dark:text-gray-100">/settings</code>,
+            le centre de contrôle unifié offre des déclencheurs globaux et une supervision complète des tâches d'arrière-plan.
+          </p>
+        </div>
+        <button
+          type="button"
+          data-action="click->docs#copyLink"
+          data-section-id="ops-center"
+          title="Copier le lien direct vers cette section"
+          class="text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-300 p-1">
+          <span class="font-mono text-lg font-bold">#</span>
+          <span class="link-copied-feedback hidden text-[10px] text-cyan-600 dark:text-cyan-400">Lien copié</span>
+        </button>
       </div>
 
-      <div
-        class="
-          rounded-lg bg-gray-50 dark:bg-gray-950 p-4 border border-gray-200
-          dark:border-gray-800 space-y-3
-        ">
-        <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Supervision Solid Queue &amp; Calendrier récurrent</h3>
-        <p class="text-xs text-gray-600 dark:text-gray-300">
-          Les workers s'exécutent via Solid Queue. L'interface affiche en temps
-          réel :
-        </p>
-        <ul class="space-y-1.5 text-xs text-gray-600 dark:text-gray-300">
-          <li>&bull; Les
-            <strong>processus actifs</strong>
-            disposant d'un heartbeat récent (&lt; 5 minutes).</li>
-          <li>&bull; Le compteur d'<strong>exécutions en échec</strong>
-            nécessitant un rejeu ou diagnostic.</li>
-          <li>&bull; Le calendrier récurrent (<code class="font-mono">config/recurring.yml</code>) :
-            <ul
-              class="
-                ml-4 mt-1 space-y-0.5 text-gray-500 dark:text-gray-400 font-mono text-[11px]
-              ">
-              <li>- HealthcheckAllJob (chaque minute)</li>
-              <li>- SyncGithubJob (toutes les 5 minutes)</li>
-              <li>- CronStatusJob (toutes les 5 minutes)</li>
-              <li>- Purge des jobs terminés (toutes les heures)</li>
-            </ul>
-          </li>
-        </ul>
+      <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950 space-y-3">
+          <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Déclencheurs d'exploitation globaux</h3>
+          <dl class="space-y-2 text-xs">
+            <div>
+              <dt class="font-bold text-gray-800 dark:text-gray-200">Healthcheck global :</dt>
+              <dd class="text-gray-600 dark:text-gray-400">Vérification immédiate de la disponibilité HTTP de tous les projets avec monitoring actif.</dd>
+            </div>
+            <div>
+              <dt class="font-bold text-gray-800 dark:text-gray-200">Sync GitHub global :</dt>
+              <dd class="text-gray-600 dark:text-gray-400">Interroge l'API GitHub pour rafraîchir commits récents, statut de drift et pull requests ouvertes.</dd>
+            </div>
+            <div>
+              <dt class="font-bold text-gray-800 dark:text-gray-200">Sync Crons VPS :</dt>
+              <dd class="text-gray-600 dark:text-gray-400">Lit <code class="font-mono">status.sh</code> sur le VPS pour consigner l'état et l'historique d'exécution des cron jobs.</dd>
+            </div>
+            <div>
+              <dt class="font-bold text-gray-800 dark:text-gray-200">Sync Umami global :</dt>
+              <dd class="text-gray-600 dark:text-gray-400">Interroge l'API Umami v2 pour consolider le trafic et les statistiques de visites de tous les projets.</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950 space-y-3">
+          <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Supervision Solid Queue &amp; Calendrier récurrent</h3>
+          <ul class="space-y-1.5 text-xs text-gray-600 dark:text-gray-300">
+            <li>&bull; Les <strong>processus actifs</strong> avec un heartbeat récent (&lt; 5 minutes).</li>
+            <li>&bull; Le compteur d'<strong>exécutions en échec</strong>.</li>
+            <li>&bull; Le calendrier récurrent (<code class="font-mono">config/recurring.yml</code>) :
+              <ul class="ml-4 mt-1 space-y-0.5 font-mono text-[11px] text-gray-500 dark:text-gray-400">
+                <li>- HealthcheckAllJob (chaque minute)</li>
+                <li>- SyncGithubJob (toutes les 5 minutes)</li>
+                <li>- CronStatusJob (toutes les 5 minutes)</li>
+                <li>- Purge des jobs terminés (toutes les heures)</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
-  <!-- Section 9: FAQ & Dépannage -->
+
+  <!-- Panel 9: FAQ & Dépannage -->
   <section
     id="faq"
-    class="
-      overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white
-      dark:bg-gray-900 p-6 shadow
-    ">
-    <div class="max-w-3xl">
-      <p
-        class="
-          text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-300
-        ">FAQ &bull; Troubleshooting</p>
-      <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">Questions fréquentes</h2>
-      <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">
-        Les réponses sont repliables pour garder la page légère et rapide à
-        scanner.
-      </p>
-    </div>
+    data-docs-target="tabPanel"
+    data-panel-id="faq"
+    data-doc-keywords="faq questions frequentes depannage troubleshooting ci cd ssh secrets tests rspec playwright coverage bin/ci"
+    class="hidden space-y-6">
+    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <span class="rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">FAQ &bull; Troubleshooting</span>
+          <h2 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">Questions fréquentes</h2>
+          <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">
+            Réponses directes aux questions courantes sur l'architecture, la sécurité et les suites de tests.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            data-action="click->docs#expandAllFaq"
+            class="rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+            Tout ouvrir
+          </button>
+          <button
+            type="button"
+            data-action="click->docs#collapseAllFaq"
+            class="rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+            Tout fermer
+          </button>
+          <button
+            type="button"
+            data-action="click->docs#copyLink"
+            data-section-id="faq"
+            title="Copier le lien direct vers la FAQ"
+            class="text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-300 p-1">
+            <span class="font-mono text-lg font-bold">#</span>
+            <span class="link-copied-feedback hidden text-[10px] text-cyan-600 dark:text-cyan-400">Lien copié</span>
+          </button>
+        </div>
+      </div>
 
-    <div
-      class="
-        mt-6 divide-y divide-gray-200 dark:divide-gray-800 rounded-lg border
-        border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950
-      ">
-      <details class="group p-4">
-        <summary
-          class="
-            flex cursor-pointer list-none items-center justify-between gap-4 font-semibold
-            text-gray-900 dark:text-gray-100
-          ">
-          Est-ce que Sentinel remplace une CI/CD complète ?
-          <span
-            class="
-              text-xl leading-none text-gray-500 group-open:rotate-45 transition-transform
-            ">+</span>
-        </summary>
-        <p class="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-400">
-          Non. Sentinel sert surtout à piloter et observer des déploiements
-          simples sur VPS. Une CI/CD reste préférable pour les pipelines
-          complexes, les matrices de tests ou les environnements multiples.
-        </p>
-      </details>
+      <div class="mt-6 divide-y divide-gray-200 rounded-xl border border-gray-200 bg-gray-50 dark:divide-gray-800 dark:border-gray-800 dark:bg-gray-950">
+        <details data-docs-target="faqDetails" class="group p-5 transition-colors hover:bg-gray-100/50 dark:hover:bg-gray-900/50">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
+            <span>Est-ce que Sentinel remplace une CI/CD complète ?</span>
+            <span class="text-xl leading-none text-gray-400 transition-transform group-open:rotate-45">+</span>
+          </summary>
+          <p class="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-400">
+            Non. Sentinel sert surtout à piloter et observer des déploiements simples sur VPS. Une CI/CD reste préférable pour les pipelines complexes, les matrices de tests ou les environnements multiples.
+          </p>
+        </details>
 
-      <details class="group p-4">
-        <summary
-          class="
-            flex cursor-pointer list-none items-center justify-between gap-4 font-semibold
-            text-gray-900 dark:text-gray-100
-          ">
-          Pourquoi passer par SSH ?
-          <span
-            class="
-              text-xl leading-none text-gray-500 group-open:rotate-45 transition-transform
-            ">+</span>
-        </summary>
-        <p class="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-400">
-          Parce que beaucoup de petits projets sont déjà déployés avec un
-          script fiable sur un VPS. Sentinel encadre cette commande avec
-          validations, timeouts, historique et visibilité.
-        </p>
-      </details>
+        <details data-docs-target="faqDetails" class="group p-5 transition-colors hover:bg-gray-100/50 dark:hover:bg-gray-900/50">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
+            <span>Pourquoi passer par SSH ?</span>
+            <span class="text-xl leading-none text-gray-400 transition-transform group-open:rotate-45">+</span>
+          </summary>
+          <p class="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-400">
+            Parce que beaucoup de petits projets sont déjà déployés avec un script fiable sur un VPS. Sentinel encadre cette commande avec validations, timeouts, historique et visibilité.
+          </p>
+        </details>
 
-      <details class="group p-4">
-        <summary
-          class="
-            flex cursor-pointer list-none items-center justify-between gap-4 font-semibold
-            text-gray-900 dark:text-gray-100
-          ">
-          Quels secrets sont visibles dans l’interface ?
-          <span
-            class="
-              text-xl leading-none text-gray-500 group-open:rotate-45 transition-transform
-            ">+</span>
-        </summary>
-        <p class="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-400">
-          Aucun secret ne doit être affiché. Les pages de configuration
-          indiquent seulement si les intégrations sensibles sont configurées ou
-          manquantes.
-        </p>
-      </details>
+        <details data-docs-target="faqDetails" class="group p-5 transition-colors hover:bg-gray-100/50 dark:hover:bg-gray-900/50">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
+            <span>Quels secrets sont visibles dans l’interface ?</span>
+            <span class="text-xl leading-none text-gray-400 transition-transform group-open:rotate-45">+</span>
+          </summary>
+          <p class="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-400">
+            Aucun secret ne doit être affiché. Les pages de configuration indiquent seulement si les intégrations sensibles sont configurées ou manquantes.
+          </p>
+        </details>
 
-      <details class="group p-4">
-        <summary
-          class="
-            flex cursor-pointer list-none items-center justify-between gap-4 font-semibold
-            text-gray-900 dark:text-gray-100
-          ">
-          Quelle commande lancer pour valider le projet ?
-          <span
-            class="
-              text-xl leading-none text-gray-500 group-open:rotate-45 transition-transform
-            ">+</span>
-        </summary>
-        <p class="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-400">
-          La commande de test courante est
-          <code
-            class="
-              rounded bg-white dark:bg-gray-900 px-1.5 py-0.5 text-gray-900 dark:text-gray-100
-              font-mono
-            ">docker compose exec sentinel-api bundle exec rspec</code> (la couverture SimpleCov est générée automatiquement dans <code class="rounded bg-white dark:bg-gray-900 px-1.5 py-0.5 text-gray-900 dark:text-gray-100 font-mono">coverage/</code>). Pour jouer la suite de tests E2E Playwright en mode headless, lancez
-          <code
-            class="
-              rounded bg-white dark:bg-gray-900 px-1.5 py-0.5 text-gray-900 dark:text-gray-100
-              font-mono
-            ">docker compose run --rm playwright</code>. Pour tout valider avant commit, utilisez
-          <code
-            class="
-              rounded bg-white dark:bg-gray-900 px-1.5 py-0.5 text-gray-900 dark:text-gray-100
-              font-mono
-            ">docker compose exec sentinel-api bin/ci</code>.
-        </p>
-      </details>
+        <details data-docs-target="faqDetails" class="group p-5 transition-colors hover:bg-gray-100/50 dark:hover:bg-gray-900/50">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
+            <span>Quelle commande lancer pour valider le projet ?</span>
+            <span class="text-xl leading-none text-gray-400 transition-transform group-open:rotate-45">+</span>
+          </summary>
+          <div class="mt-3 space-y-2 text-sm leading-6 text-gray-600 dark:text-gray-400">
+            <p>
+              La commande de test courante est
+              <code class="rounded bg-white px-1.5 py-0.5 font-mono text-gray-900 dark:bg-gray-900 dark:text-gray-100">docker compose exec sentinel-api bundle exec rspec</code> (la couverture SimpleCov est générée automatiquement dans <code class="rounded bg-white px-1.5 py-0.5 font-mono text-gray-900 dark:bg-gray-900 dark:text-gray-100">coverage/</code>).
+            </p>
+            <p>
+              Pour jouer la suite de tests E2E Playwright en mode headless, lancez
+              <code class="rounded bg-white px-1.5 py-0.5 font-mono text-gray-900 dark:bg-gray-900 dark:text-gray-100">docker compose run --rm playwright</code>.
+            </p>
+            <p>
+              Pour tout valider avant commit, utilisez
+              <code class="rounded bg-white px-1.5 py-0.5 font-mono text-gray-900 dark:bg-gray-900 dark:text-gray-100">docker compose exec sentinel-api bin/ci</code>.
+            </p>
+          </div>
+        </details>
+      </div>
     </div>
   </section>
-</section>
+</div>
