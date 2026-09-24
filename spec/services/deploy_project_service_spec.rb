@@ -31,12 +31,26 @@ RSpec.describe DeployProjectService, type: :service do
   it 'handles SSH failure gracefully' do
     allow_any_instance_of(SshExecutionService).to receive(:execute)
       .and_return({ exit_code: 1, stdout: '', stderr: 'Command not found' })
+    expect(Rails.logger).to receive(:error).with(
+      /event=deploy_failed project=#{project.slug} exit_code=1 error="Command not found"/
+    )
     service.call
     deployment = Deployment.last
     expect(deployment.status).to eq('failed')
     # Le projet n'est pas mis à jour en cas d'échec
     project.reload
     expect(project.last_commit_deployed).to be_nil
+  end
+
+  it 'logs an exception and marks deployment as failed when an unexpected error occurs' do
+    allow_any_instance_of(SshExecutionService).to receive(:execute)
+      .and_raise(StandardError, 'Connection reset by peer')
+    expect(Rails.logger).to receive(:error).with(
+      /event=deploy_exception project=#{project.slug} error_class=StandardError error="Connection reset by peer"/
+    )
+    service.call
+    deployment = Deployment.last
+    expect(deployment.status).to eq('failed')
   end
 
   it 'truncates oversized deployment logs before storing them' do
