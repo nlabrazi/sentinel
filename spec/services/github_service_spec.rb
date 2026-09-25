@@ -224,5 +224,144 @@ RSpec.describe GithubService, type: :service do
       expect(service.compare_branches('main', 'staging')).to be_nil
       expect(Rails.logger).to have_received(:warn).with(/GitHub branch comparison \(main\.\.\.staging\) failed/)
     end
+
+    it 'treats staging as synced when base HEAD merged staging (merge_base in base_commit parents)' do
+      allow(client).to receive(:compare)
+        .with('nlabrazi/argandici', 'main', 'staging')
+        .and_return({
+          ahead_by: 0,
+          behind_by: 30,
+          status: 'behind',
+          total_commits: 0,
+          html_url: 'https://github.com/nlabrazi/argandici/compare/main...staging',
+          permalink_url: 'https://github.com/nlabrazi/argandici/compare/main...staging',
+          merge_base_commit: { sha: 'staging123' },
+          base_commit: {
+            sha: 'merge123',
+            parents: [ { sha: 'prevmaster' }, { sha: 'staging123' } ]
+          },
+          commits: []
+        })
+
+      result = service.compare_branches('main', 'staging')
+
+      expect(result[:ahead_by]).to eq(0)
+      expect(result[:behind_by]).to eq(0)
+      expect(result[:status]).to eq('identical')
+    end
+
+    it 'treats staging as ahead when staging has unmerged commits and base HEAD is the previous merge' do
+      allow(client).to receive(:compare)
+        .with('nlabrazi/argandici', 'main', 'staging')
+        .and_return({
+          ahead_by: 2,
+          behind_by: 30,
+          status: 'diverged',
+          total_commits: 2,
+          html_url: 'https://github.com/nlabrazi/argandici/compare/main...staging',
+          permalink_url: 'https://github.com/nlabrazi/argandici/compare/main...staging',
+          merge_base_commit: { sha: 'staging_prev' },
+          base_commit: {
+            sha: 'merge123',
+            parents: [ { sha: 'prevmaster' }, { sha: 'staging_prev' } ]
+          },
+          commits: []
+        })
+
+      result = service.compare_branches('main', 'staging')
+
+      expect(result[:ahead_by]).to eq(2)
+      expect(result[:behind_by]).to eq(0)
+      expect(result[:status]).to eq('ahead')
+    end
+
+    it 'treats staging as synced when git trees are identical and ahead_by is zero' do
+      allow(client).to receive(:compare)
+        .with('nlabrazi/argandici', 'main', 'staging')
+        .and_return({
+          ahead_by: 0,
+          behind_by: 15,
+          status: 'behind',
+          total_commits: 0,
+          html_url: 'https://github.com/nlabrazi/argandici/compare/main...staging',
+          permalink_url: 'https://github.com/nlabrazi/argandici/compare/main...staging',
+          merge_base_commit: {
+            sha: 'mb123',
+            commit: { tree: { sha: 'identical_tree_sha' } }
+          },
+          base_commit: {
+            sha: 'squash123',
+            commit: { tree: { sha: 'identical_tree_sha' } },
+            parents: [ { sha: 'prevmaster' } ]
+          },
+          commits: []
+        })
+
+      result = service.compare_branches('main', 'staging')
+
+      expect(result[:ahead_by]).to eq(0)
+      expect(result[:behind_by]).to eq(0)
+      expect(result[:status]).to eq('identical')
+    end
+
+    it 'counts only new commits added to base branch after the merge of staging' do
+      allow(client).to receive(:compare)
+        .with('nlabrazi/argandici', 'main', 'staging')
+        .and_return({
+          ahead_by: 0,
+          behind_by: 32,
+          status: 'behind',
+          total_commits: 0,
+          html_url: 'https://github.com/nlabrazi/argandici/compare/main...staging',
+          permalink_url: 'https://github.com/nlabrazi/argandici/compare/main...staging',
+          merge_base_commit: { sha: 'staging123' },
+          base_commit: {
+            sha: 'hotfix2',
+            parents: [ { sha: 'hotfix1' } ]
+          },
+          commits: []
+        })
+
+      allow(client).to receive(:commits)
+        .with('nlabrazi/argandici', sha: 'main', per_page: 30)
+        .and_return([
+          { sha: 'hotfix2', parents: [ { sha: 'hotfix1' } ] },
+          { sha: 'hotfix1', parents: [ { sha: 'merge123' } ] },
+          { sha: 'merge123', parents: [ { sha: 'prevmaster' }, { sha: 'staging123' } ] }
+        ])
+
+      result = service.compare_branches('main', 'staging')
+
+      expect(result[:ahead_by]).to eq(0)
+      expect(result[:behind_by]).to eq(2)
+      expect(result[:status]).to eq('behind')
+    end
+
+    it 'falls back to raw behind_by when commit history traversal fails' do
+      allow(client).to receive(:compare)
+        .with('nlabrazi/argandici', 'main', 'staging')
+        .and_return({
+          ahead_by: 0,
+          behind_by: 7,
+          status: 'behind',
+          total_commits: 0,
+          html_url: 'https://github.com/nlabrazi/argandici/compare/main...staging',
+          permalink_url: 'https://github.com/nlabrazi/argandici/compare/main...staging',
+          merge_base_commit: { sha: 'staging123' },
+          base_commit: {
+            sha: 'hotfix1',
+            parents: [ { sha: 'other' } ]
+          },
+          commits: []
+        })
+
+      allow(client).to receive(:commits)
+        .with('nlabrazi/argandici', sha: 'main', per_page: 30)
+        .and_raise(Octokit::Error)
+
+      result = service.compare_branches('main', 'staging')
+
+      expect(result[:behind_by]).to eq(7)
+    end
   end
 end
