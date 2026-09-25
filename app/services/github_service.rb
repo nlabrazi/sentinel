@@ -8,7 +8,8 @@ class GithubService
 
   # Retourne le dernier commit de la branche principale sous forme d'objet Sawyer::Resource
   def latest_commit_on_branch
-    branch_ref = @client.ref(@project.github_repo, "heads/#{@project.branch}")
+    branch_name = @project.effective_production_branch
+    branch_ref = @client.ref(@project.github_repo, "heads/#{branch_name}")
     @client.commit(@project.github_repo, branch_ref[:object][:sha])
   rescue Octokit::Error, Faraday::Error => e
     log_github_error("latest commit lookup", e)
@@ -19,7 +20,8 @@ class GithubService
   def commits_behind(base_sha)
     return 0 unless base_sha
 
-    comparison = @client.compare(@project.github_repo, base_sha, "heads/#{@project.branch}")
+    branch_name = @project.effective_production_branch
+    comparison = @client.compare(@project.github_repo, base_sha, "heads/#{branch_name}")
     comparison[:ahead_by] || 0
   rescue Octokit::Error, Faraday::Error => e
     log_github_error("commit comparison", e)
@@ -37,12 +39,16 @@ class GithubService
 
     comparison = @client.compare(@project.github_repo, base, head)
 
+    ahead_by = comparison[:ahead_by] || 0
+    behind_by = calculate_commits_behind(comparison, base)
+    status = determine_branch_status(ahead_by, behind_by)
+
     {
       base_branch: base,
       head_branch: head,
-      ahead_by: comparison[:ahead_by] || 0,
-      behind_by: comparison[:behind_by] || 0,
-      status: comparison[:status] || "identical",
+      ahead_by: ahead_by,
+      behind_by: behind_by,
+      status: status,
       total_commits: comparison[:total_commits] || 0,
       html_url: comparison[:html_url],
       permalink_url: comparison[:permalink_url],
@@ -54,7 +60,8 @@ class GithubService
   end
 
   def recent_commits(limit: 20)
-    @client.commits(@project.github_repo, sha: @project.branch, per_page: limit).map do |commit|
+    branch_name = @project.effective_production_branch
+    @client.commits(@project.github_repo, sha: branch_name, per_page: limit).map do |commit|
       normalize_commit(commit)
     end
   rescue Octokit::Error, Faraday::Error => e
@@ -92,6 +99,89 @@ class GithubService
 
   private
 
+  def calculate_commits_behind(comparison, base_branch)
+    raw_behind = comparison[:behind_by].to_i
+    return 0 if raw_behind.zero?
+
+    merge_base_sha = comparison.dig(:merge_base_commit, :sha)
+    return raw_behind if merge_base_sha.blank?
+
+    base_commit = comparison[:base_commit]
+    return raw_behind if base_commit.blank?
+
+    base_commit_sha = extract_commit_sha(base_commit)
+    return 0 if base_commit_sha == merge_base_sha
+
+    if comparison[:ahead_by].to_i.zero?
+      base_tree = comparison.dig(:base_commit, :commit, :tree, :sha)
+      merge_base_tree = comparison.dig(:merge_base_commit, :commit, :tree, :sha)
+      return 0 if base_tree.present? && base_tree == merge_base_tree
+    end
+
+    base_parents = extract_parent_shas(base_commit)
+    return 0 if base_parents.include?(merge_base_sha)
+
+    commits_since_merge = count_commits_on_base_since_merge(base_branch, merge_base_sha)
+    commits_since_merge.nil? ? raw_behind : commits_since_merge
+  end
+
+  def count_commits_on_base_since_merge(base_branch, merge_base_sha)
+    recent_commits = @client.commits(@project.github_repo, sha: base_branch, per_page: 30)
+    count = 0
+    found = false
+
+    recent_commits.each do |c|
+      sha = extract_commit_sha(c)
+      parents = extract_parent_shas(c)
+
+      if sha == merge_base_sha || parents.include?(merge_base_sha)
+        found = true
+        break
+      end
+
+      count += 1
+    end
+
+    found ? count : nil
+  rescue Octokit::Error, Faraday::Error => e
+    log_github_error("counting commits behind on #{base_branch}", e)
+    nil
+  end
+
+  def extract_commit_sha(commit)
+    return commit[:sha] if commit.is_a?(Hash) && commit.key?(:sha)
+    return commit["sha"] if commit.is_a?(Hash) && commit.key?("sha")
+    return commit.sha if commit.respond_to?(:sha)
+    return commit[:sha] if commit.respond_to?(:[]) && commit[:sha].present?
+
+    nil
+  end
+
+  def extract_parent_shas(commit)
+    parents = commit[:parents] || (commit.respond_to?(:parents) ? commit.parents : nil) || []
+    parents.map do |p|
+      if p.is_a?(Hash)
+        p[:sha] || p["sha"]
+      elsif p.respond_to?(:sha)
+        p.sha
+      elsif p.respond_to?(:[])
+        p[:sha] || p["sha"]
+      end
+    end.compact
+  end
+
+  def determine_branch_status(ahead_by, behind_by)
+    if ahead_by.zero? && behind_by.zero?
+      "identical"
+    elsif ahead_by.positive? && behind_by.zero?
+      "ahead"
+    elsif ahead_by.zero? && behind_by.positive?
+      "behind"
+    else
+      "diverged"
+    end
+  end
+
   def normalize_commit(commit)
     commit_payload = commit[:commit] || {}
     author_payload = commit_payload[:author] || {}
@@ -116,8 +206,9 @@ class GithubService
   end
 
   def log_github_error(action, error)
+    branch_name = @project.effective_production_branch
     Rails.logger.warn(
-      "GitHub #{action} failed for #{@project.github_repo}@#{@project.branch}: #{error.class}: #{error.message}"
+      "GitHub #{action} failed for #{@project.github_repo}@#{branch_name}: #{error.class}: #{error.message}"
     )
   end
 end
