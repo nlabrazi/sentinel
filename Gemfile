@@ -4,7 +4,7 @@ source "https://rubygems.org"
 gem "rails", "~> 8.1.3"
 # Rails 8.1.3.1 session deserialization is incompatible with JSON 3.
 # See https://github.com/rails/rails/issues/58685
-gem "json", "~> 2.19"
+gem "json", "~> 3.0"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
 # Use postgresql as the database for Active Record
