@@ -4,6 +4,7 @@ require "shellwords"
 class Project < ApplicationRecord
   SCREENSHOT_OPEN_TIMEOUT = 5
   SCREENSHOT_READ_TIMEOUT = 10
+  CRON_SYNC_STALE_AFTER = ENV.fetch("CRON_SYNC_STALE_AFTER_MINUTES", "15").to_i.minutes
   VPS_ROOT = "/srv/apps"
   SAFE_VPS_PATH_PATTERN = %r{\A#{Regexp.escape(VPS_ROOT)}/[A-Za-z0-9._/-]+\z}
 
@@ -186,13 +187,18 @@ class Project < ApplicationRecord
     bash_command("#{action} #{Shellwords.escape(maintenance_flag_path)}")
   end
 
-  def cron_summary_status
+  def cron_sync_stale?(at: Time.current)
+    cron_monitoring_enabled? && (cron_synced_at.nil? || cron_synced_at <= at - CRON_SYNC_STALE_AFTER)
+  end
+
+  def cron_summary_status(at: Time.current)
     return "disabled" unless cron_monitoring_enabled?
 
     jobs = loaded_or_query_cron_jobs
     return "not_reported" if jobs.empty?
 
     return "failed" if jobs.any?(&:failed?)
+    return "overdue" if jobs.any? { |job| job.overdue?(at: at) }
     return "never_run" if jobs.any?(&:never_run?)
     return "unknown" if jobs.any?(&:unknown?)
     return "ok" if jobs.all?(&:success?)
@@ -200,8 +206,8 @@ class Project < ApplicationRecord
     "unknown"
   end
 
-  def cron_needs_attention?
-    %w[failed unknown never_run not_reported].include?(cron_summary_status)
+  def cron_needs_attention?(at: Time.current)
+    cron_sync_stale?(at: at) || %w[failed overdue unknown never_run not_reported].include?(cron_summary_status(at: at))
   end
 
   def cron_summary_label
@@ -212,6 +218,8 @@ class Project < ApplicationRecord
       I18n.t("projects.cron_summary.ok", default: "OK")
     when "failed"
       I18n.t("projects.cron_summary.failed", default: "Failed")
+    when "overdue"
+      I18n.t("projects.cron_summary.overdue", default: "Overdue")
     when "never_run"
       I18n.t("projects.cron_summary.never_run", default: "Never run")
     when "not_reported"
@@ -229,7 +237,7 @@ class Project < ApplicationRecord
       :success
     when "failed"
       :danger
-    when "never_run", "not_reported", "unknown"
+    when "overdue", "never_run", "not_reported", "unknown"
       :warning
     else
       :muted
@@ -244,6 +252,8 @@ class Project < ApplicationRecord
       :circle_check
     when "failed"
       :circle_xmark
+    when "overdue"
+      :clock
     when "never_run"
       :circle_play
     when "not_reported"

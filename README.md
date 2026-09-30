@@ -538,6 +538,43 @@ All architectural layers are tested under `spec/`:
 docker compose exec sentinel-api bundle exec rspec
 ```
 
+### Cron monitoring and Prometheus
+
+Sentinel evaluates VPS cron schedules in UTC using the existing Fugit dependency.
+`CRON_OVERDUE_GRACE_MINUTES` and `CRON_SYNC_STALE_AFTER_MINUTES` default to 15;
+restart Rails after changing these thresholds. A missed occurrence becomes overdue
+at the end of its grace period. Failed executions keep priority, jobs that never
+ran remain separate, and invalid schedules are unknown. Sync health is independent:
+a missing sync or one aged 15 minutes or more requires attention.
+
+Set `PROMETHEUS_METRICS_TOKEN` in the Rails environment, then scrape:
+
+```bash
+curl --fail -H "Authorization: Bearer $PROMETHEUS_METRICS_TOKEN" \
+  https://sentinel.example.com/metrics
+```
+
+The endpoint returns Prometheus text format 0.0.4 without a Devise session.
+Missing, incorrect, or unconfigured tokens return 401; tokens in URLs are not accepted.
+Only projects with cron monitoring enabled are exported. All metrics are gauges:
+
+| Metric prefix: `sentinel_cron_` | Meaning |
+| --- | --- |
+| `job_healthy` | 1 when the job needs no attention, otherwise 0 |
+| `job_failed` | 1 when the last execution failed |
+| `job_overdue` | 1 when an expected occurrence was missed beyond the grace period |
+| `job_last_execution_timestamp_seconds` | Last execution as Unix seconds |
+| `job_last_duration_seconds` | Last execution duration in seconds |
+| `project_last_sync_timestamp_seconds` | Last successful sync as Unix seconds |
+| `project_sync_stale` | 1 when sync is old or missing |
+| `project_healthy` | 1 when jobs are healthy and sync is recent |
+
+Labels are limited to `project` (slug) and, for job metrics, `job` (name).
+Unknown timestamps and durations are omitted, while a known zero duration is exported.
+A project with no reported jobs is unhealthy. Job health describes execution health;
+project health also accounts for synchronization. Grafana can consume these values
+without recomputing cron schedules. Prometheus/Grafana alert configuration is separate.
+
 ### 📊 2. Code Coverage (SimpleCov)
 [SimpleCov](https://github.com/simplecov-ruby/simplecov) is loaded automatically in `spec/spec_helper.rb` on every RSpec run:
 - **Coverage**: **>91%** across the entire application codebase (305 passing tests).

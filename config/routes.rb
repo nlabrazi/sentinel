@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   devise_for :users,
              only: [ :sessions, :omniauth_callbacks ],
              controllers: { omniauth_callbacks: "users/omniauth_callbacks" }
+  get "/metrics", to: "metrics#index"
   root "dashboard#index"
   resources :projects, only: [ :show ] do
     member do

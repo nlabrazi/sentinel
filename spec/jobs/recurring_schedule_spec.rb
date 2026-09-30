@@ -31,4 +31,14 @@ RSpec.describe 'Recurring schedule configuration', type: :job do
       expect(task).to be_valid, "Task #{key} is invalid: #{task.errors.full_messages.join(', ')}"
     end
   end
+
+  it "syncs crons every five minutes in each configured environment" do
+    %w[development staging production].each do |environment|
+      task = raw_config.fetch(environment).fetch("cron_status")
+      expect(task.fetch("class")).to eq("CronStatusJob")
+      schedule = Fugit.parse(task.fetch("schedule"))
+      first_run = schedule.next_time(Time.utc(2026, 9, 30, 0, 0))
+      expect(schedule.next_time(first_run) - first_run).to eq(5.minutes)
+    end
+  end
 end

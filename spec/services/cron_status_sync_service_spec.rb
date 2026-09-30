@@ -32,6 +32,7 @@ RSpec.describe CronStatusSyncService, type: :service do
     )
 
     expect(service.call).to eq(true)
+    expect(project.reload.cron_synced_at).to be_within(1.second).of(Time.current)
 
     cron_job = project.cron_jobs.find_by!(name: 'daily-import')
     expect(cron_job.command).to eq('./bin/daily-import')
@@ -144,5 +145,30 @@ RSpec.describe CronStatusSyncService, type: :service do
 
     expect(service.call).to eq(false)
     expect(Rails.logger).to have_received(:error).with(/event=cron_sync_failed Cron status JSON invalid/)
+  end
+
+  it "preserves the last successful sync on SSH, JSON, and persistence failures" do
+    project.update!(cron_synced_at: 1.hour.ago)
+    previous_sync = project.reload.cron_synced_at
+    responses = [
+      { exit_code: 1, stdout: "", stderr: "failed" },
+      { exit_code: 0, stdout: "invalid JSON", stderr: "" },
+      { exit_code: 0, stdout: { jobs: [ { name: "invalid", last_status: "success" } ] }.to_json, stderr: "" }
+    ]
+
+    responses.each_with_index do |response, index|
+      allow(ssh).to receive(:execute).and_return(response)
+      if index == 2
+        allow_any_instance_of(CronJob).to receive(:update!).and_raise(ActiveRecord::RecordInvalid.new(CronJob.new))
+      end
+      expect(service.call).to be(false)
+      expect(project.reload.cron_synced_at).to eq(previous_sync)
+    end
+  end
+
+  it "preserves a missing sync when the SSH connection raises" do
+    allow(ssh).to receive(:execute).and_raise(Net::SSH::Exception, "connection failed")
+    expect(service.call).to be(false)
+    expect(project.reload.cron_synced_at).to be_nil
   end
 end

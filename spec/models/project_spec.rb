@@ -388,4 +388,62 @@ RSpec.describe Project, type: :model do
       expect(project.github_compare_deploy_url).to eq('https://github.com/nlabrazi/sentinel/compare/abc1234...master')
     end
   end
+
+  describe "cron monitoring health" do
+    include ActiveSupport::Testing::TimeHelpers
+
+    let(:now) { Time.utc(2026, 9, 30, 6, 30) }
+    let(:project) { build(:project, cron_monitoring_enabled: true, cron_synced_at: now) }
+
+    before { stub_const("Project::CRON_SYNC_STALE_AFTER", 15.minutes) }
+
+    it "only flags enabled monitoring with missing or old syncs" do
+      expect(project.cron_sync_stale?(at: now)).to be(false)
+      project.cron_synced_at = now - 15.minutes + 1.second
+      expect(project.cron_sync_stale?(at: now)).to be(false)
+      project.cron_synced_at = now - 15.minutes
+      expect(project.cron_sync_stale?(at: now)).to be(true)
+      project.cron_synced_at = now - 1.hour
+      expect(project.cron_sync_stale?(at: now)).to be(true)
+      project.cron_synced_at = nil
+      expect(project.cron_sync_stale?(at: now)).to be(true)
+      project.cron_monitoring_enabled = false
+      expect(project.cron_sync_stale?(at: now)).to be(false)
+      expect(project.cron_needs_attention?(at: now)).to be(false)
+    end
+
+    it "requires attention for stale syncs even when jobs are healthy" do
+      project.cron_jobs << build(:cron_job, project: project, last_execution_at: now)
+      expect(project.cron_needs_attention?(at: now)).to be(false)
+      project.cron_synced_at = nil
+      expect(project.cron_summary_status(at: now)).to eq("ok")
+      expect(project.cron_needs_attention?(at: now)).to be(true)
+    end
+
+    it "prioritizes failed, overdue, never run, unknown, then ok" do
+      healthy = build(:cron_job, project: project, last_execution_at: now)
+      unknown = build(:cron_job, project: project, last_status: "unknown", last_execution_at: now)
+      never_run = build(:cron_job, project: project, last_execution_at: nil)
+      overdue = build(:cron_job, project: project, last_execution_at: now - 1.day)
+      failed = build(:cron_job, project: project, last_status: "failed", last_execution_at: now)
+      jobs = [ healthy, unknown, never_run, overdue, failed ]
+      allow(project).to receive(:cron_jobs).and_return(jobs)
+
+      %w[failed overdue never_run unknown ok].each do |status|
+        expect(project.cron_summary_status(at: now)).to eq(status)
+        jobs.pop
+      end
+    end
+
+    it "exposes overdue labels and warning styling" do
+      project.cron_jobs << build(:cron_job, project: project, last_execution_at: now - 1.day)
+      travel_to(now) do
+        expect(project.cron_needs_attention?).to be(true)
+        expect(project.cron_summary_tone).to eq(:warning)
+        expect(project.cron_summary_icon).to eq(:clock)
+        I18n.with_locale(:en) { expect(project.cron_summary_label).to eq("Overdue") }
+        I18n.with_locale(:fr) { expect(project.cron_summary_label).to eq("En retard") }
+      end
+    end
+  end
 end

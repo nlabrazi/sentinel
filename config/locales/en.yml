@@ -141,6 +141,8 @@ en:
       disabled: "Disabled"
       unknown: "Unknown"
     cron_summary:
+      overdue: "Overdue"
+      sync_stale: "Cron sync stale or missing"
       disabled: "Disabled"
       ok: "OK"
       failed: "Failed"
