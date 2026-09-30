@@ -1,4 +1,8 @@
+require "fugit"
+
 class CronJob < ApplicationRecord
+  OVERDUE_GRACE = ENV.fetch("CRON_OVERDUE_GRACE_MINUTES", "15").to_i.minutes
+
   belongs_to :project
   has_many :job_executions, dependent: :destroy
 
@@ -22,21 +26,38 @@ class CronJob < ApplicationRecord
   end
 
   def unknown?
-    last_status.blank? || last_status == "unknown"
+    !%w[success failed].include?(last_status) || cron_schedule.nil?
   end
 
   def never_run?
     last_execution_at.blank?
   end
 
-  def needs_attention?
-    failed? || never_run? || unknown?
+  def overdue?(at: Time.current)
+    return false if never_run?
+
+    cron = cron_schedule
+    return false unless cron
+
+    # Fugit searches strictly before its argument; include the cutoff second.
+    cutoff = (at - OVERDUE_GRACE).utc
+    expected_at = cron.previous_time(cutoff.floor + 1).to_t
+    last_execution_at < expected_at
+  rescue ArgumentError, RuntimeError
+    # Invalid or impossible schedules must not interrupt monitoring.
+    false
+  end
+
+  def needs_attention?(at: Time.current)
+    failed? || overdue?(at: at) || never_run? || unknown?
   end
 
   def display_status
-    return "never run" if never_run?
-    return "success" if success?
     return "failed" if failed?
+    return "overdue" if overdue?
+    return "never run" if never_run?
+    return "unknown" if unknown?
+    return "success" if success?
 
     "unknown"
   end
@@ -49,5 +70,11 @@ class CronJob < ApplicationRecord
 
   def last_log_excerpt(length: 140)
     latest_execution&.log.to_s.squish.truncate(length)
+  end
+
+  private
+
+  def cron_schedule
+    Fugit::Cron.parse("#{schedule} UTC")
   end
 end

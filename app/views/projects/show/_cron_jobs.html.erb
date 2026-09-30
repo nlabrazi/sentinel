@@ -21,6 +21,12 @@
         </p>
       </div>
       <div class="flex flex-wrap items-center gap-2">
+        <% if project.cron_sync_stale? %>
+          <%= render "shared/ui/badge",
+          label: t("projects.cron_summary.sync_stale"),
+          variant: :warning,
+          icon: :triangle_exclamation %>
+        <% end %>
         <span
           class="
             inline-flex w-fit items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold
@@ -35,6 +41,11 @@
               <%= fa_icon(:circle_xmark, class_name: "text-[10px]") %>
               <%= cron_jobs.count(&:failed?) %> failed
             </span>
+          <% elsif cron_jobs.any?(&:needs_attention?) %>
+            <%= render "shared/ui/badge",
+            label: project.cron_summary_label,
+            variant: project.cron_summary_tone,
+            icon: project.cron_summary_icon %>
           <% else %>
             <span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/40 dark:text-green-300">
               <%= fa_icon(:circle_check, class_name: "text-[10px]") %>
@@ -78,6 +89,7 @@
         <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
           <% cron_jobs.each do |cron_job| %>
             <% last_log = cron_job.last_log_excerpt %>
+            <% job_status = cron_job.display_status %>
             <tr class="align-top <%= 'bg-rose-50/40 dark:bg-rose-950/10' if cron_job.failed? %>">
               <td class="px-5 py-4">
                 <p class="font-semibold text-gray-900 dark:text-gray-100"><%= cron_job.name %></p>
@@ -93,12 +105,12 @@
               </td>
               <td class="whitespace-nowrap px-5 py-4">
                 <%= render "shared/ui/badge",
-                label: cron_job.display_status,
-                variant: cron_job.success? ? :success : cron_job.failed? ? :danger : :warning,
+                label: job_status == "overdue" ? t("projects.cron_summary.overdue") : job_status,
+                variant: job_status == "success" ? :success : job_status == "failed" ? :danger : :warning,
                 icon:
-                  cron_job.success? ?
+                  job_status == "success" ?
                     :circle_check :
-                    cron_job.failed? ? :circle_xmark : :triangle_exclamation %>
+                    job_status == "failed" ? :circle_xmark : :triangle_exclamation %>
               </td>
               <td class="whitespace-nowrap px-5 py-4 text-gray-600 dark:text-gray-300">
                 <%= cron_job.display_duration %>

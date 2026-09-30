@@ -189,6 +189,8 @@ fr:
       disabled: "Désactivé"
       unknown: "Inconnu"
     cron_summary:
+      overdue: "En retard"
+      sync_stale: "Synchronisation cron ancienne ou absente"
       disabled: "Désactivé"
       ok: "OK"
       failed: "Échoué"
