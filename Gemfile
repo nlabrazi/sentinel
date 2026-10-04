@@ -49,7 +49,7 @@ gem "faraday-retry", "~> 2.3"
 gem "net-ssh", "~> 7.3"
 
 # Healthcheck HTTP
-gem "httparty", "~> 0.22"
+gem "httparty", "~> 0.24"
 
 # Stockage cloud des previews via Active Storage
 gem "cloudinary"

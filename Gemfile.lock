@@ -169,7 +169,7 @@ GEM
     hashdiff (1.2.1)
     hashie (5.1.0)
       logger
-    httparty (0.24.2)
+    httparty (0.24.3)
       csv
       mini_mime (>= 1.0.0)
       multi_xml (>= 0.5.2)
@@ -506,7 +506,7 @@ DEPENDENCIES
   erb_lint
   factory_bot_rails (~> 6.4)
   faraday-retry (~> 2.3)
-  httparty (~> 0.22)
+  httparty (~> 0.24)
   image_processing (~> 1.2)
   importmap-rails
   json (~> 2.19)
