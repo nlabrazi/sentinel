@@ -2,6 +2,7 @@ import { getDb } from '#server/db'
 import { syncAllProjectsCronStatus } from '#server/services/cron-sync'
 import { syncAllProjectsGithub } from '#server/services/github'
 import { sentinelScheduler } from '#server/services/scheduler'
+import { isUmamiConfigured, syncAllProjectsUmami } from '#server/services/umami'
 import { discoverVpsProjects } from '#server/services/vps-discovery'
 import { getEnv } from '#server/utils/env'
 
@@ -30,6 +31,13 @@ export default defineNitroPlugin((nitroApp) => {
       return
     }
     await discoverVpsProjects(getDb())
+  })
+
+  sentinelScheduler.register('sync-umami', '*/15 * * * *', async () => {
+    if (!isUmamiConfigured()) {
+      return
+    }
+    await syncAllProjectsUmami(getDb())
   })
 
   nitroApp.hooks.hook('close', () => {

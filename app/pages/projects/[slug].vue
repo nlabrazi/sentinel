@@ -172,6 +172,8 @@ async function handleToggleMaintenance() {
 
     <ProjectsGithubPanel :project="project" @refreshed="refresh()" />
 
+    <ProjectsUmamiPanel :project="project" @refreshed="refresh()" />
+
     <ProjectsProjectEditSlideover
       v-model:open="editOpen"
       :project="project"
