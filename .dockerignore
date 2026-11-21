@@ -1,0 +1,14 @@
+.git
+.gitignore
+.nuxt
+.output
+.env
+.env.*
+config/ssh_key/*
+!config/ssh_key/.gitkeep
+node_modules
+coverage
+playwright-report
+test-results
+*.log
+.DS_Store
