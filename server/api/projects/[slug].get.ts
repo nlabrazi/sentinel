@@ -1,6 +1,7 @@
 import { asc, desc, eq, inArray } from 'drizzle-orm'
 import { getDb } from '#server/db'
 import { cronJobs, deployments, githubPullRequests, jobExecutions } from '#server/db/schema'
+import { evaluateCronJobStatus, evaluateProjectCronSummary } from '#server/services/cron-metrics'
 import {
   findProjectBySlugOrThrow,
   serializeCronJob,
@@ -69,7 +70,7 @@ export default defineEventHandler(async (event): Promise<ProjectDetailDto> => {
   )
 
   const serializedCrons = cronJobRows.map((job) =>
-    serializeCronJob(job, executionsByJob.get(job.id) ?? []),
+    serializeCronJob(job, executionsByJob.get(job.id) ?? [], evaluateCronJobStatus(job)),
   )
 
   const openPrs = serializedPullRequests.filter((pr) => pr.state === 'open')
@@ -78,6 +79,7 @@ export default defineEventHandler(async (event): Promise<ProjectDetailDto> => {
     openPrsCount: openPrs.length,
     openRenovatePrsCount: openPrs.filter((pr) => pr.isRenovate).length,
     hasRunningDeployment: Boolean(runningDeployment),
+    cronSummaryStatus: evaluateProjectCronSummary(project, cronJobRows),
   })
 
   return {

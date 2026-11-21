@@ -1,4 +1,5 @@
 import { getDb } from '#server/db'
+import { syncAllProjectsCronStatus } from '#server/services/cron-sync'
 import { syncAllProjectsGithub } from '#server/services/github'
 import { sentinelScheduler } from '#server/services/scheduler'
 import { discoverVpsProjects } from '#server/services/vps-discovery'
@@ -15,6 +16,13 @@ export default defineNitroPlugin((nitroApp) => {
       return
     }
     await syncAllProjectsGithub(getDb())
+  })
+
+  sentinelScheduler.register('sync-cron', '*/5 * * * *', async () => {
+    if (!getEnv().vps.host) {
+      return
+    }
+    await syncAllProjectsCronStatus(getDb())
   })
 
   sentinelScheduler.register('scan-vps', '*/30 * * * *', async () => {

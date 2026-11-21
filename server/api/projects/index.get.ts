@@ -1,30 +1,9 @@
 import { asc, desc, eq } from 'drizzle-orm'
 import { getDb } from '#server/db'
 import { cronJobs, deployments, githubPullRequests, projects } from '#server/db/schema'
+import { evaluateProjectCronSummary } from '#server/services/cron-metrics'
 import { serializeProjectSummary, serializePullRequest } from '#server/utils/project-serializer'
-import type { ProjectSummaryDto, ProjectsDashboardResponse } from '#shared/types/api'
-
-function computeBasicCronSummary(
-  enabled: boolean,
-  jobs: Array<{ lastStatus: string; lastExecutionAt: Date | null }>,
-): ProjectSummaryDto['cronSummaryStatus'] {
-  if (!enabled) {
-    return 'disabled'
-  }
-  if (jobs.length === 0) {
-    return 'not_reported'
-  }
-  if (jobs.some((job) => job.lastStatus === 'failed')) {
-    return 'failed'
-  }
-  if (jobs.some((job) => !job.lastExecutionAt)) {
-    return 'never_run'
-  }
-  if (jobs.every((job) => job.lastStatus === 'success')) {
-    return 'ok'
-  }
-  return 'unknown'
-}
+import type { ProjectsDashboardResponse } from '#shared/types/api'
 
 export default defineEventHandler(async (): Promise<ProjectsDashboardResponse> => {
   const db = getDb()
@@ -66,7 +45,7 @@ export default defineEventHandler(async (): Promise<ProjectsDashboardResponse> =
       openPrsCount: prCount.total,
       openRenovatePrsCount: prCount.renovate,
       hasRunningDeployment: runningProjectIds.has(row.id),
-      cronSummaryStatus: computeBasicCronSummary(row.cronMonitoringEnabled, projectCrons),
+      cronSummaryStatus: evaluateProjectCronSummary(row, projectCrons),
     })
   })
 
