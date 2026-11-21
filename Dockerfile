@@ -30,6 +30,7 @@ RUN apt-get update -qq && \
 
 COPY --from=build /app/.output ./.output
 COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/server/db/migrations ./server/db/migrations
 
 EXPOSE 3000
 CMD ["node", ".output/server/index.mjs"]
