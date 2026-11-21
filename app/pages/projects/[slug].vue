@@ -124,6 +124,8 @@ const editOpen = ref(false)
       </UCard>
     </div>
 
+    <ProjectsDeployPanel :project="project" @refreshed="refresh()" />
+
     <ProjectsGithubPanel :project="project" @refreshed="refresh()" />
 
     <ProjectsProjectEditSlideover
