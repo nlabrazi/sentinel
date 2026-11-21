@@ -168,6 +168,8 @@ async function handleToggleMaintenance() {
 
     <ProjectsCronPanel :project="project" @refreshed="refresh()" />
 
+    <ProjectsQuickTerminal :project="project" />
+
     <ProjectsGithubPanel :project="project" @refreshed="refresh()" />
 
     <ProjectsProjectEditSlideover
