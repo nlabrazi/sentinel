@@ -126,6 +126,8 @@ const editOpen = ref(false)
 
     <ProjectsDeployPanel :project="project" @refreshed="refresh()" />
 
+    <ProjectsCronPanel :project="project" @refreshed="refresh()" />
+
     <ProjectsGithubPanel :project="project" @refreshed="refresh()" />
 
     <ProjectsProjectEditSlideover
