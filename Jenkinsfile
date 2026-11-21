@@ -30,7 +30,7 @@ pipeline {
                         postgres:16-alpine
 
                     for i in $(seq 1 30); do
-                        if docker exec sentinel-ci-db pg_isready -U sentinel_ci -d sentinel_test >/dev/null 2>&1; then
+                        if docker exec sentinel-ci-db pg_isready -h 127.0.0.1 -U sentinel_ci -d sentinel_test >/dev/null 2>&1; then
                             echo "PostgreSQL test database is ready"
                             exit 0
                         fi
@@ -104,13 +104,18 @@ pipeline {
 
             environment {
                 CI = 'true'
+                NODE_ENV = 'test'
                 DATABASE_URL = 'postgresql://sentinel_ci:sentinel_ci@sentinel-ci-db:5432/sentinel_test'
                 SESSION_SECRET = 'ci-session-secret-0123456789abcdef0123456789abcdef'
+                PROMETHEUS_METRICS_TOKEN = 'ci-metrics-token'
                 AUTH_DEV_BYPASS = 'true'
             }
 
             steps {
-                sh 'npm run test:e2e'
+                sh '''
+                    npm run db:migrate
+                    npm run test:e2e
+                '''
             }
         }
 
