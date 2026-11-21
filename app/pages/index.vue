@@ -9,6 +9,31 @@ const { data, pending, refresh } = await useFetch<ProjectsDashboardResponse>('/a
 const search = ref('')
 const kindFilter = ref<'all' | 'app' | 'service' | 'cron'>('all')
 const scanning = ref(false)
+const syncingGithub = ref(false)
+
+async function handleSyncAllGithub() {
+  syncingGithub.value = true
+  try {
+    const result = await $fetch<{ syncedCount: number; failedSlugs: string[] }>(
+      '/api/ops/sync-github',
+      { method: 'POST' },
+    )
+    await refresh()
+    toast.add({
+      title: 'Synchro GitHub terminée',
+      description: `${result.syncedCount} dépôt(s) synchronisé(s).`,
+      color: result.failedSlugs.length > 0 ? 'warning' : 'success',
+    })
+  } catch (error) {
+    toast.add({
+      title: 'Échec de synchro GitHub',
+      description: error instanceof Error ? error.message : 'Erreur GitHub API.',
+      color: 'error',
+    })
+  } finally {
+    syncingGithub.value = false
+  }
+}
 
 const filteredProjects = computed(() => {
   const list = data.value?.projects ?? []
@@ -92,6 +117,15 @@ const kpis = computed(() => [
 
       <div class="flex flex-wrap items-center gap-2">
         <UButton
+          color="neutral"
+          variant="soft"
+          icon="i-lucide-git-branch"
+          :loading="syncingGithub"
+          @click="handleSyncAllGithub"
+        >
+          Sync GitHub
+        </UButton>
+        <UButton
           icon="i-lucide-radar"
           :loading="scanning"
           @click="handleScanVps"
@@ -113,6 +147,9 @@ const kpis = computed(() => [
         </div>
       </UCard>
     </div>
+
+    <!-- Global Open & Renovate PR Queue -->
+    <DashboardRenovateQueue :pull-requests="data?.openPullRequests ?? []" />
 
     <!-- Search & Kind Filters -->
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

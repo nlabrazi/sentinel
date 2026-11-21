@@ -64,6 +64,22 @@ const cronBadgeColor = computed(() => {
         {{ project.commitsBehind }} commit(s) à déployer
       </UBadge>
 
+      <UBadge
+        v-if="project.stagingSyncStatus === 'ahead'"
+        color="info"
+        variant="subtle"
+      >
+        staging +{{ project.stagingCommitsAhead }}
+      </UBadge>
+
+      <UBadge
+        v-else-if="project.stagingSyncStatus === 'diverged'"
+        color="warning"
+        variant="subtle"
+      >
+        staging +{{ project.stagingCommitsAhead }}/-{{ project.stagingCommitsBehind }}
+      </UBadge>
+
       <UBadge v-if="project.openRenovatePrsCount > 0" color="secondary" variant="subtle">
         {{ project.openRenovatePrsCount }} Renovate PR
       </UBadge>
