@@ -16,6 +16,38 @@ useHead(() => ({
 }))
 
 const editOpen = ref(false)
+const maintenanceModalOpen = ref(false)
+const togglingMaintenance = ref(false)
+const toast = useToast()
+
+async function handleToggleMaintenance() {
+  if (!project.value) {
+    return
+  }
+  togglingMaintenance.value = true
+  try {
+    const nextState = !project.value.maintenanceMode
+    await $fetch(`/api/projects/${project.value.slug}/maintenance`, {
+      method: 'PATCH',
+      body: { enabled: nextState },
+    })
+    maintenanceModalOpen.value = false
+    await refresh()
+    toast.add({
+      title: nextState ? 'Mode maintenance activé' : 'Mode maintenance désactivé',
+      description: `Flag maintenance.on ${nextState ? 'créé' : 'supprimé'} sur le VPS.`,
+      color: nextState ? 'warning' : 'success',
+    })
+  } catch (error) {
+    toast.add({
+      title: 'Erreur mode maintenance',
+      description: error instanceof Error ? error.message : 'Erreur SSH.',
+      color: 'error',
+    })
+  } finally {
+    togglingMaintenance.value = false
+  }
+}
 </script>
 
 <template>
@@ -64,6 +96,14 @@ const editOpen = ref(false)
           icon="i-lucide-external-link"
         >
           Production
+        </UButton>
+        <UButton
+          :color="project.maintenanceMode ? 'warning' : 'neutral'"
+          variant="soft"
+          icon="i-lucide-wrench"
+          @click="maintenanceModalOpen = true"
+        >
+          {{ project.maintenanceMode ? 'Désactiver maintenance' : 'Maintenance' }}
         </UButton>
         <UButton
           color="neutral"
@@ -136,5 +176,34 @@ const editOpen = ref(false)
       @saved="refresh()"
       @deleted="router.push('/')"
     />
+
+    <UModal
+      v-model:open="maintenanceModalOpen"
+      :title="
+        project.maintenanceMode
+          ? `Désactiver la maintenance pour ${project.name} ?`
+          : `Activer la maintenance pour ${project.name} ?`
+      "
+      :description="
+        project.maintenanceMode
+          ? `Supprime ${project.vpsPath}/maintenance.on sans recharger Nginx.`
+          : `Crée ${project.vpsPath}/maintenance.on pour afficher la page 503 instantanément.`
+      "
+    >
+      <template #footer>
+        <div class="flex w-full justify-end gap-2">
+          <UButton color="neutral" variant="ghost" @click="maintenanceModalOpen = false">
+            Annuler
+          </UButton>
+          <UButton
+            :color="project.maintenanceMode ? 'success' : 'warning'"
+            :loading="togglingMaintenance"
+            @click="handleToggleMaintenance"
+          >
+            {{ project.maintenanceMode ? 'Désactiver' : 'Activer' }}
+          </UButton>
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>
