@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Nuxt / Nitro
+.nuxt/
+.nitro/
+.cache/
+.output/
+dist/
+
+# Environment & Secrets (NEVER commit)
+.env
+.env.*
+!.env.example
+config/ssh_key/*
+!config/ssh_key/.gitkeep
+
+# Tests & Coverage
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# Logs & OS
+*.log
+.DS_Store
+Thumbs.db
