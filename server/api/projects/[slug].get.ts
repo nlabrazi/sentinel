@@ -2,6 +2,7 @@ import { asc, desc, eq, inArray } from 'drizzle-orm'
 import { getDb } from '#server/db'
 import { cronJobs, deployments, githubPullRequests, jobExecutions } from '#server/db/schema'
 import { evaluateCronJobStatus, evaluateProjectCronSummary } from '#server/services/cron-metrics'
+import { buildGrafanaDirectDashboardUrl, buildGrafanaUrl } from '#server/services/grafana'
 import {
   findProjectBySlugOrThrow,
   serializeCronJob,
@@ -88,7 +89,7 @@ export default defineEventHandler(async (event): Promise<ProjectDetailDto> => {
     runningDeployment,
     cronJobs: serializedCrons,
     pullRequests: serializedPullRequests,
-    grafanaEmbedUrl: null,
-    grafanaDirectUrl: null,
+    grafanaEmbedUrl: buildGrafanaUrl({ project }),
+    grafanaDirectUrl: buildGrafanaDirectDashboardUrl({ project }),
   }
 })
