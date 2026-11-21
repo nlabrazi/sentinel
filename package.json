@@ -38,6 +38,7 @@
     "@nlabrazi/config-playwright": "^0.1.0",
     "@nlabrazi/config-vitest": "^0.2.4",
     "@nlabrazi/tsconfig": "^0.1.0",
-    "@types/node": "^26.0.0"
+    "@types/node": "^26.0.0",
+    "vue-tsc": "^3.3.14"
   }
 }
