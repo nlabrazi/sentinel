@@ -1,0 +1,6 @@
+{
+  "extends": ["@nlabrazi/config-biome/configs/recommended"],
+  "files": {
+    "includes": ["!**/*.css"]
+  }
+}
