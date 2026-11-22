@@ -40,6 +40,13 @@ const loggedOut = computed(() => route.query.logged_out === '1')
 <template>
   <main class="w-full max-w-md">
     <div class="mb-8 text-center">
+      <img
+        src="/logo.png"
+        alt="Logo Sentinel"
+        width="56"
+        height="56"
+        class="mx-auto mb-3 size-14 object-contain"
+      />
       <h1 id="main-content" tabindex="-1" class="text-3xl font-bold tracking-tight text-white">
         Sentinel
       </h1>

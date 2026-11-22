@@ -43,11 +43,18 @@ function isActive(to: string): boolean {
       class="hidden lg:flex lg:w-64 lg:shrink-0 lg:flex-col border-r border-default bg-elevated/40"
     >
       <div class="flex h-16 items-center gap-3 border-b border-default px-5">
-        <div
-          class="flex size-9 items-center justify-center rounded-lg bg-primary/15 text-primary ring-1 ring-primary/30"
+        <NuxtLink
+          to="/"
+          class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-zinc-900 ring-1 ring-default"
         >
-          <UIcon name="i-lucide-shield-check" class="size-5" aria-hidden="true" />
-        </div>
+          <img
+            src="/logo.png"
+            alt="Logo Sentinel"
+            width="28"
+            height="28"
+            class="size-7 object-contain"
+          />
+        </NuxtLink>
         <div class="min-w-0">
           <p class="truncate text-sm font-semibold tracking-tight">Sentinel</p>
           <p class="truncate text-xs text-muted">VPS Control Plane</p>
@@ -132,7 +139,13 @@ function isActive(to: string): boolean {
           @click="mobileOpen = true"
         />
         <NuxtLink to="/" class="flex items-center gap-2 font-semibold">
-          <UIcon name="i-lucide-shield-check" class="size-5 text-primary" aria-hidden="true" />
+          <img
+            src="/logo.png"
+            alt="Logo Sentinel"
+            width="24"
+            height="24"
+            class="size-6 object-contain"
+          />
           <span>Sentinel</span>
         </NuxtLink>
       </div>

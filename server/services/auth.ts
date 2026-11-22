@@ -44,7 +44,18 @@ export const DEV_ADMIN_USER: SessionUser = {
 }
 
 const PUBLIC_PREFIXES = ['/_nuxt/', '/__nuxt_error', '/api/_nuxt_icon/', '/auth/', '/users/auth/']
-const PUBLIC_EXACT_PATHS = new Set(['/login', '/metrics', '/favicon.ico', '/robots.txt'])
+const PUBLIC_EXACT_PATHS = new Set([
+  '/login',
+  '/metrics',
+  '/favicon.ico',
+  '/favicon-32x32.png',
+  '/apple-touch-icon.png',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/logo.png',
+  '/site.webmanifest',
+  '/robots.txt',
+])
 
 const discoveryCache = new Map<string, { doc: OidcDiscoveryDocument; expiresAt: number }>()
 
