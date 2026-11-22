@@ -46,6 +46,7 @@ export const DEV_ADMIN_USER: SessionUser = {
 const PUBLIC_PREFIXES = ['/_nuxt/', '/__nuxt_error', '/api/_nuxt_icon/', '/auth/', '/users/auth/']
 const PUBLIC_EXACT_PATHS = new Set([
   '/login',
+  '/users/sign_in',
   '/metrics',
   '/favicon.ico',
   '/favicon-32x32.png',
@@ -79,7 +80,13 @@ export function sanitizeReturnTo(raw: string | undefined): string {
   if (!trimmed.startsWith('/') || trimmed.startsWith('//') || trimmed.startsWith('/\\')) {
     return '/'
   }
-  if (trimmed.startsWith('/auth/') || trimmed.startsWith('/users/auth/') || trimmed === '/login') {
+  const pathOnly = trimmed.split(/[?#]/)[0] || '/'
+  if (
+    pathOnly.startsWith('/auth/') ||
+    pathOnly.startsWith('/users/auth/') ||
+    pathOnly === '/login' ||
+    pathOnly === '/users/sign_in'
+  ) {
     return '/'
   }
   return trimmed
