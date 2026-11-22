@@ -14,6 +14,7 @@ describe('umami v2 client', () => {
 
   it('extracts normalized hostnames and parses v2 nested/flat metric objects', () => {
     expect(extractDomainHost('https://sentinel.nabster.dev/dashboard')).toBe('sentinel.nabster.dev')
+    expect(extractDomainHost('https://www.nabster.dev/')).toBe('nabster.dev')
     expect(extractDomainHost('NABSTER.DEV')).toBe('nabster.dev')
 
     expect(

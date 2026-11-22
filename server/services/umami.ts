@@ -35,9 +35,9 @@ export function extractDomainHost(urlOrDomain: string | null | undefined): strin
   }
   const normalized = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
   try {
-    return new URL(normalized).hostname.toLowerCase()
+    return new URL(normalized).hostname.toLowerCase().replace(/^www\./, '')
   } catch {
-    return trimmed.toLowerCase()
+    return trimmed.toLowerCase().replace(/^www\./, '')
   }
 }
 
