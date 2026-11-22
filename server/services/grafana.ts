@@ -90,3 +90,14 @@ export function buildGrafanaDirectDashboardUrl(
 ): string | null {
   return buildGrafanaUrl({ ...options, panelId: null })
 }
+
+export function buildGrafanaSsoUrl(env: SentinelEnv['grafana'] = getEnv().grafana): string | null {
+  const baseUri = parseSafeBaseUrl(env.baseUrl)
+  if (!baseUri) {
+    return null
+  }
+  const baseSegments = baseUri.pathname.split('/').filter(Boolean)
+  const result = new URL(baseUri.toString())
+  result.pathname = `/${[...baseSegments, 'login', 'generic_oauth'].join('/')}`
+  return result.toString()
+}

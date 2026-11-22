@@ -8,6 +8,7 @@ interface AuthMeResponse {
   } | null
   authMode: 'dev-bypass' | 'authentik-oidc'
   grafanaBaseUrl: string | null
+  grafanaSsoUrl: string | null
 }
 
 const route = useRoute()
@@ -72,8 +73,8 @@ function isActive(to: string): boolean {
         <USeparator class="my-3" />
 
         <a
-          v-if="authData?.grafanaBaseUrl"
-          :href="authData.grafanaBaseUrl"
+          v-if="authData?.grafanaSsoUrl"
+          :href="authData.grafanaSsoUrl"
           target="_blank"
           rel="noopener noreferrer"
           class="flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted transition-colors hover:bg-elevated hover:text-default"
@@ -137,14 +138,14 @@ function isActive(to: string): boolean {
       </div>
       <div class="flex items-center gap-1">
         <UButton
-          v-if="authData?.grafanaBaseUrl"
-          :to="authData.grafanaBaseUrl"
+          v-if="authData?.grafanaSsoUrl"
+          :to="authData.grafanaSsoUrl"
           target="_blank"
           icon="i-lucide-activity"
           color="neutral"
           variant="ghost"
           size="sm"
-          aria-label="Ouvrir Grafana"
+          aria-label="Ouvrir Grafana via SSO"
         />
         <UColorModeButton size="sm" />
       </div>

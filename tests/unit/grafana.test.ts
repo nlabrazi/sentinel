@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { buildGrafanaDirectDashboardUrl, buildGrafanaUrl } from '#server/services/grafana'
+import {
+  buildGrafanaDirectDashboardUrl,
+  buildGrafanaSsoUrl,
+  buildGrafanaUrl,
+} from '#server/services/grafana'
 
 const baseGrafanaEnv = {
   baseUrl: 'https://grafana.nabster.dev',
@@ -61,5 +65,12 @@ describe('grafana embed URL builder', () => {
         env: { ...baseGrafanaEnv, variableName: 'bad var!' },
       }),
     ).toBeNull()
+  })
+
+  it('builds direct Grafana OAuth SSO URL to bypass anonymous viewer mode', () => {
+    expect(buildGrafanaSsoUrl(baseGrafanaEnv)).toBe(
+      'https://grafana.nabster.dev/login/generic_oauth',
+    )
+    expect(buildGrafanaSsoUrl({ ...baseGrafanaEnv, baseUrl: '' })).toBeNull()
   })
 })

@@ -1,4 +1,5 @@
 import { isDevBypassActive } from '#server/services/auth'
+import { buildGrafanaSsoUrl } from '#server/services/grafana'
 import { getEnv } from '#server/utils/env'
 
 export default defineEventHandler((event) => {
@@ -7,5 +8,6 @@ export default defineEventHandler((event) => {
     user: event.context.user ?? null,
     authMode: isDevBypassActive(env) ? 'dev-bypass' : 'authentik-oidc',
     grafanaBaseUrl: env.grafana.baseUrl || null,
+    grafanaSsoUrl: buildGrafanaSsoUrl(env.grafana),
   }
 })
