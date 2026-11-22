@@ -48,7 +48,7 @@ describe('quick command security policy', () => {
     expect(res.success).toBe(true)
     expect(res.stdout).toBe('up 12 days\n')
     expect(mockSsh.execute).toHaveBeenCalledWith(
-      "cd '/srv/apps/sentinel' && uptime",
+      "export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0='*' && cd '/srv/apps/sentinel' && uptime",
       expect.objectContaining({ timeoutSeconds: 10 }),
     )
 

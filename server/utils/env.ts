@@ -19,6 +19,7 @@ export interface SentinelEnv {
   vps: {
     host: string
     user: string
+    deployAsUser: string
     appsRoot: string
     sshKeyPath: string
     sshKnownHostsPath: string
@@ -132,6 +133,7 @@ export function getEnv(source: Record<string, string | undefined> = process.env)
     vps: {
       host: (source.VPS_HOST || '').trim(),
       user: (source.VPS_USER || 'control-panel').trim(),
+      deployAsUser: (source.SSH_DEPLOY_AS_USER || '').trim(),
       appsRoot: (source.VPS_APPS_ROOT || '/srv/apps').trim().replace(/\/+$/, ''),
       sshKeyPath: (source.SSH_KEY_PATH || 'config/ssh_key/sentinel_control_panel').trim(),
       sshKnownHostsPath: (source.SSH_KNOWN_HOSTS_PATH || 'config/ssh_key/known_hosts').trim(),
@@ -216,6 +218,12 @@ export function getEnvStatusReport(
       key: 'VPS_USER',
       configured: Boolean(env.vps.user),
       required: true,
+    },
+    {
+      category: 'VPS / SSH',
+      key: 'SSH_DEPLOY_AS_USER',
+      configured: Boolean(env.vps.deployAsUser),
+      required: false,
     },
     {
       category: 'VPS / SSH',

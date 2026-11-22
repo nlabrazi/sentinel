@@ -73,9 +73,20 @@ describe('deploy service', () => {
     expect(truncated).toContain('[Log truncated]')
   })
 
-  it('builds safe deploy.sh command and rejects unsafe paths', () => {
-    expect(buildDeployCommand('/srv/apps/sentinel', '/srv/apps')).toContain('./deploy.sh')
-    expect(() => buildDeployCommand('/etc/passwd', '/srv/apps')).toThrow(/Unsafe VPS path/)
+  it('builds safe deploy.sh command, supports SSH_DEPLOY_AS_USER and rejects unsafe inputs', () => {
+    const direct = buildDeployCommand('/srv/apps/sentinel', '/srv/apps', '')
+    expect(direct).toContain('./deploy.sh')
+    expect(direct).toContain('GIT_CONFIG_COUNT=1')
+
+    const delegated = buildDeployCommand('/srv/apps/sentinel', '/srv/apps', 'zref')
+    expect(delegated).toContain('sudo -n -H -u')
+    expect(delegated).toContain('zref')
+    expect(delegated).toContain('/srv/apps/sentinel/deploy.sh')
+
+    expect(() => buildDeployCommand('/etc/passwd', '/srv/apps', '')).toThrow(/Unsafe VPS path/)
+    expect(() => buildDeployCommand('/srv/apps/sentinel', '/srv/apps', 'zref; id')).toThrow(
+      /Invalid SSH_DEPLOY_AS_USER/,
+    )
   })
 
   it('streams chunks live through DeployLogBus and clears active buffer on finish', () => {

@@ -49,6 +49,7 @@ services:
       APIFLASH_ACCESS_KEY: ${APIFLASH_ACCESS_KEY:-}
       VPS_HOST: ${VPS_HOST:-}
       VPS_USER: ${VPS_USER:-control-panel}
+      SSH_DEPLOY_AS_USER: ${SSH_DEPLOY_AS_USER:-}
       VPS_APPS_ROOT: ${VPS_APPS_ROOT:-/srv/apps}
       SSH_KEY_PATH: ${SSH_KEY_PATH:-config/ssh_key/sentinel_control_panel}
       SSH_KNOWN_HOSTS_PATH: ${SSH_KNOWN_HOSTS_PATH:-config/ssh_key/known_hosts}

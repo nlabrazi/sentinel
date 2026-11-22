@@ -94,11 +94,31 @@ export function truncateLog(log: string, maxBytes = MAX_DEPLOY_LOG_BYTES): strin
   return `${buf.subarray(0, sliceLen).toString('utf8')}${TRUNCATED_NOTICE}`
 }
 
-export function buildDeployCommand(vpsPath: string, appsRoot = getEnv().vps.appsRoot): string {
+const SAFE_UNIX_USER_PATTERN = /^[a-z_][a-z0-9_-]*$/
+
+export function buildDeployCommand(
+  vpsPath: string,
+  appsRoot = getEnv().vps.appsRoot,
+  deployAsUser = getEnv().vps.deployAsUser,
+): string {
   if (!isSafeVpsPath(vpsPath, appsRoot)) {
     throw new Error(`Unsafe VPS path rejected: ${vpsPath}`)
   }
-  return wrapBashCommand(`cd ${shellEscape(vpsPath)} && ./deploy.sh`)
+
+  const targetUser = (deployAsUser ?? '').trim()
+  if (targetUser) {
+    if (!SAFE_UNIX_USER_PATTERN.test(targetUser)) {
+      throw new Error(`Invalid SSH_DEPLOY_AS_USER value: ${targetUser}`)
+    }
+    const scriptPath = `${vpsPath}/deploy.sh`
+    return wrapBashCommand(
+      `cd ${shellEscape(vpsPath)} && sudo -n -H -u ${shellEscape(targetUser)} ${shellEscape(scriptPath)}`,
+    )
+  }
+
+  return wrapBashCommand(
+    `cd ${shellEscape(vpsPath)} && GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0='*' ./deploy.sh`,
+  )
 }
 
 export async function acquireDeploymentLock(
@@ -145,6 +165,7 @@ export async function executeDeploymentRun(params: {
   ssh?: SshExecutor
   bus?: DeployLogBus
   appsRoot?: string
+  deployAsUser?: string
 }): Promise<{ status: DeploymentStatus; durationSeconds: number; log: string }> {
   const ssh = params.ssh ?? defaultSshExecutor
   const bus = params.bus ?? deployLogBus
@@ -159,7 +180,7 @@ export async function executeDeploymentRun(params: {
   }
 
   try {
-    const command = buildDeployCommand(params.project.vpsPath, params.appsRoot)
+    const command = buildDeployCommand(params.project.vpsPath, params.appsRoot, params.deployAsUser)
     const result = await ssh.execute(command, {
       onStdout: appendChunk,
       onStderr: appendChunk,

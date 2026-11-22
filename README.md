@@ -235,6 +235,7 @@ Drizzle migrations under `server/db/migrations/` are automatically applied on Ni
 | | `AUTHENTIK_ALLOWED_EMAILS` | Optional comma-separated allowlist of administrator emails. |
 | **VPS / SSH** | `VPS_HOST` | Hostname or IP address of the target VPS. |
 | | `VPS_USER` | SSH user on the VPS. Default: `control-panel`. |
+| | `SSH_DEPLOY_AS_USER` | Optional Unix user to run `/srv/apps/<slug>/deploy.sh` via `sudo -n -H -u <user>` (requires a targeted `sudoers` rule). |
 | | `VPS_APPS_ROOT` | Root directory scanned for deployed projects. Default: `/srv/apps`. |
 | | `SSH_KEY_PATH` | Path to the SSH private key (`config/ssh_key/sentinel_control_panel`). |
 | | `SSH_KNOWN_HOSTS_PATH` | Path to the SSH `known_hosts` file (`config/ssh_key/known_hosts`). |
@@ -303,6 +304,16 @@ Each deployable project exposes an executable deployment script at:
 - Returns exit code `0` on success and non-zero on failure.
 - Streams diagnostic messages to `stdout` and `stderr` (forwarded live over SSE and stored up to 64 KB).
 - Keeps project-specific build/migration logic encapsulated inside the project itself.
+
+#### Optional Least-Privilege Delegation (`SSH_DEPLOY_AS_USER`)
+
+If your `/srv/apps/*/repo` directories are owned by another user (e.g. `zref`) while Sentinel connects over SSH as a dedicated read-only user (`sentinel`), set `SSH_DEPLOY_AS_USER=zref` and add a single scoped `sudoers` rule on the VPS (`/etc/sudoers.d/sentinel`):
+
+```sudoers
+sentinel ALL=(zref) NOPASSWD: /srv/apps/*/deploy.sh
+```
+
+Sentinel will execute `sudo -n -H -u zref /srv/apps/<slug>/deploy.sh`, keeping `sentinel` read-only everywhere else while preserving the target user's Git ownership and SSH deploy keys.
 
 #### Recommended `deploy.sh` Template (Docker Compose)
 

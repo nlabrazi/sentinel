@@ -243,7 +243,7 @@ export async function executeQuickCommand(
   }
 
   const startedAt = Date.now()
-  const fullCommand = `cd ${shellEscape(project.vpsPath)} && ${command}`
+  const fullCommand = `export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0='*' && cd ${shellEscape(project.vpsPath)} && ${command}`
   const result = await ssh.execute(fullCommand, {
     timeoutSeconds: QUICK_COMMAND_TIMEOUT_SECONDS,
   })
