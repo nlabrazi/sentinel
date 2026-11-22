@@ -38,6 +38,7 @@ export const projects = pgTable(
     umamiBounceRate: integer('umami_bounce_rate').notNull().default(0),
     umamiSyncError: text('umami_sync_error'),
     umamiSyncedAt: timestamp('umami_synced_at', { withTimezone: true }),
+    screenshotUpdatedAt: timestamp('screenshot_updated_at', { withTimezone: true }),
     vpsSyncedAt: timestamp('vps_synced_at', { withTimezone: true }),
     githubSyncedAt: timestamp('github_synced_at', { withTimezone: true }),
     cronSyncedAt: timestamp('cron_synced_at', { withTimezone: true }),
@@ -139,9 +140,19 @@ export const githubPullRequests = pgTable(
   ],
 )
 
+export const projectScreenshots = pgTable('project_screenshots', {
+  projectId: integer('project_id')
+    .primaryKey()
+    .references(() => projects.id, { onDelete: 'cascade' }),
+  contentType: text('content_type').notNull().default('image/jpeg'),
+  dataBase64: text('data_base64').notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 export type ProjectRow = typeof projects.$inferSelect
 export type NewProjectRow = typeof projects.$inferInsert
 export type DeploymentRow = typeof deployments.$inferSelect
 export type CronJobRow = typeof cronJobs.$inferSelect
 export type JobExecutionRow = typeof jobExecutions.$inferSelect
 export type GithubPullRequestRow = typeof githubPullRequests.$inferSelect
+export type ProjectScreenshotRow = typeof projectScreenshots.$inferSelect

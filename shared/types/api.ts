@@ -90,6 +90,8 @@ export interface ProjectSummaryDto {
   umamiBounceRate: number
   umamiSyncError: string | null
   umamiSyncedAt: string | null
+  screenshotUrl: string | null
+  screenshotUpdatedAt: string | null
   vpsSyncedAt: string | null
   githubSyncedAt: string | null
   cronSyncedAt: string | null

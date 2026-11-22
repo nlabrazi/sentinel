@@ -15,6 +15,7 @@ export interface SentinelEnv {
   }
   databaseUrl: string
   githubToken: string
+  apiflashAccessKey: string
   vps: {
     host: string
     user: string
@@ -127,6 +128,7 @@ export function getEnv(source: Record<string, string | undefined> = process.env)
     },
     databaseUrl: (source.DATABASE_URL || defaultDbUrl).trim(),
     githubToken: (source.GITHUB_TOKEN || '').trim(),
+    apiflashAccessKey: (source.APIFLASH_ACCESS_KEY || '').trim(),
     vps: {
       host: (source.VPS_HOST || '').trim(),
       user: (source.VPS_USER || 'control-panel').trim(),
@@ -226,6 +228,12 @@ export function getEnvStatusReport(
       key: 'GITHUB_TOKEN',
       configured: Boolean(env.githubToken),
       required: true,
+    },
+    {
+      category: 'Screenshots',
+      key: 'APIFLASH_ACCESS_KEY',
+      configured: Boolean(env.apiflashAccessKey),
+      required: false,
     },
     {
       category: 'Monitoring',

@@ -3,6 +3,7 @@ import { and, eq, sql } from 'drizzle-orm'
 import type { SentinelDb } from '#server/db'
 import { type DeploymentRow, deployments, type ProjectRow, projects } from '#server/db/schema'
 import { fetchLatestBranchCommit } from '#server/services/github'
+import { captureProjectScreenshot } from '#server/services/screenshot'
 import {
   defaultSshExecutor,
   type SshExecutor,
@@ -195,6 +196,15 @@ export async function executeDeploymentRun(params: {
           updatedAt: now,
         })
         .where(eq(projects.id, params.project.id))
+    }
+
+    if (status === 'success' && params.project.productionUrl && getEnv().apiflashAccessKey) {
+      void captureProjectScreenshot(params.db, params.project).catch((err) => {
+        console.warn(
+          `[sentinel:screenshot] Post-deploy capture failed for ${params.project.slug}:`,
+          err,
+        )
+      })
     }
 
     bus.finish(params.deployment.id, status, durationSeconds)

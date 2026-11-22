@@ -30,6 +30,7 @@ function makeProjectRow(overrides: Partial<ProjectRow> = {}): ProjectRow {
     umamiBounceRate: 0,
     umamiSyncError: null,
     umamiSyncedAt: null,
+    screenshotUpdatedAt: now,
     vpsSyncedAt: now,
     githubSyncedAt: now,
     cronSyncedAt: null,
@@ -60,6 +61,7 @@ describe('project serializer', () => {
     expect(dto.openRenovatePrsCount).toBe(2)
     expect(dto.hasRunningDeployment).toBe(true)
     expect(dto.cronSummaryStatus).toBe('ok')
+    expect(dto.screenshotUrl).toMatch(/^\/api\/projects\/sentinel\/screenshot\?v=\d+$/)
   })
 
   it('handles projects without repository or staging branch cleanly', () => {

@@ -165,6 +165,10 @@ export function serializeProjectSummary(
     umamiBounceRate: row.umamiBounceRate,
     umamiSyncError: row.umamiSyncError,
     umamiSyncedAt: row.umamiSyncedAt?.toISOString() ?? null,
+    screenshotUrl: row.screenshotUpdatedAt
+      ? `/api/projects/${encodeURIComponent(row.slug)}/screenshot?v=${Math.floor(row.screenshotUpdatedAt.getTime() / 1000)}`
+      : null,
+    screenshotUpdatedAt: row.screenshotUpdatedAt?.toISOString() ?? null,
     vpsSyncedAt: row.vpsSyncedAt?.toISOString() ?? null,
     githubSyncedAt: row.githubSyncedAt?.toISOString() ?? null,
     cronSyncedAt: row.cronSyncedAt?.toISOString() ?? null,

@@ -38,6 +38,7 @@ function makeFakeProject(): ProjectRow {
     umamiBounceRate: 0,
     umamiSyncError: null,
     umamiSyncedAt: null,
+    screenshotUpdatedAt: null,
     vpsSyncedAt: now,
     githubSyncedAt: now,
     cronSyncedAt: null,
