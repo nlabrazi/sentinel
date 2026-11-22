@@ -16,18 +16,24 @@ test.describe('Sentinel v2 core user journeys', () => {
   })
 
   test('navigates between Cockpit, Deployments Hub and Ops Control Center', async ({ page }) => {
+    const pageErrors: string[] = []
+    page.on('pageerror', (err) => pageErrors.push(err.message))
+
     await page.goto('/')
 
     await page.getByRole('link', { name: 'Déploiements' }).click()
     await expect(page).toHaveURL(/\/deploys/)
     await expect(page.getByRole('heading', { name: 'Hub Déploiements' })).toBeVisible()
     await expect(page.getByText('Taux de succès')).toBeVisible()
+    await expect(page.getByRole('combobox', { name: 'Filtrer par projet' })).toBeVisible()
 
     await page.getByRole('link', { name: 'Ops Center' }).click()
     await expect(page).toHaveURL(/\/settings/)
     await expect(page.getByRole('heading', { name: 'Ops Control Center' })).toBeVisible()
     await expect(page.getByText('PostgreSQL OK')).toBeVisible()
     await expect(page.getByRole('heading', { name: "Variables d'environnement" })).toBeVisible()
+
+    expect(pageErrors).toEqual([])
   })
 
   test('protects Prometheus /metrics with Bearer token and returns 0.0.4 text format', async ({

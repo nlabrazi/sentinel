@@ -19,6 +19,9 @@ export function getPool(): Pool {
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 5_000,
     })
+    poolInstance.on('error', (error) => {
+      console.error('[sentinel:db] Idle PostgreSQL client error:', error.message)
+    })
   }
   return poolInstance
 }

@@ -15,15 +15,19 @@ interface DeploysHubResponse {
   }
 }
 
+const ALL_PROJECTS_VALUE = '__all__'
+
 const toast = useToast()
-const selectedProject = ref('')
+const selectedProject = ref(ALL_PROJECTS_VALUE)
 const selectedStatus = ref('')
 const search = ref('')
 const selectedDeploy = ref<DeploymentDto | null>(null)
 const drawerOpen = ref(false)
 
 const queryParams = computed(() => ({
-  ...(selectedProject.value ? { project: selectedProject.value } : {}),
+  ...(selectedProject.value && selectedProject.value !== ALL_PROJECTS_VALUE
+    ? { project: selectedProject.value }
+    : {}),
   ...(selectedStatus.value ? { status: selectedStatus.value } : {}),
   ...(search.value.trim() ? { q: search.value.trim() } : {}),
 }))
@@ -125,7 +129,7 @@ async function copyLog(log: string) {
         <USelect
           v-model="selectedProject"
           :items="[
-            { label: 'Tous les projets', value: '' },
+            { label: 'Tous les projets', value: ALL_PROJECTS_VALUE },
             ...(data?.projects ?? []).map((p) => ({ label: p.name, value: p.slug })),
           ]"
           class="w-48"
