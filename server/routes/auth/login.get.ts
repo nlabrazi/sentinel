@@ -22,17 +22,11 @@ export default defineEventHandler(async (event) => {
   }
 
   if (!env.authentik.enabled || !env.authentik.issuer || !env.authentik.clientId) {
-    throw createError({
-      statusCode: 503,
-      statusMessage: 'Authentik SSO is not configured',
-    })
+    return sendRedirect(event, '/login?error=not_configured', 302)
   }
 
   if (!env.sessionSecret || env.sessionSecret.length < 16) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'SESSION_SECRET is missing or too short',
-    })
+    return sendRedirect(event, '/login?error=not_configured', 302)
   }
 
   const discovery = await fetchOidcDiscovery(env.authentik.issuer)

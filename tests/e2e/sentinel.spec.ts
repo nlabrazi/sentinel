@@ -1,6 +1,16 @@
 import { expect, test } from '@playwright/test'
 
 test.describe('Sentinel v2 core user journeys', () => {
+  test('renders dedicated Authentik login screen with SSO button', async ({ page }) => {
+    await page.goto('/login')
+
+    await expect(page.getByRole('heading', { name: 'Sentinel' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Connexion' })).toBeVisible()
+    const ssoLink = page.getByRole('link', { name: 'Se connecter avec Authentik' })
+    await expect(ssoLink).toBeVisible()
+    await expect(ssoLink).toHaveAttribute('href', /\/auth\/login\?returnTo=/)
+  })
+
   test('renders Cockpit dashboard with KPIs, filters and VPS scan action', async ({ page }) => {
     await page.goto('/')
 

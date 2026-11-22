@@ -48,5 +48,5 @@ export default defineEventHandler((event) => {
   }
 
   const returnTo = encodeURIComponent(`${pathname}${getRequestURL(event).search}`)
-  return sendRedirect(event, `/auth/login?returnTo=${returnTo}`, 302)
+  return sendRedirect(event, `/login?returnTo=${returnTo}`, 302)
 })

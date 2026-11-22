@@ -18,5 +18,5 @@ export default defineEventHandler(async (event) => {
     // Fall back to local login screen if discovery is unavailable during logout
   }
 
-  return sendRedirect(event, '/auth/login', 302)
+  return sendRedirect(event, '/login?logged_out=1', 302)
 })

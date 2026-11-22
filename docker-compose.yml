@@ -37,12 +37,12 @@ services:
       POSTGRES_HOST: sentinel-db
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@sentinel-db:5432/${POSTGRES_DB:-sentinel_development}
       SESSION_SECRET: ${SESSION_SECRET:-dev-session-secret-change-me-in-production-0123456789}
-      AUTH_DEV_BYPASS: ${AUTH_DEV_BYPASS:-true}
-      AUTHENTIK_ENABLED: ${AUTHENTIK_ENABLED:-false}
+      AUTH_DEV_BYPASS: ${AUTH_DEV_BYPASS:-false}
+      AUTHENTIK_ENABLED: ${AUTHENTIK_ENABLED:-true}
       AUTHENTIK_ISSUER: ${AUTHENTIK_ISSUER:-}
       AUTHENTIK_CLIENT_ID: ${AUTHENTIK_CLIENT_ID:-}
       AUTHENTIK_CLIENT_SECRET: ${AUTHENTIK_CLIENT_SECRET:-}
-      AUTHENTIK_REDIRECT_URI: ${AUTHENTIK_REDIRECT_URI:-http://localhost:3000/auth/callback}
+      AUTHENTIK_REDIRECT_URI: ${AUTHENTIK_REDIRECT_URI:-http://localhost:3000/users/auth/openid_connect/callback}
       AUTHENTIK_ALLOWED_GROUPS: ${AUTHENTIK_ALLOWED_GROUPS:-authentik Admins}
       AUTHENTIK_ALLOWED_EMAILS: ${AUTHENTIK_ALLOWED_EMAILS:-}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}

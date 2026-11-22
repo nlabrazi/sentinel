@@ -43,8 +43,8 @@ export const DEV_ADMIN_USER: SessionUser = {
   devBypass: true,
 }
 
-const PUBLIC_PREFIXES = ['/_nuxt/', '/__nuxt_error', '/api/_nuxt_icon/', '/auth/']
-const PUBLIC_EXACT_PATHS = new Set(['/metrics', '/favicon.ico', '/robots.txt'])
+const PUBLIC_PREFIXES = ['/_nuxt/', '/__nuxt_error', '/api/_nuxt_icon/', '/auth/', '/users/auth/']
+const PUBLIC_EXACT_PATHS = new Set(['/login', '/metrics', '/favicon.ico', '/robots.txt'])
 
 const discoveryCache = new Map<string, { doc: OidcDiscoveryDocument; expiresAt: number }>()
 
@@ -68,7 +68,7 @@ export function sanitizeReturnTo(raw: string | undefined): string {
   if (!trimmed.startsWith('/') || trimmed.startsWith('//') || trimmed.startsWith('/\\')) {
     return '/'
   }
-  if (trimmed.startsWith('/auth/')) {
+  if (trimmed.startsWith('/auth/') || trimmed.startsWith('/users/auth/') || trimmed === '/login') {
     return '/'
   }
   return trimmed
@@ -197,7 +197,7 @@ export function buildAuthorizationUrl(params: {
   url.searchParams.set('response_type', 'code')
   url.searchParams.set('client_id', params.clientId)
   url.searchParams.set('redirect_uri', params.redirectUri)
-  url.searchParams.set('scope', 'openid profile email groups')
+  url.searchParams.set('scope', 'openid profile email')
   url.searchParams.set('state', params.state)
   url.searchParams.set('code_challenge', params.codeChallenge)
   url.searchParams.set('code_challenge_method', 'S256')

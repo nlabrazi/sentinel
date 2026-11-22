@@ -99,9 +99,11 @@ describe('auth service & env helpers', () => {
   })
 
   it('identifies public vs protected routes and sanitizes returnTo URLs', () => {
+    expect(isPublicPath('/login')).toBe(true)
     expect(isPublicPath('/metrics')).toBe(true)
     expect(isPublicPath('/auth/login')).toBe(true)
     expect(isPublicPath('/auth/callback?code=abc')).toBe(true)
+    expect(isPublicPath('/users/auth/openid_connect/callback?code=abc')).toBe(true)
     expect(isPublicPath('/_nuxt/app.js')).toBe(true)
     expect(isPublicPath('/')).toBe(false)
     expect(isPublicPath('/api/projects')).toBe(false)
@@ -110,6 +112,7 @@ describe('auth service & env helpers', () => {
     expect(sanitizeReturnTo('https://evil.com')).toBe('/')
     expect(sanitizeReturnTo('//evil.com')).toBe('/')
     expect(sanitizeReturnTo('/auth/login')).toBe('/')
+    expect(sanitizeReturnTo('/login')).toBe('/')
     expect(sanitizeReturnTo(undefined)).toBe('/')
   })
 
@@ -127,7 +130,7 @@ describe('auth service & env helpers', () => {
     })
 
     const parsed = new URL(authUrl)
-    expect(parsed.searchParams.get('scope')).toContain('groups')
+    expect(parsed.searchParams.get('scope')).toBe('openid profile email')
     expect(parsed.searchParams.get('code_challenge_method')).toBe('S256')
     expect(parsed.searchParams.get('state')).toBe('abc-state')
 
