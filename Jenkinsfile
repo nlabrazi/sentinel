@@ -12,6 +12,7 @@ pipeline {
         stage('Notify start') {
             steps {
                 notifyTelegram('started')
+                sh 'git clean -ffdx'
             }
         }
 
