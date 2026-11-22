@@ -102,6 +102,7 @@ describe('vps discovery parser', () => {
     expect(cmd).toContain('$dir/repo/.git')
     expect(cmd).toContain('org.opencontainers.image.revision')
     expect(cmd).toContain('org.opencontainers.image.source')
+    expect(cmd).toContain('ghcr.io/*')
   })
 
   it('parses GHCR-only container discoveries populated from OCI image labels without local git checkout', () => {

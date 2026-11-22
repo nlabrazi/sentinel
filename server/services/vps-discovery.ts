@@ -72,6 +72,8 @@ export function buildVpsDiscoveryCommand(appsRoot = DEFAULT_VPS_ROOT): string {
     '    oci_rev=""; oci_src=""',
     '    for cid in $(docker ps -q --filter "label=com.docker.compose.project=$slug" 2>/dev/null || true); do',
     '      [ -n "$cid" ] || continue',
+    '      img="$(docker inspect --format \'{{.Config.Image}}\' "$cid" 2>/dev/null || true)"',
+    '      case "$img" in ghcr.io/*) ;; *) continue ;; esac',
     '      rev="$(docker inspect --format \'{{index .Config.Labels "org.opencontainers.image.revision"}}\' "$cid" 2>/dev/null || true)"',
     '      src="$(docker inspect --format \'{{index .Config.Labels "org.opencontainers.image.source"}}\' "$cid" 2>/dev/null || true)"',
     '      if [ -z "$oci_rev" ] && [ -n "$rev" ] && [ "$rev" != "<no value>" ]; then oci_rev="$rev"; fi',
