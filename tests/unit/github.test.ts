@@ -4,7 +4,9 @@ import {
   computeEffectiveBehindBy,
   fetchLatestBranchCommit,
   fetchRecentPullRequests,
+  fetchRepoMetadata,
   isRenovatePullRequest,
+  normalizeHomepageUrl,
 } from '#server/services/github'
 
 describe('github service', () => {
@@ -121,5 +123,31 @@ describe('github service', () => {
     expect(prs).toHaveLength(2)
     expect(prs[0]).toMatchObject({ number: 12, state: 'open', isRenovate: true })
     expect(prs[1]).toMatchObject({ number: 11, state: 'merged', isRenovate: false })
+  })
+
+  it('normalizes GitHub homepage URLs and fetches repo metadata', async () => {
+    expect(normalizeHomepageUrl('https://nabster.dev/')).toBe('https://nabster.dev')
+    expect(normalizeHomepageUrl('argandici.com')).toBe('https://argandici.com')
+    expect(normalizeHomepageUrl('')).toBeNull()
+    expect(normalizeHomepageUrl('ftp://invalid.example')).toBeNull()
+
+    const mockFetch = vi.fn<typeof fetch>().mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          homepage: 'https://riftvision.nabster.dev/',
+          default_branch: 'master',
+        }),
+        { status: 200 },
+      ),
+    )
+
+    const meta = await fetchRepoMetadata('nlabrazi/riftvision', {
+      token: 'ghp_test',
+      fetchImpl: mockFetch,
+    })
+    expect(meta).toEqual({
+      homepage: 'https://riftvision.nabster.dev',
+      defaultBranch: 'master',
+    })
   })
 })

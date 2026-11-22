@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm'
 import type { SentinelDb } from '#server/db'
 import { githubPullRequests, type ProjectRow, projects } from '#server/db/schema'
 import { getEnv } from '#server/utils/env'
-import { extractGithubRepo } from '#shared/schemas/project'
+import { extractGithubRepo, isValidHttpUrl } from '#shared/schemas/project'
 
 const GITHUB_API_BASE = 'https://api.github.com'
 
@@ -82,6 +82,45 @@ async function githubGetJson<T>(
     return null
   }
   return (await response.json()) as T
+}
+
+export interface GithubRepoMetadata {
+  homepage: string | null
+  defaultBranch: string | null
+}
+
+export function normalizeHomepageUrl(raw: string | null | undefined): string | null {
+  const trimmed = (raw ?? '').trim()
+  if (!trimmed) {
+    return null
+  }
+  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed) && !/^https?:\/\//i.test(trimmed)) {
+    return null
+  }
+  const candidate = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+  return isValidHttpUrl(candidate) ? candidate.replace(/\/+$/, '') : null
+}
+
+export async function fetchRepoMetadata(
+  repo: string,
+  options: GithubSyncOptions = {},
+): Promise<GithubRepoMetadata | null> {
+  const token = options.token ?? getEnv().githubToken
+  const fetchImpl = options.fetchImpl ?? fetch
+
+  const data = await githubGetJson<{
+    homepage?: string | null
+    default_branch?: string | null
+  }>(`/repos/${repo}`, token, fetchImpl)
+
+  if (!data) {
+    return null
+  }
+
+  return {
+    homepage: normalizeHomepageUrl(data.homepage),
+    defaultBranch: data.default_branch?.trim() || null,
+  }
 }
 
 export async function fetchLatestBranchCommit(
@@ -295,8 +334,8 @@ export async function syncProjectGithub(
     }
   }
 
-  let stagingAhead = project.stagingCommitsAhead
-  let stagingBehind = project.stagingCommitsBehind
+  let stagingAhead = 0
+  let stagingBehind = 0
   if (project.stagingBranch) {
     const branchComparison = await compareGithubRefs(
       repo,
@@ -307,6 +346,18 @@ export async function syncProjectGithub(
     if (branchComparison) {
       stagingAhead = branchComparison.aheadBy
       stagingBehind = branchComparison.behindBy
+    }
+  }
+
+  let resolvedProductionUrl = project.productionUrl
+  let resolvedGrafanaAppValue = project.grafanaAppValue
+  if (!resolvedProductionUrl || !resolvedGrafanaAppValue) {
+    const meta = await fetchRepoMetadata(repo, options)
+    if (!resolvedProductionUrl && meta?.homepage) {
+      resolvedProductionUrl = meta.homepage
+    }
+    if (!resolvedGrafanaAppValue && resolvedProductionUrl) {
+      resolvedGrafanaAppValue = resolvedProductionUrl
     }
   }
 
@@ -355,6 +406,8 @@ export async function syncProjectGithub(
   await db
     .update(projects)
     .set({
+      productionUrl: resolvedProductionUrl,
+      grafanaAppValue: resolvedGrafanaAppValue,
       latestCommitAvailable: latestCommit?.sha ?? project.latestCommitAvailable,
       commitsBehind,
       stagingCommitsAhead: stagingAhead,
