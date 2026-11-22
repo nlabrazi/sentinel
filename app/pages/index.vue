@@ -190,9 +190,10 @@ const kpis = computed(() => [
       class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
     >
       <DashboardProjectCard
-        v-for="project in filteredProjects"
+        v-for="(project, index) in filteredProjects"
         :key="project.slug"
         :project="project"
+        :priority="index < 2"
       />
     </div>
 

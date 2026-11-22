@@ -3,6 +3,7 @@ import type { ProjectSummaryDto } from '#shared/types/api'
 
 const props = defineProps<{
   project: ProjectSummaryDto
+  priority?: boolean
 }>()
 
 const kindColor = computed(() => {
@@ -33,6 +34,34 @@ const cronBadgeColor = computed(() => {
 
 <template>
   <UCard class="flex h-full flex-col transition-colors hover:border-primary/50">
+    <NuxtLink
+      :to="`/projects/${project.slug}`"
+      class="group mb-3 block aspect-video overflow-hidden rounded-lg border border-default bg-elevated/60"
+    >
+      <img
+        v-if="project.screenshotUrl"
+        :src="project.screenshotUrl"
+        :alt="`Aperçu de ${project.name}`"
+        width="1280"
+        height="720"
+        :loading="priority ? undefined : 'lazy'"
+        :fetchpriority="priority ? 'high' : undefined"
+        decoding="async"
+        class="h-full w-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.02]"
+      />
+      <div
+        v-else
+        class="flex h-full w-full flex-col items-center justify-center gap-1.5 px-3 text-center text-xs text-muted"
+      >
+        <UIcon
+          :name="project.productionUrl ? 'i-lucide-image' : 'i-lucide-terminal'"
+          class="size-6 opacity-50"
+          aria-hidden="true"
+        />
+        <span>{{ project.productionUrl ? 'Aperçu non capturé' : 'Service interne' }}</span>
+      </div>
+    </NuxtLink>
+
     <div class="flex items-start justify-between gap-3">
       <div class="min-w-0">
         <NuxtLink

@@ -18,7 +18,34 @@ useHead(() => ({
 const editOpen = ref(false)
 const maintenanceModalOpen = ref(false)
 const togglingMaintenance = ref(false)
+const capturingScreenshot = ref(false)
 const toast = useToast()
+
+async function handleCaptureScreenshot() {
+  if (!project.value) {
+    return
+  }
+  capturingScreenshot.value = true
+  try {
+    await $fetch(`/api/projects/${project.value.slug}/screenshot`, {
+      method: 'POST',
+    })
+    await refresh()
+    toast.add({
+      title: 'Aperçu mis à jour',
+      description: `Capture ApiFlash enregistrée pour ${project.value.name}.`,
+      color: 'success',
+    })
+  } catch (error) {
+    toast.add({
+      title: 'Échec de capture',
+      description: error instanceof Error ? error.message : 'Vérifiez APIFLASH_ACCESS_KEY et URL.',
+      color: 'error',
+    })
+  } finally {
+    capturingScreenshot.value = false
+  }
+}
 
 async function handleToggleMaintenance() {
   if (!project.value) {
@@ -116,52 +143,107 @@ async function handleToggleMaintenance() {
       </div>
     </div>
 
-    <!-- Overview metadata strip -->
-    <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-      <UCard>
-        <p class="text-xs text-muted">Commit déployé (VPS)</p>
-        <p class="mt-1 font-mono text-lg font-semibold">
-          {{ shortSha(project.lastCommitDeployed) }}
-        </p>
-        <p class="mt-0.5 text-xs text-muted">
-          Scan VPS : {{ formatRelativeTime(project.vpsSyncedAt) }}
-        </p>
-      </UCard>
+    <!-- Overview screenshot preview & metadata strip -->
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
+      <UCard class="lg:col-span-5">
+        <div class="overflow-hidden rounded-lg border border-default bg-elevated/60">
+          <img
+            v-if="project.screenshotUrl"
+            :src="project.screenshotUrl"
+            :alt="`Aperçu en production de ${project.name}`"
+            width="1280"
+            height="720"
+            fetchpriority="high"
+            decoding="async"
+            class="aspect-video w-full object-cover object-top"
+          />
+          <div
+            v-else
+            class="flex aspect-video w-full flex-col items-center justify-center gap-2 px-4 text-center text-xs text-muted"
+          >
+            <UIcon
+              :name="project.productionUrl ? 'i-lucide-camera' : 'i-lucide-terminal'"
+              class="size-8 opacity-50"
+              aria-hidden="true"
+            />
+            <span>
+              {{
+                project.productionUrl
+                  ? 'Aucun aperçu capturé pour ce projet'
+                  : 'Aucune URL de production configurée'
+              }}
+            </span>
+          </div>
+        </div>
 
-      <UCard>
-        <p class="text-xs text-muted">Branche prod / staging</p>
-        <p class="mt-1 font-mono text-lg font-semibold">
-          {{ project.productionBranch }}
-          <span v-if="project.stagingBranch" class="text-sm font-normal text-muted">
-            / {{ project.stagingBranch }}
+        <div class="mt-3 flex items-center justify-between gap-2">
+          <span class="text-xs text-muted">
+            {{
+              project.screenshotUpdatedAt
+                ? `Capturé ${formatRelativeTime(project.screenshotUpdatedAt)}`
+                : 'Jamais capturé'
+            }}
           </span>
-        </p>
-        <p class="mt-0.5 text-xs text-muted">
-          {{ project.commitsBehind > 0 ? `${project.commitsBehind} commit(s) en attente` : 'À jour' }}
-        </p>
-      </UCard>
-
-      <UCard>
-        <p class="text-xs text-muted">Scripts VPS détectés</p>
-        <div class="mt-1.5 flex items-center gap-2">
-          <UBadge :color="project.hasDeployScript ? 'success' : 'neutral'" variant="subtle" size="sm">
-            deploy.sh
-          </UBadge>
-          <UBadge :color="project.hasStatusScript ? 'success' : 'neutral'" variant="subtle" size="sm">
-            status.sh
-          </UBadge>
+          <UButton
+            size="xs"
+            color="neutral"
+            variant="soft"
+            icon="i-lucide-camera"
+            :loading="capturingScreenshot"
+            :disabled="!project.productionUrl"
+            @click="handleCaptureScreenshot"
+          >
+            Rafraîchir l'aperçu
+          </UButton>
         </div>
       </UCard>
 
-      <UCard>
-        <p class="text-xs text-muted">Pull Requests ouvertes</p>
-        <p class="mt-1 text-lg font-semibold">
-          {{ project.openPrsCount }}
-          <span v-if="project.openRenovatePrsCount > 0" class="text-xs font-normal text-secondary">
-            ({{ project.openRenovatePrsCount }} Renovate)
-          </span>
-        </p>
-      </UCard>
+      <div class="grid grid-cols-2 gap-4 lg:col-span-7">
+        <UCard>
+          <p class="text-xs text-muted">Commit déployé (VPS)</p>
+          <p class="mt-1 font-mono text-lg font-semibold">
+            {{ shortSha(project.lastCommitDeployed) }}
+          </p>
+          <p class="mt-0.5 text-xs text-muted">
+            Scan VPS : {{ formatRelativeTime(project.vpsSyncedAt) }}
+          </p>
+        </UCard>
+
+        <UCard>
+          <p class="text-xs text-muted">Branche prod / staging</p>
+          <p class="mt-1 font-mono text-lg font-semibold">
+            {{ project.productionBranch }}
+            <span v-if="project.stagingBranch" class="text-sm font-normal text-muted">
+              / {{ project.stagingBranch }}
+            </span>
+          </p>
+          <p class="mt-0.5 text-xs text-muted">
+            {{ project.commitsBehind > 0 ? `${project.commitsBehind} commit(s) en attente` : 'À jour' }}
+          </p>
+        </UCard>
+
+        <UCard>
+          <p class="text-xs text-muted">Scripts VPS détectés</p>
+          <div class="mt-1.5 flex items-center gap-2">
+            <UBadge :color="project.hasDeployScript ? 'success' : 'neutral'" variant="subtle" size="sm">
+              deploy.sh
+            </UBadge>
+            <UBadge :color="project.hasStatusScript ? 'success' : 'neutral'" variant="subtle" size="sm">
+              status.sh
+            </UBadge>
+          </div>
+        </UCard>
+
+        <UCard>
+          <p class="text-xs text-muted">Pull Requests ouvertes</p>
+          <p class="mt-1 text-lg font-semibold">
+            {{ project.openPrsCount }}
+            <span v-if="project.openRenovatePrsCount > 0" class="text-xs font-normal text-secondary">
+              ({{ project.openRenovatePrsCount }} Renovate)
+            </span>
+          </p>
+        </UCard>
+      </div>
     </div>
 
     <ProjectsDeployPanel :project="project" @refreshed="refresh()" />

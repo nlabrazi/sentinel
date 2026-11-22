@@ -41,6 +41,7 @@ test.describe('Sentinel v2 core user journeys', () => {
     await expect(page).toHaveURL(/\/settings/)
     await expect(page.getByRole('heading', { name: 'Ops Control Center' })).toBeVisible()
     await expect(page.getByText('PostgreSQL OK')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Capturer les aperçus' })).toBeVisible()
     await expect(page.getByRole('heading', { name: "Variables d'environnement" })).toBeVisible()
 
     expect(pageErrors).toEqual([])

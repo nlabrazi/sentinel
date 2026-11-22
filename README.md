@@ -11,6 +11,7 @@ It centralizes day-to-day operations across all Docker/Git projects hosted under
 - **Zero-Reload Maintenance Mode & Whitelisted Quick Terminal**: Instant `maintenance.on` toggling and strictly sandboxed SSH diagnostic commands.
 - **Authentik Admin SSO + Direct Grafana Access**: Stateless Authentik OIDC (PKCE S256, encrypted `httpOnly` cookie, no local passwords) restricted to Authentik admin groups/emails, establishing your `*.nabster.dev` SSO session for seamless Grafana access.
 - **Umami v2 Analytics & Grafana Embed**: 24h site metrics and theme-synced Grafana embeds.
+- **Project Screenshots (ApiFlash + PostgreSQL)**: Automatic post-deploy and on-demand 16:9 website previews stored directly in PostgreSQL (`project_screenshots`) via `APIFLASH_ACCESS_KEY`.
 
 ---
 

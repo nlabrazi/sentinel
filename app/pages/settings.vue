@@ -121,6 +121,34 @@ async function triggerGlobal(key: string, endpoint: string, label: string) {
           >
             Sync Umami
           </UButton>
+
+          <UButton
+            color="neutral"
+            variant="soft"
+            icon="i-lucide-camera"
+            block
+            :loading="busyAction === 'screenshots'"
+            @click="triggerGlobal('screenshots', '/api/ops/sync-screenshots', 'Capture des aperçus')"
+          >
+            Capturer les aperçus
+          </UButton>
+
+          <UButton
+            color="neutral"
+            variant="soft"
+            icon="i-lucide-refresh-cw"
+            block
+            :loading="busyAction === 'screenshots-force'"
+            @click="
+              triggerGlobal(
+                'screenshots-force',
+                '/api/ops/sync-screenshots?force=true',
+                'Rafraîchissement complet des aperçus',
+              )
+            "
+          >
+            Rafraîchir tous les aperçus
+          </UButton>
         </div>
       </UCard>
 
