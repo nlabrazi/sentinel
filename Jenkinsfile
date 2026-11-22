@@ -97,7 +97,7 @@ pipeline {
         stage('End-to-end tests') {
             agent {
                 docker {
-                    image 'mcr.microsoft.com/playwright:v1.63.0-noble'
+                    image 'mcr.microsoft.com/playwright:v1.65.1-noble'
                     args '--network sentinel-ci --ipc=host'
                     reuseNode true
                 }
