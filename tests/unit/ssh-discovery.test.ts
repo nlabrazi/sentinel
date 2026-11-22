@@ -100,6 +100,26 @@ describe('vps discovery parser', () => {
     expect(cmd).toContain('/srv/apps')
     expect(cmd).toContain('safe.directory="*"')
     expect(cmd).toContain('$dir/repo/.git')
+    expect(cmd).toContain('org.opencontainers.image.revision')
+    expect(cmd).toContain('org.opencontainers.image.source')
+    expect(cmd).toContain('ghcr.io/*')
+  })
+
+  it('parses GHCR-only container discoveries populated from OCI image labels without local git checkout', () => {
+    const stdout =
+      'games-lab\t/srv/apps/games-lab\thttps://github.com/nlabrazi/games-lab\t\t9124d1cf7b2a8497803ad1817795188021dae1fe\t1\t1\t0\t'
+    const { projects, warnings } = parseDiscoveryOutput(stdout, '/srv/apps')
+
+    expect(warnings).toEqual([])
+    expect(projects).toHaveLength(1)
+    expect(projects[0]).toMatchObject({
+      slug: 'games-lab',
+      repoUrl: 'https://github.com/nlabrazi/games-lab',
+      productionBranch: 'master',
+      lastCommitDeployed: '9124d1cf7b2a8497803ad1817795188021dae1fe',
+      hasDeployScript: true,
+      hasStatusScript: true,
+    })
   })
 
   it('parses git metadata, SSH remotes, scripts, maintenance flag and sentinel.json', () => {

@@ -12,6 +12,7 @@ pipeline {
         stage('Notify start') {
             steps {
                 notifyTelegram('started')
+                sh 'git clean -ffdx'
             }
         }
 
@@ -96,7 +97,7 @@ pipeline {
         stage('End-to-end tests') {
             agent {
                 docker {
-                    image 'mcr.microsoft.com/playwright:v1.63.0-noble'
+                    image 'mcr.microsoft.com/playwright:v1.65.1-noble'
                     args '--network sentinel-ci --ipc=host'
                     reuseNode true
                 }
@@ -119,10 +120,10 @@ pipeline {
             }
         }
 
-        stage('Docker production build') {
+        stage('Docker build & push') {
             steps {
-                dockerBuildWithPackages(
-                    image: 'sentinel:ci',
+                dockerBuildAndPush(
+                    imageName: 'sentinel',
                     target: 'prod'
                 )
             }
