@@ -98,6 +98,8 @@ describe('vps discovery parser', () => {
     const cmd = buildVpsDiscoveryCommand('/srv/apps')
     expect(cmd).toMatch(/^bash -lc '/)
     expect(cmd).toContain('/srv/apps')
+    expect(cmd).toContain('safe.directory="*"')
+    expect(cmd).toContain('$dir/repo/.git')
   })
 
   it('parses git metadata, SSH remotes, scripts, maintenance flag and sentinel.json', () => {
@@ -112,15 +114,16 @@ describe('vps discovery parser', () => {
     ).toString('base64')
 
     const stdout = [
-      `portfolio\t/srv/apps/portfolio\tgit@github.com:nlabrazi/portfolio-3d.git\tmaster\t1234567890abcdef1234567890abcdef12345678\t1\t1\t0\t${manifest}`,
+      `portfolio\t/srv/apps/portfolio\tgit@github-portfolio:nlabrazi/portfolio-3d.git\tmaster\t1234567890abcdef1234567890abcdef12345678\t1\t1\t0\t${manifest}`,
       'sjvtdm\t/srv/apps/sjvtdm\thttps://github.com/nlabrazi/sjvtdm.git\tmain\tabcdef1234567\t0\t1\t1\t',
+      'umami\t/srv/apps/umami\t\t\t\t0\t1\t0\t',
       'evil\t/etc/passwd\t\t\t\t0\t0\t0\t',
       'broken-manifest\t/srv/apps/broken-manifest\t\t\t\t1\t0\t0\tnot-valid-base64!!!',
     ].join('\n')
 
     const { projects, warnings } = parseDiscoveryOutput(stdout, '/srv/apps')
 
-    expect(projects).toHaveLength(3)
+    expect(projects).toHaveLength(4)
     expect(warnings).toHaveLength(2)
 
     expect(projects[0]).toMatchObject({
@@ -151,6 +154,13 @@ describe('vps discovery parser', () => {
     })
 
     expect(projects[2]).toMatchObject({
+      slug: 'umami',
+      kind: 'service',
+      repoUrl: null,
+      hasStatusScript: true,
+    })
+
+    expect(projects[3]).toMatchObject({
       slug: 'broken-manifest',
       name: 'Broken Manifest',
       kind: 'app',

@@ -63,14 +63,16 @@ export function buildVpsDiscoveryCommand(appsRoot = DEFAULT_VPS_ROOT): string {
     '  [ -d "$dir" ] || continue',
     '  slug="$(basename "$dir")"',
     '  case "$slug" in .*) continue ;; esac',
-    '  repo="$(git -C "$dir" remote get-url origin 2>/dev/null || true)"',
-    '  branch="$(git -C "$dir" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"',
-    '  sha="$(git -C "$dir" rev-parse HEAD 2>/dev/null || true)"',
+    '  gitdir="$dir"',
+    '  [ -d "$dir/repo/.git" ] && gitdir="$dir/repo"',
+    '  repo="$(git -c safe.directory="*" -C "$gitdir" remote get-url origin 2>/dev/null || true)"',
+    '  branch="$(git -c safe.directory="*" -C "$gitdir" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"',
+    '  sha="$(git -c safe.directory="*" -C "$gitdir" rev-parse HEAD 2>/dev/null || true)"',
     '  has_deploy=0; [ -x "$dir/deploy.sh" ] && has_deploy=1',
     '  has_status=0; ([ -x "$dir/status.sh" ] || [ -f "$dir/sentinel/cron-status.json" ]) && has_status=1',
     '  maint=0; [ -f "$dir/maintenance.on" ] && maint=1',
     '  manifest=""',
-    '  if [ -f "$dir/sentinel.json" ]; then manifest="$(base64 "$dir/sentinel.json" 2>/dev/null | tr -d "\\n\\r" || true)"; fi',
+    '  if [ -f "$dir/sentinel.json" ]; then manifest="$(base64 "$dir/sentinel.json" 2>/dev/null | tr -d "\\n\\r" || true)"; elif [ -f "$dir/repo/sentinel.json" ]; then manifest="$(base64 "$dir/repo/sentinel.json" 2>/dev/null | tr -d "\\n\\r" || true)"; fi',
     '  printf "%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\t%s\\n" "$slug" "$dir" "$repo" "$branch" "$sha" "$has_deploy" "$has_status" "$maint" "$manifest"',
     'done',
   ].join('\n')
@@ -142,7 +144,11 @@ export function parseDiscoveryOutput(
 
     const inferredKind: ProjectKind =
       manifest?.kind ??
-      (hasStatusScript && !manifest?.production_url && !hasDeployScript ? 'cron' : 'app')
+      (!repoUrl && !hasDeployScript
+        ? 'service'
+        : hasStatusScript && !manifest?.production_url && !hasDeployScript
+          ? 'cron'
+          : 'app')
 
     discovered.push({
       slug,

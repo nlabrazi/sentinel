@@ -29,6 +29,9 @@ describe('project validation schemas & helpers', () => {
     expect(normalizeGithubRepoUrl('git@github.com:nlabrazi/sentinel.git')).toBe(
       'https://github.com/nlabrazi/sentinel.git',
     )
+    expect(normalizeGithubRepoUrl('git@github-argandici:nlabrazi/argandici.git')).toBe(
+      'https://github.com/nlabrazi/argandici.git',
+    )
     expect(normalizeGithubRepoUrl('https://github.com/nlabrazi/sentinel')).toBe(
       'https://github.com/nlabrazi/sentinel',
     )

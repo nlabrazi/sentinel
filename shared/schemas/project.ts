@@ -29,7 +29,9 @@ export function normalizeGithubRepoUrl(rawUrl: string | null | undefined): strin
     return null
   }
 
-  const sshMatch = trimmed.match(/^git@github\.com:([A-Za-z0-9-]+\/[A-Za-z0-9._-]+?)(?:\.git)?$/)
+  const sshMatch = trimmed.match(
+    /^git@github(?:[.-][A-Za-z0-9._-]+)?:([A-Za-z0-9-]+\/[A-Za-z0-9._-]+?)(?:\.git)?$/,
+  )
   if (sshMatch?.[1]) {
     return `https://github.com/${sshMatch[1]}.git`
   }
