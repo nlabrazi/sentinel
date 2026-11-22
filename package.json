@@ -1,0 +1,55 @@
+{
+  "name": "sentinel",
+  "version": "2.0.0",
+  "description": "Self-hosted DevOps & VPS operations control plane",
+  "author": "Nabil Labrazi",
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "check": "biome check .",
+    "check:write": "biome check --write .",
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "typecheck": "nuxt typecheck",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report"
+  },
+  "dependencies": {
+    "@nuxt/ui": "^4.12.0",
+    "cron-parser": "^5.10.6",
+    "croner": "^11.0.1",
+    "drizzle-orm": "^0.45.4",
+    "nuxt": "^4.2.2",
+    "pg": "^8.23.1",
+    "ssh2": "^1.17.0",
+    "vue": "^3.5.25",
+    "vue-router": "^4.6.5",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@iconify-json/lucide": "^1.2.158",
+    "@nlabrazi/config-biome": "^0.2.0",
+    "@nlabrazi/config-playwright": "^0.1.0",
+    "@nlabrazi/config-vitest": "^0.2.4",
+    "@nlabrazi/tsconfig": "^0.1.0",
+    "@types/node": "^26.0.0",
+    "@types/pg": "^8.23.1",
+    "@types/ssh2": "^1.15.6",
+    "drizzle-kit": "^0.31.11",
+    "vue-tsc": "^3.3.14"
+  }
+}

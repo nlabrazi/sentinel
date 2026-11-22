@@ -1,0 +1,82 @@
+name: sentinel
+
+services:
+  sentinel-db:
+    image: postgres:16-alpine
+    container_name: sentinel-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-sentinel_development}
+    ports:
+      - "5432:5432"
+    volumes:
+      - sentinel-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-sentinel_development}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  sentinel-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+      secrets:
+        - npmrc
+    container_name: sentinel-app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      POSTGRES_HOST: sentinel-db
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@sentinel-db:5432/${POSTGRES_DB:-sentinel_development}
+      SESSION_SECRET: ${SESSION_SECRET:-dev-session-secret-change-me-in-production-0123456789}
+      AUTH_DEV_BYPASS: ${AUTH_DEV_BYPASS:-false}
+      AUTHENTIK_ENABLED: ${AUTHENTIK_ENABLED:-true}
+      AUTHENTIK_ISSUER: ${AUTHENTIK_ISSUER:-}
+      AUTHENTIK_CLIENT_ID: ${AUTHENTIK_CLIENT_ID:-}
+      AUTHENTIK_CLIENT_SECRET: ${AUTHENTIK_CLIENT_SECRET:-}
+      AUTHENTIK_REDIRECT_URI: ${AUTHENTIK_REDIRECT_URI:-http://localhost:3000/users/auth/openid_connect/callback}
+      AUTHENTIK_ALLOWED_GROUPS: ${AUTHENTIK_ALLOWED_GROUPS:-authentik Admins}
+      AUTHENTIK_ALLOWED_EMAILS: ${AUTHENTIK_ALLOWED_EMAILS:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      APIFLASH_ACCESS_KEY: ${APIFLASH_ACCESS_KEY:-}
+      VPS_HOST: ${VPS_HOST:-}
+      VPS_USER: ${VPS_USER:-control-panel}
+      SSH_DEPLOY_AS_USER: ${SSH_DEPLOY_AS_USER:-}
+      VPS_APPS_ROOT: ${VPS_APPS_ROOT:-/srv/apps}
+      SSH_KEY_PATH: ${SSH_KEY_PATH:-config/ssh_key/sentinel_control_panel}
+      SSH_KNOWN_HOSTS_PATH: ${SSH_KNOWN_HOSTS_PATH:-config/ssh_key/known_hosts}
+      SSH_VERIFY_HOST_KEY: ${SSH_VERIFY_HOST_KEY:-always}
+      PROMETHEUS_METRICS_TOKEN: ${PROMETHEUS_METRICS_TOKEN:-}
+      UMAMI_BASE_URL: ${UMAMI_BASE_URL:-}
+      UMAMI_AUTH_TOKEN: ${UMAMI_AUTH_TOKEN:-}
+      GRAFANA_BASE_URL: ${GRAFANA_BASE_URL:-}
+      GRAFANA_DASHBOARD_UID: ${GRAFANA_DASHBOARD_UID:-}
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "300"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/app
+      - sentinel-node-modules:/app/node_modules
+      - sentinel-nuxt-dev:/app/.nuxt
+    depends_on:
+      sentinel-db:
+        condition: service_healthy
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
+
+secrets:
+  npmrc:
+    file: ${NPMRC_FILE:-~/.npmrc}
+
+volumes:
+  sentinel-postgres-data:
+  sentinel-node-modules:
+  sentinel-nuxt-dev:
