@@ -19,12 +19,76 @@ const logModalOpen = ref(false)
 const logContainer = ref<HTMLElement | null>(null)
 
 let eventSource: EventSource | null = null
+let pollTimer: ReturnType<typeof setTimeout> | null = null
+
+function clearPollTimer() {
+  if (pollTimer) {
+    clearTimeout(pollTimer)
+    pollTimer = null
+  }
+}
 
 function closeStream() {
+  clearPollTimer()
   if (eventSource) {
     eventSource.close()
     eventSource = null
   }
+}
+
+function scrollLogToBottom() {
+  nextTick(() => {
+    if (logContainer.value) {
+      logContainer.value.scrollTop = logContainer.value.scrollHeight
+    }
+  })
+}
+
+function finishLiveDeploy(status: 'success' | 'failed', durationSeconds?: number | null) {
+  liveStatus.value = status
+  toast.add({
+    title: status === 'success' ? 'Déploiement réussi' : 'Déploiement en échec',
+    description: `Terminé en ${formatDuration(durationSeconds)}.`,
+    color: status === 'success' ? 'success' : 'error',
+  })
+  closeStream()
+  emit('refreshed')
+}
+
+function pollDeploymentUntilSettled(deployId: number, attempt = 0) {
+  const MAX_POLL_ATTEMPTS = 30
+  if (activeDeployId.value !== deployId || liveStatus.value !== 'running') {
+    return
+  }
+
+  if (attempt >= MAX_POLL_ATTEMPTS) {
+    liveLog.value +=
+      '\n[sentinel] Délai de reconnexion dépassé. Rechargez la page pour vérifier le statut.\n'
+    scrollLogToBottom()
+    clearPollTimer()
+    emit('refreshed')
+    return
+  }
+
+  pollTimer = setTimeout(async () => {
+    if (activeDeployId.value !== deployId || liveStatus.value !== 'running') {
+      return
+    }
+    try {
+      const deploy = await $fetch<DeploymentDto>(`/api/deploys/${deployId}`)
+      if (deploy.status === 'success' || deploy.status === 'failed') {
+        if (deploy.log) {
+          liveLog.value = deploy.log
+          scrollLogToBottom()
+        }
+        finishLiveDeploy(deploy.status, deploy.durationSeconds)
+        return
+      }
+    } catch {
+      // Transient 502/503 or network error while Sentinel container restarts
+    }
+    pollDeploymentUntilSettled(deployId, attempt + 1)
+  }, 2000)
 }
 
 function attachStream(deployId: number) {
@@ -45,11 +109,7 @@ function attachStream(deployId: number) {
       const payload = JSON.parse((ev as MessageEvent).data) as { text?: string }
       if (payload.text) {
         liveLog.value += payload.text
-        nextTick(() => {
-          if (logContainer.value) {
-            logContainer.value.scrollTop = logContainer.value.scrollHeight
-          }
-        })
+        scrollLogToBottom()
       }
     } catch {
       // Ignore malformed SSE chunk
@@ -62,20 +122,25 @@ function attachStream(deployId: number) {
         status?: 'success' | 'failed'
         durationSeconds?: number
       }
-      liveStatus.value = payload.status ?? 'failed'
-      toast.add({
-        title: liveStatus.value === 'success' ? 'Déploiement réussi' : 'Déploiement en échec',
-        description: `Terminé en ${formatDuration(payload.durationSeconds)}.`,
-        color: liveStatus.value === 'success' ? 'success' : 'error',
-      })
-    } finally {
+      finishLiveDeploy(payload.status ?? 'failed', payload.durationSeconds)
+    } catch {
       closeStream()
       emit('refreshed')
     }
   })
 
   es.onerror = () => {
-    closeStream()
+    if (eventSource === es) {
+      eventSource.close()
+      eventSource = null
+    }
+    if (activeDeployId.value === deployId && liveStatus.value === 'running') {
+      liveLog.value +=
+        '\n[sentinel] Connexion interrompue (redémarrage en cours ?), reconnexion automatique…\n'
+      scrollLogToBottom()
+      pollDeploymentUntilSettled(deployId)
+      return
+    }
     emit('refreshed')
   }
 }

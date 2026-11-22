@@ -3,14 +3,22 @@ import type { SentinelDb } from '#server/db'
 import type { DeploymentRow, ProjectRow } from '#server/db/schema'
 import {
   buildDeployCommand,
+  buildSelfDeployCommand,
   DeployLogBus,
   type DeployStreamEvent,
   executeDeploymentRun,
+  isSelfDeployProject,
+  parseSelfDeployLog,
+  reconcileInterruptedDeployments,
+  SELF_DEPLOY_EXIT_MARKER,
+  SELF_DEPLOY_MISSING_MARKER,
+  selfDeployLogPath,
   truncateLog,
 } from '#server/services/deploy'
 import type { SshExecutor } from '#server/services/ssh'
+import { getEnv } from '#server/utils/env'
 
-function makeFakeProject(): ProjectRow {
+function makeFakeProject(overrides: Partial<ProjectRow> = {}): ProjectRow {
   const now = new Date()
   return {
     id: 1,
@@ -44,10 +52,11 @@ function makeFakeProject(): ProjectRow {
     cronSyncedAt: null,
     createdAt: now,
     updatedAt: now,
+    ...overrides,
   }
 }
 
-function makeFakeDeployment(): DeploymentRow {
+function makeFakeDeployment(overrides: Partial<DeploymentRow> = {}): DeploymentRow {
   const now = new Date()
   return {
     id: 42,
@@ -59,6 +68,7 @@ function makeFakeDeployment(): DeploymentRow {
     log: '',
     createdAt: now,
     updatedAt: now,
+    ...overrides,
   }
 }
 
@@ -135,7 +145,7 @@ describe('deploy service', () => {
     const bus = new DeployLogBus()
     const result = await executeDeploymentRun({
       db: fakeDb,
-      project: makeFakeProject(),
+      project: makeFakeProject({ slug: 'games-lab', vpsPath: '/srv/apps/games-lab' }),
       deployment: makeFakeDeployment(),
       ssh: fakeSsh,
       bus,
@@ -147,5 +157,165 @@ describe('deploy service', () => {
     expect(updates).toHaveLength(2)
     expect(updates[0]).toMatchObject({ status: 'success' })
     expect(updates[1]).toMatchObject({ lastCommitDeployed: '2222222', commitsBehind: 0 })
+  })
+
+  it('detects self-deploy project, builds detached setsid command, and parses self-deploy markers', () => {
+    expect(isSelfDeployProject({ slug: 'sentinel' })).toBe(true)
+    expect(isSelfDeployProject({ slug: 'Sentinel' })).toBe(true)
+    expect(isSelfDeployProject({ slug: 'games-lab' })).toBe(false)
+
+    expect(selfDeployLogPath(42)).toBe('/tmp/sentinel-self-deploy-42.log')
+    expect(() => selfDeployLogPath(0)).toThrow(/Invalid deployment id/)
+    expect(() => selfDeployLogPath(-5)).toThrow(/Invalid deployment id/)
+
+    const cmd = buildSelfDeployCommand('/srv/apps/sentinel', 42, '/srv/apps', 'zref')
+    expect(cmd).toContain('setsid')
+    expect(cmd).toContain('/tmp/sentinel-self-deploy-42.log')
+    expect(cmd).toContain('sudo -n -H -u')
+    expect(cmd).toContain('/srv/apps/sentinel/deploy.sh')
+    expect(cmd).toContain(SELF_DEPLOY_EXIT_MARKER)
+
+    const parsedOk = parseSelfDeployLog(
+      `🚀 Starting Sentinel deploy...\n✅ Sentinel deploy done!\n${SELF_DEPLOY_EXIT_MARKER}0\n`,
+    )
+    expect(parsedOk.exitCode).toBe(0)
+    expect(parsedOk.log).toBe('🚀 Starting Sentinel deploy...\n✅ Sentinel deploy done!')
+
+    const parsedRunning = parseSelfDeployLog('🚀 Starting Sentinel deploy...\n📦 Pulling...\n')
+    expect(parsedRunning.exitCode).toBeNull()
+    expect(parsedRunning.log).toContain('Pulling...')
+  })
+
+  it('reconciles orphaned deploys on startup: fails other projects and recovers detached sentinel self-deploy', async () => {
+    const updates: Array<Record<string, unknown>> = []
+    const runningRows = [
+      {
+        deployment: makeFakeDeployment({ id: 10, projectId: 2, commitSha: 'aaaaaaa' }),
+        project: makeFakeProject({
+          id: 2,
+          slug: 'games-lab',
+          name: 'Games-Lab',
+          vpsPath: '/srv/apps/games-lab',
+        }),
+      },
+      {
+        deployment: makeFakeDeployment({ id: 11, projectId: 1, commitSha: 'bbbbbbb' }),
+        project: makeFakeProject({ id: 1, slug: 'sentinel', name: 'Sentinel' }),
+      },
+    ]
+
+    const fakeDb = {
+      select: vi.fn(() => ({
+        from: vi.fn(() => ({
+          innerJoin: vi.fn(() => ({
+            where: vi.fn(async () => runningRows),
+          })),
+        })),
+      })),
+      update: vi.fn(() => ({
+        set: vi.fn((values: Record<string, unknown>) => {
+          updates.push(values)
+          return {
+            where: vi.fn(async () => []),
+          }
+        }),
+      })),
+    } as unknown as SentinelDb
+
+    const sshCalls: string[] = []
+    const fakeSsh: SshExecutor = {
+      execute: vi.fn(async (cmd) => {
+        sshCalls.push(cmd)
+        if (sshCalls.length === 1) {
+          return { exitCode: 0, stdout: '🚀 Pulling...\n', stderr: '' }
+        }
+        if (sshCalls.length === 2) {
+          return {
+            exitCode: 0,
+            stdout: `🚀 Pulling...\n✅ Sentinel deploy done!\n${SELF_DEPLOY_EXIT_MARKER}0\n`,
+            stderr: '',
+          }
+        }
+        return { exitCode: 0, stdout: '', stderr: '' }
+      }),
+    }
+
+    const bus = new DeployLogBus()
+    const env = getEnv({ VPS_HOST: 'vps.example.com' })
+    const summary = await reconcileInterruptedDeployments(fakeDb, {
+      ssh: fakeSsh,
+      bus,
+      env,
+      maxPollAttempts: 3,
+      pollIntervalMs: 0,
+      syncVpsOnSuccess: false,
+    })
+
+    expect(summary).toEqual({ reconciled: 2, selfSucceeded: 1, failed: 1 })
+    // First update: games-lab marked failed
+    expect(updates[0]).toMatchObject({ status: 'failed' })
+    expect(String(updates[0]?.log)).toContain('interrompu par un redémarrage')
+    // Second & third updates: sentinel marked success with full log + project commit updated
+    expect(updates[1]).toMatchObject({
+      status: 'success',
+      log: '🚀 Pulling...\n✅ Sentinel deploy done!',
+    })
+    expect(updates[2]).toMatchObject({
+      lastCommitDeployed: 'bbbbbbb',
+      latestCommitAvailable: 'bbbbbbb',
+      commitsBehind: 0,
+    })
+    // Third SSH call cleaned up the temp log file
+    expect(sshCalls[2]).toContain('rm -f')
+    expect(sshCalls[2]).toContain('/tmp/sentinel-self-deploy-11.log')
+  })
+
+  it('reconciles legacy sentinel self-deploy immediately when no detached log file exists', async () => {
+    const updates: Array<Record<string, unknown>> = []
+    const runningRows = [
+      {
+        deployment: makeFakeDeployment({ id: 99, projectId: 1, commitSha: 'ccccccc' }),
+        project: makeFakeProject({ id: 1, slug: 'sentinel', name: 'Sentinel' }),
+      },
+    ]
+
+    const fakeDb = {
+      select: vi.fn(() => ({
+        from: vi.fn(() => ({
+          innerJoin: vi.fn(() => ({
+            where: vi.fn(async () => runningRows),
+          })),
+        })),
+      })),
+      update: vi.fn(() => ({
+        set: vi.fn((values: Record<string, unknown>) => {
+          updates.push(values)
+          return {
+            where: vi.fn(async () => []),
+          }
+        }),
+      })),
+    } as unknown as SentinelDb
+
+    const fakeSsh: SshExecutor = {
+      execute: vi.fn(async () => ({
+        exitCode: 0,
+        stdout: `${SELF_DEPLOY_MISSING_MARKER}\n`,
+        stderr: '',
+      })),
+    }
+
+    const summary = await reconcileInterruptedDeployments(fakeDb, {
+      ssh: fakeSsh,
+      env: getEnv({ VPS_HOST: 'vps.example.com' }),
+      maxPollAttempts: 3,
+      pollIntervalMs: 0,
+      syncVpsOnSuccess: false,
+    })
+
+    expect(summary).toEqual({ reconciled: 1, selfSucceeded: 1, failed: 0 })
+    expect(fakeSsh.execute).toHaveBeenCalledTimes(1)
+    expect(updates[0]).toMatchObject({ status: 'success' })
+    expect(String(updates[0]?.log)).toContain('auto-déploiement')
   })
 })
