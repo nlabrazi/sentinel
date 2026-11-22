@@ -119,10 +119,10 @@ pipeline {
             }
         }
 
-        stage('Docker production build') {
+        stage('Docker build & push') {
             steps {
-                dockerBuildWithPackages(
-                    image: 'sentinel:ci',
+                dockerBuildAndPush(
+                    imageName: 'sentinel',
                     target: 'prod'
                 )
             }
