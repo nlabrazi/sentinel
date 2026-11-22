@@ -1,0 +1,62 @@
+name: sentinel
+
+services:
+  sentinel:
+    build:
+      context: ./repo
+      dockerfile: Dockerfile
+      target: prod
+      secrets:
+        - npmrc
+    container_name: sentinel
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      AUTH_DEV_BYPASS: "false"
+      POSTGRES_HOST: sentinel-db
+      POSTGRES_USER: sentinel
+      POSTGRES_DB: sentinel_v2_production
+      DATABASE_URL: postgresql://sentinel:${POSTGRES_PASSWORD}@sentinel-db:5432/sentinel_v2_production
+    volumes:
+      - ./config/ssh_key:/app/config/ssh_key:ro
+    depends_on:
+      sentinel-db:
+        condition: service_healthy
+    networks:
+      - web
+      - sentinel-internal
+
+  sentinel-db:
+    image: postgres:16
+    container_name: sentinel-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: sentinel_v2_production
+      POSTGRES_USER: sentinel
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - sentinel-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U sentinel -d sentinel_v2_production"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sentinel-internal
+
+secrets:
+  npmrc:
+    file: ${NPMRC_FILE:-/root/.npmrc}
+
+volumes:
+  sentinel-postgres-data:
+
+networks:
+  web:
+    external: true
+  sentinel-internal:
+    driver: bridge

@@ -1,0 +1,9 @@
+{
+  "name": "Sentinel",
+  "kind": "app",
+  "production_url": "https://sentinel.nabster.dev",
+  "production_branch": "master",
+  "staging_branch": "staging",
+  "grafana_app_value": "https://sentinel.nabster.dev",
+  "cron_monitoring": false
+}
