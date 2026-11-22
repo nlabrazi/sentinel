@@ -27,9 +27,16 @@ export interface CronEvalOptions {
   syncStaleAfterMinutes?: number
 }
 
+export function isManualCronSchedule(schedule: string | null | undefined): boolean {
+  return (schedule ?? '').trim().toLowerCase() === 'manual'
+}
+
 export function isValidCronSchedule(schedule: string | null | undefined): boolean {
   if (!schedule || schedule === 'unknown') {
     return false
+  }
+  if (isManualCronSchedule(schedule)) {
+    return true
   }
   try {
     CronExpressionParser.parse(schedule.trim(), { tz: 'UTC' })
@@ -43,7 +50,7 @@ export function isCronJobOverdue(
   job: Pick<CronJobRow, 'schedule' | 'lastExecutionAt'>,
   options: CronEvalOptions = {},
 ): boolean {
-  if (!job.lastExecutionAt) {
+  if (!job.lastExecutionAt || isManualCronSchedule(job.schedule)) {
     return false
   }
   const at = options.at ?? new Date()

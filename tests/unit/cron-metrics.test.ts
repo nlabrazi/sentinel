@@ -82,6 +82,37 @@ describe('cron overdue evaluation & Prometheus metrics export', () => {
       ),
     ).toBe('failed')
 
+    // Manual probe schedule is valid, never overdue, and healthy when lastStatus is success
+    expect(
+      isCronJobOverdue(
+        {
+          schedule: 'manual',
+          lastExecutionAt: new Date('2025-01-01T00:00:00Z'),
+        },
+        { at: new Date('2026-11-21T11:30:00Z') },
+      ),
+    ).toBe(false)
+    expect(
+      evaluateCronJobStatus(
+        {
+          schedule: 'manual',
+          lastStatus: 'success',
+          lastExecutionAt: new Date('2025-01-01T00:00:00Z'),
+        },
+        { at: new Date('2026-11-21T11:30:00Z') },
+      ),
+    ).toBe('ok')
+    expect(
+      evaluateCronJobStatus(
+        {
+          schedule: 'manual',
+          lastStatus: 'failed',
+          lastExecutionAt: new Date('2025-01-01T00:00:00Z'),
+        },
+        { at: new Date('2026-11-21T11:30:00Z') },
+      ),
+    ).toBe('failed')
+
     // Invalid schedule returns unknown and does not throw
     expect(
       evaluateCronJobStatus(
