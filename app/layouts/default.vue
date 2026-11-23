@@ -40,7 +40,7 @@ function isActive(to: string): boolean {
 
     <!-- Desktop Sidebar -->
     <aside
-      class="hidden lg:flex lg:w-64 lg:shrink-0 lg:flex-col border-r border-default bg-elevated/40"
+      class="hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-56 lg:shrink-0 lg:flex-col border-r border-default bg-elevated/35"
     >
       <div class="flex h-16 items-center gap-3 border-b border-default px-5">
         <NuxtLink

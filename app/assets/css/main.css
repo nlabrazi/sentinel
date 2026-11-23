@@ -5,6 +5,11 @@
   color-scheme: light dark;
 }
 
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 .visually-hidden:where(:not(:focus-within, :active)) {
   position: absolute !important;
   clip-path: inset(50%) !important;
@@ -21,4 +26,133 @@
   overflow: auto;
   max-inline-size: 100%;
   container-type: inline-size;
+}
+
+/* Single-row accessible tablist with forced-colors-safe underline & scroll-edge fades */
+@property --fade-start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --fade-end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+.sentinel-tablist {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: inline proximity;
+  --fade-size: 2rem;
+  --fade-dir: right;
+  --fade-start-pos: 0;
+  --fade-end-pos: 100%;
+  scroll-padding-inline: var(--fade-size);
+}
+
+.sentinel-tablist::-webkit-scrollbar {
+  display: none;
+}
+
+@supports (animation-timeline: scroll(self inline)) {
+  .sentinel-tablist {
+    mask:
+      linear-gradient(black, black) no-clip subtract,
+      linear-gradient(to var(--fade-dir), black, transparent) var(--fade-start-pos) 0 /
+      var(--fade-start) 100% no-repeat no-clip,
+      linear-gradient(to var(--fade-dir), transparent, black) var(--fade-end-pos) 0 /
+      var(--fade-end) 100% no-repeat no-clip;
+    animation:
+      sentinel-reveal-fade-start linear both,
+      sentinel-hide-fade-end linear both;
+    animation-timeline: scroll(self inline);
+    animation-range:
+      0 var(--fade-size),
+      calc(100% - var(--fade-size)) 100%;
+  }
+}
+
+@keyframes sentinel-reveal-fade-start {
+  to {
+    --fade-start: var(--fade-size);
+  }
+}
+
+@keyframes sentinel-hide-fade-end {
+  from {
+    --fade-end: var(--fade-size);
+  }
+}
+
+.sentinel-tab {
+  position: relative;
+  flex: none;
+  scroll-snap-align: start;
+}
+
+.sentinel-tab[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  border-block-end: 2px solid currentColor;
+}
+
+/* Native disclosure / accordion with smooth intrinsic-size animation */
+.sentinel-details > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.sentinel-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.sentinel-details > summary::before {
+  content: "";
+  inline-size: 1rem;
+  block-size: 1rem;
+  flex-shrink: 0;
+  background-color: currentColor;
+  opacity: 0.6;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")
+    no-repeat center / contain;
+  rotate: -90deg;
+}
+
+.sentinel-details[open] > summary::before {
+  rotate: 0deg;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sentinel-details > summary::before {
+    transition: rotate 0.2s ease;
+  }
+}
+
+.sentinel-details::details-content {
+  interpolate-size: allow-keywords;
+  overflow: clip;
+  contain: layout;
+}
+
+.sentinel-details:not([open])::details-content {
+  block-size: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sentinel-details::details-content {
+    transition: block-size, content-visibility, display;
+    transition-duration: 0.25s;
+    transition-timing-function: ease-in-out;
+    transition-behavior: allow-discrete;
+  }
 }

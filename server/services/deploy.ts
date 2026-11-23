@@ -10,12 +10,15 @@ import {
   shellEscape,
   wrapBashCommand,
 } from '#server/services/ssh'
-import { getEnv } from '#server/utils/env'
+import { discoverVpsProjects } from '#server/services/vps-discovery'
+import { getEnv, type SentinelEnv } from '#server/utils/env'
 import { extractGithubRepo, isSafeVpsPath } from '#shared/schemas/project'
 import type { DeploymentStatus } from '#shared/types/sentinel'
 
 export const MAX_DEPLOY_LOG_BYTES = 64 * 1024
 const TRUNCATED_NOTICE = '\n\n[Log truncated]\n'
+export const SELF_DEPLOY_EXIT_MARKER = '__SENTINEL_SELF_DEPLOY_EXIT__='
+export const SELF_DEPLOY_MISSING_MARKER = '__SENTINEL_SELF_DEPLOY_MISSING__'
 
 export class DeploymentAlreadyRunningError extends Error {
   constructor(slug: string) {
@@ -96,7 +99,39 @@ export function truncateLog(log: string, maxBytes = MAX_DEPLOY_LOG_BYTES): strin
 
 const SAFE_UNIX_USER_PATTERN = /^[a-z_][a-z0-9_-]*$/
 
-export function buildDeployCommand(
+export function isSelfDeployProject(project: Pick<ProjectRow, 'slug'>): boolean {
+  return project.slug.trim().toLowerCase() === 'sentinel'
+}
+
+export function selfDeployLogPath(deploymentId: number): string {
+  if (!Number.isInteger(deploymentId) || deploymentId <= 0) {
+    throw new Error(`Invalid deployment id: ${deploymentId}`)
+  }
+  return `/tmp/sentinel-self-deploy-${deploymentId}.log`
+}
+
+export function parseSelfDeployLog(raw: string): { log: string; exitCode: number | null } {
+  let exitCode: number | null = null
+  const keptLines: string[] = []
+
+  for (const line of raw.split(/\r?\n/)) {
+    if (line.startsWith(SELF_DEPLOY_EXIT_MARKER)) {
+      const parsed = Number.parseInt(line.slice(SELF_DEPLOY_EXIT_MARKER.length).trim(), 10)
+      if (Number.isInteger(parsed)) {
+        exitCode = parsed
+      }
+      continue
+    }
+    keptLines.push(line)
+  }
+
+  return {
+    log: keptLines.join('\n').trimEnd(),
+    exitCode,
+  }
+}
+
+function buildInnerDeployInvocation(
   vpsPath: string,
   appsRoot = getEnv().vps.appsRoot,
   deployAsUser = getEnv().vps.deployAsUser,
@@ -111,14 +146,44 @@ export function buildDeployCommand(
       throw new Error(`Invalid SSH_DEPLOY_AS_USER value: ${targetUser}`)
     }
     const scriptPath = `${vpsPath}/deploy.sh`
-    return wrapBashCommand(
-      `cd ${shellEscape(vpsPath)} && sudo -n -H -u ${shellEscape(targetUser)} ${shellEscape(scriptPath)}`,
-    )
+    return `sudo -n -H -u ${shellEscape(targetUser)} ${shellEscape(scriptPath)}`
   }
 
-  return wrapBashCommand(
-    `cd ${shellEscape(vpsPath)} && GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0='*' ./deploy.sh`,
-  )
+  return `GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0='*' ./deploy.sh`
+}
+
+export function buildDeployCommand(
+  vpsPath: string,
+  appsRoot = getEnv().vps.appsRoot,
+  deployAsUser = getEnv().vps.deployAsUser,
+): string {
+  const invocation = buildInnerDeployInvocation(vpsPath, appsRoot, deployAsUser)
+  return wrapBashCommand(`cd ${shellEscape(vpsPath)} && ${invocation}`)
+}
+
+export function buildSelfDeployCommand(
+  vpsPath: string,
+  deploymentId: number,
+  appsRoot = getEnv().vps.appsRoot,
+  deployAsUser = getEnv().vps.deployAsUser,
+): string {
+  const invocation = buildInnerDeployInvocation(vpsPath, appsRoot, deployAsUser)
+  const logFile = selfDeployLogPath(deploymentId)
+  const runnerBody = `${invocation} >"$1" 2>&1; printf '\\n${SELF_DEPLOY_EXIT_MARKER}%s\\n' "$?" >>"$1"`
+  const script = [
+    'set -e',
+    `cd ${shellEscape(vpsPath)}`,
+    `LOG_FILE=${shellEscape(logFile)}`,
+    'rm -f "$LOG_FILE"',
+    'install -m 600 /dev/null "$LOG_FILE"',
+    `setsid bash -c ${shellEscape(runnerBody)} _ "$LOG_FILE" </dev/null >/dev/null 2>&1 &`,
+    'BG_PID=$!',
+    'tail -n +1 -f --pid="$BG_PID" "$LOG_FILE" || true',
+    `RC=$(sed -n 's/^${SELF_DEPLOY_EXIT_MARKER}//p' "$LOG_FILE" | tail -n1)`,
+    'rm -f "$LOG_FILE"',
+    'if [ -n "$RC" ]; then exit "$RC"; else exit 1; fi',
+  ].join('\n')
+  return wrapBashCommand(script)
 }
 
 export async function acquireDeploymentLock(
@@ -174,13 +239,27 @@ export async function executeDeploymentRun(params: {
 
   bus.start(params.deployment.id)
 
+  const selfDeploy = isSelfDeployProject(params.project)
   const appendChunk = (chunk: string) => {
     combinedLog += chunk
-    bus.append(params.deployment.id, chunk)
+    const visibleChunk = selfDeploy ? parseSelfDeployLog(chunk).log : chunk
+    if (visibleChunk) {
+      bus.append(
+        params.deployment.id,
+        selfDeploy && chunk.endsWith('\n') ? `${visibleChunk}\n` : visibleChunk,
+      )
+    }
   }
 
   try {
-    const command = buildDeployCommand(params.project.vpsPath, params.appsRoot, params.deployAsUser)
+    const command = selfDeploy
+      ? buildSelfDeployCommand(
+          params.project.vpsPath,
+          params.deployment.id,
+          params.appsRoot,
+          params.deployAsUser,
+        )
+      : buildDeployCommand(params.project.vpsPath, params.appsRoot, params.deployAsUser)
     const result = await ssh.execute(command, {
       onStdout: appendChunk,
       onStderr: appendChunk,
@@ -190,10 +269,11 @@ export async function executeDeploymentRun(params: {
       combinedLog = [result.stdout, result.stderr].filter(Boolean).join('\n')
     }
 
+    const cleanedLog = selfDeploy ? parseSelfDeployLog(combinedLog).log : combinedLog
     const durationSeconds = Math.max(0, Math.round((Date.now() - startedAt) / 1000))
     const status: DeploymentStatus = result.exitCode === 0 ? 'success' : 'failed'
     const finalLog = truncateLog(
-      combinedLog || (status === 'failed' ? `Exit code ${result.exitCode}` : ''),
+      cleanedLog || (status === 'failed' ? `Exit code ${result.exitCode}` : ''),
     )
     const now = new Date()
 
@@ -269,4 +349,216 @@ export async function startProjectDeployment(
   void executeDeploymentRun({ db, project, deployment })
 
   return deployment
+}
+
+export interface ReconcileDeploymentsOptions {
+  ssh?: SshExecutor
+  bus?: DeployLogBus
+  env?: SentinelEnv
+  maxPollAttempts?: number
+  pollIntervalMs?: number
+  syncVpsOnSuccess?: boolean
+}
+
+function sleepMs(ms: number): Promise<void> {
+  if (ms <= 0) {
+    return Promise.resolve()
+  }
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+
+async function finalizeReconciledDeployment(params: {
+  db: SentinelDb
+  deployment: DeploymentRow
+  project: ProjectRow
+  status: DeploymentStatus
+  log: string
+  bus: DeployLogBus
+}): Promise<void> {
+  const now = new Date()
+  const durationSeconds = Math.max(
+    0,
+    Math.round((now.getTime() - params.deployment.createdAt.getTime()) / 1000),
+  )
+  const finalLog = truncateLog(params.log)
+
+  await params.db
+    .update(deployments)
+    .set({
+      status: params.status,
+      durationSeconds,
+      log: finalLog,
+      updatedAt: now,
+    })
+    .where(eq(deployments.id, params.deployment.id))
+
+  if (params.status === 'success' && params.deployment.commitSha) {
+    await params.db
+      .update(projects)
+      .set({
+        lastCommitDeployed: params.deployment.commitSha,
+        latestCommitAvailable: params.deployment.commitSha,
+        commitsBehind: 0,
+        updatedAt: now,
+      })
+      .where(eq(projects.id, params.project.id))
+  }
+
+  if (finalLog) {
+    params.bus.append(params.deployment.id, finalLog)
+  }
+  params.bus.finish(params.deployment.id, params.status, durationSeconds)
+}
+
+async function reconcileSelfDeployment(
+  db: SentinelDb,
+  deployment: DeploymentRow,
+  project: ProjectRow,
+  options: ReconcileDeploymentsOptions,
+): Promise<DeploymentStatus> {
+  const ssh = options.ssh ?? defaultSshExecutor
+  const bus = options.bus ?? deployLogBus
+  const env = options.env ?? getEnv()
+  const maxAttempts = options.maxPollAttempts ?? 8
+  const pollIntervalMs = options.pollIntervalMs ?? 2000
+
+  if (!env.vps.host) {
+    const fallbackLog =
+      deployment.log ||
+      '[sentinel] Redémarrage du conteneur Sentinel détecté suite à un auto-déploiement.'
+    await finalizeReconciledDeployment({
+      db,
+      deployment,
+      project,
+      status: 'success',
+      log: fallbackLog,
+      bus,
+    })
+    return 'success'
+  }
+
+  const logFile = selfDeployLogPath(deployment.id)
+  const readCmd = wrapBashCommand(
+    `LOG_FILE=${shellEscape(logFile)}; if [ ! -f "$LOG_FILE" ]; then printf '${SELF_DEPLOY_MISSING_MARKER}\\n'; exit 0; fi; cat "$LOG_FILE"`,
+  )
+
+  let lastObservedLog = deployment.log
+  let resolvedStatus: DeploymentStatus = 'success'
+  let shouldCleanupLog = false
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const res = await ssh.execute(readCmd, { timeoutSeconds: 15, env })
+    if (res.exitCode !== 0) {
+      lastObservedLog =
+        lastObservedLog ||
+        '[sentinel] Redémarrage du conteneur Sentinel détecté suite à un auto-déploiement.'
+      break
+    }
+
+    if (res.stdout.includes(SELF_DEPLOY_MISSING_MARKER)) {
+      lastObservedLog =
+        lastObservedLog ||
+        '[sentinel] Redémarrage du conteneur Sentinel détecté suite à un auto-déploiement.'
+      break
+    }
+
+    const parsed = parseSelfDeployLog(res.stdout)
+    if (parsed.log) {
+      lastObservedLog = parsed.log
+    }
+
+    if (parsed.exitCode !== null) {
+      resolvedStatus = parsed.exitCode === 0 ? 'success' : 'failed'
+      shouldCleanupLog = true
+      break
+    }
+
+    if (attempt + 1 < maxAttempts) {
+      await sleepMs(pollIntervalMs)
+    } else {
+      lastObservedLog = [
+        lastObservedLog,
+        '[sentinel] Redémarrage de Sentinel confirmé (nettoyage final en cours en arrière-plan).',
+      ]
+        .filter(Boolean)
+        .join('\n')
+    }
+  }
+
+  if (shouldCleanupLog) {
+    await ssh
+      .execute(wrapBashCommand(`rm -f ${shellEscape(logFile)}`), { timeoutSeconds: 10, env })
+      .catch(() => {})
+  }
+
+  await finalizeReconciledDeployment({
+    db,
+    deployment,
+    project,
+    status: resolvedStatus,
+    log: lastObservedLog,
+    bus,
+  })
+
+  if (resolvedStatus === 'success' && options.syncVpsOnSuccess !== false) {
+    void discoverVpsProjects(db, ssh).catch((error) => {
+      console.warn('[sentinel:deploy] Post-self-deploy VPS discovery failed:', error)
+    })
+  }
+
+  return resolvedStatus
+}
+
+export async function reconcileInterruptedDeployments(
+  db: SentinelDb,
+  options: ReconcileDeploymentsOptions = {},
+): Promise<{ reconciled: number; selfSucceeded: number; failed: number }> {
+  const bus = options.bus ?? deployLogBus
+  const rows = await db
+    .select({
+      deployment: deployments,
+      project: projects,
+    })
+    .from(deployments)
+    .innerJoin(projects, eq(deployments.projectId, projects.id))
+    .where(eq(deployments.status, 'running'))
+
+  if (rows.length === 0) {
+    return { reconciled: 0, selfSucceeded: 0, failed: 0 }
+  }
+
+  let selfSucceeded = 0
+  let failed = 0
+
+  for (const { deployment, project } of rows) {
+    if (isSelfDeployProject(project)) {
+      const status = await reconcileSelfDeployment(db, deployment, project, options)
+      if (status === 'success') {
+        selfSucceeded++
+      } else {
+        failed++
+      }
+      continue
+    }
+
+    const notice = '[sentinel] Déploiement interrompu par un redémarrage du serveur Sentinel.'
+    const combined = deployment.log ? `${deployment.log}\n${notice}` : notice
+    await finalizeReconciledDeployment({
+      db,
+      deployment,
+      project,
+      status: 'failed',
+      log: combined,
+      bus,
+    })
+    failed++
+  }
+
+  console.info(
+    `[sentinel:deploy] Reconciled ${rows.length} interrupted deployment(s) (selfSucceeded=${selfSucceeded}, failed=${failed})`,
+  )
+
+  return { reconciled: rows.length, selfSucceeded, failed }
 }
