@@ -19,10 +19,20 @@ test.describe('Sentinel v2 core user journeys', () => {
     await expect(page.getByRole('button', { name: 'Sync GitHub' })).toBeVisible()
     await expect(page.getByPlaceholder(/Rechercher un projet/i)).toBeVisible()
 
-    // Kind filter buttons
-    await page.getByRole('button', { name: 'Apps' }).click()
-    await page.getByRole('button', { name: 'Crons' }).click()
-    await page.getByRole('button', { name: 'Tous' }).click()
+    // Clickable KPI filters & Renovate drawer
+    await expect(page.getByRole('button', { name: /À traiter/ })).toBeVisible()
+    await expect(page.getByRole('button', { name: /À déployer/ })).toBeVisible()
+    await expect(page.getByRole('button', { name: /Alertes Crons/ })).toBeVisible()
+    await page.getByRole('button', { name: /PRs ouvertes/ }).click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+    await page.keyboard.press('Escape')
+
+    // Kind filter buttons & view switcher
+    await page.getByRole('button', { name: 'Apps', exact: true }).click()
+    await page.getByRole('button', { name: 'Crons', exact: true }).click()
+    await page.getByRole('button', { name: 'Tous', exact: true }).click()
+    await page.getByRole('button', { name: 'Vue grille' }).click()
+    await page.getByRole('button', { name: 'Vue liste' }).click()
   })
 
   test('navigates between Cockpit, Deployments Hub and Ops Control Center', async ({ page }) => {

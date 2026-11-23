@@ -1,39 +1,76 @@
 <script setup lang="ts">
+import type { DropdownMenuItem } from '@nuxt/ui'
 import type { ProjectSummaryDto } from '#shared/types/api'
 
 const props = defineProps<{
   project: ProjectSummaryDto
   priority?: boolean
+  deploying?: boolean
 }>()
 
-const kindColor = computed(() => {
-  if (props.project.kind === 'cron') {
-    return 'warning' as const
-  }
-  if (props.project.kind === 'service') {
-    return 'info' as const
-  }
-  return 'primary' as const
-})
+const emit = defineEmits<{
+  deploy: [project: ProjectSummaryDto]
+  syncGithub: [project: ProjectSummaryDto]
+  syncCron: [project: ProjectSummaryDto]
+}>()
 
-const cronBadgeColor = computed(() => {
-  switch (props.project.cronSummaryStatus) {
-    case 'ok':
-      return 'success' as const
-    case 'failed':
-      return 'error' as const
-    case 'overdue':
-    case 'never_run':
-    case 'not_reported':
-      return 'warning' as const
-    default:
-      return 'neutral' as const
+const attention = computed(() => getProjectAttentionState(props.project))
+const canDeploy = computed(() => props.project.hasDeployScript && props.project.kind !== 'service')
+const showDirectDeploy = computed(
+  () => canDeploy.value && !props.project.hasRunningDeployment && props.project.commitsBehind > 0,
+)
+
+const displayDomain = computed(() =>
+  props.project.productionUrl
+    ? props.project.productionUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')
+    : props.project.vpsPath,
+)
+
+const menuItems = computed<DropdownMenuItem[][]>(() => {
+  const primaryGroup: DropdownMenuItem[] = [
+    {
+      label: 'Ouvrir la fiche',
+      icon: 'i-lucide-folder-open',
+      to: `/projects/${props.project.slug}`,
+    },
+  ]
+  if (canDeploy.value && !props.project.hasRunningDeployment) {
+    primaryGroup.push({
+      label: 'Déployer maintenant',
+      icon: 'i-lucide-rocket',
+      onSelect: () => emit('deploy', props.project),
+    })
   }
+  if (props.project.productionUrl) {
+    primaryGroup.push({
+      label: 'Ouvrir le site',
+      icon: 'i-lucide-external-link',
+      to: props.project.productionUrl,
+      target: '_blank',
+    })
+  }
+
+  const syncGroup: DropdownMenuItem[] = []
+  if (props.project.repoUrl) {
+    syncGroup.push({
+      label: 'Sync GitHub',
+      icon: 'i-lucide-git-branch',
+      onSelect: () => emit('syncGithub', props.project),
+    })
+  }
+  if (props.project.cronMonitoringEnabled) {
+    syncGroup.push({
+      label: 'Sync Crons',
+      icon: 'i-lucide-clock',
+      onSelect: () => emit('syncCron', props.project),
+    })
+  }
+  return syncGroup.length > 0 ? [primaryGroup, syncGroup] : [primaryGroup]
 })
 </script>
 
 <template>
-  <UCard class="flex h-full flex-col transition-colors hover:border-primary/50">
+  <UCard class="flex h-full flex-col transition-colors hover:border-primary/45">
     <NuxtLink
       :to="`/projects/${project.slug}`"
       class="group mb-3 block aspect-video overflow-hidden rounded-lg border border-default bg-elevated/60"
@@ -54,15 +91,21 @@ const cronBadgeColor = computed(() => {
         class="flex h-full w-full flex-col items-center justify-center gap-1.5 px-3 text-center text-xs text-muted"
       >
         <UIcon
-          :name="project.productionUrl ? 'i-lucide-image' : 'i-lucide-terminal'"
+          :name="
+            project.kind === 'cron'
+              ? 'i-lucide-clock'
+              : project.kind === 'service'
+                ? 'i-lucide-server'
+                : 'i-lucide-globe'
+          "
           class="size-6 opacity-50"
           aria-hidden="true"
         />
-        <span>{{ project.productionUrl ? 'Aperçu non capturé' : 'Service interne' }}</span>
+        <span>{{ project.productionUrl ? 'Aperçu non capturé' : project.kind }}</span>
       </div>
     </NuxtLink>
 
-    <div class="flex items-start justify-between gap-3">
+    <div class="flex items-start justify-between gap-2">
       <div class="min-w-0">
         <NuxtLink
           :to="`/projects/${project.slug}`"
@@ -70,113 +113,74 @@ const cronBadgeColor = computed(() => {
         >
           {{ project.name }}
         </NuxtLink>
-        <p class="mt-0.5 truncate font-mono text-xs text-muted">{{ project.vpsPath }}</p>
+        <p class="mt-0.5 truncate text-xs text-muted">{{ displayDomain }}</p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-1.5">
-        <UBadge v-if="project.maintenanceMode" color="warning" variant="subtle" size="sm">
-          Maintenance
-        </UBadge>
-        <UBadge :color="kindColor" variant="soft" size="sm">
-          {{ project.kind }}
-        </UBadge>
-      </div>
+      <UBadge :color="attention.color" variant="subtle" size="xs" class="shrink-0">
+        {{ attention.label }}
+      </UBadge>
     </div>
 
-    <div class="mt-4 flex flex-wrap items-center gap-2 text-xs">
-      <UBadge v-if="project.hasRunningDeployment" color="info" variant="subtle">
-        <UIcon name="i-lucide-loader-circle" class="size-3 animate-spin" aria-hidden="true" />
-        Déploiement en cours
-      </UBadge>
-
-      <UBadge v-if="project.commitsBehind > 0" color="warning" variant="subtle">
-        {{ project.commitsBehind }} commit(s) à déployer
-      </UBadge>
-
+    <div class="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-muted">
+      <span v-if="project.lastCommitDeployed" class="font-mono">
+        {{ shortSha(project.lastCommitDeployed) }}
+      </span>
       <UBadge
-        v-if="project.stagingSyncStatus === 'ahead'"
+        v-if="project.stagingSyncStatus === 'ahead' && attention.severity !== 'info'"
         color="info"
-        variant="subtle"
+        variant="soft"
+        size="xs"
       >
         staging +{{ project.stagingCommitsAhead }}
       </UBadge>
-
-      <UBadge
-        v-else-if="project.stagingSyncStatus === 'diverged'"
-        color="warning"
-        variant="subtle"
-      >
-        staging +{{ project.stagingCommitsAhead }}/-{{ project.stagingCommitsBehind }}
+      <UBadge v-if="project.openRenovatePrsCount > 0" color="secondary" variant="soft" size="xs">
+        {{ project.openRenovatePrsCount }} Renovate
       </UBadge>
-
-      <UBadge v-if="project.openRenovatePrsCount > 0" color="secondary" variant="subtle">
-        {{ project.openRenovatePrsCount }} Renovate PR
-      </UBadge>
-
-      <UBadge
-        v-if="project.openPrsCount > project.openRenovatePrsCount"
-        color="neutral"
-        variant="subtle"
-      >
-        {{ project.openPrsCount - project.openRenovatePrsCount }} PR ouverte(s)
-      </UBadge>
-
-      <UBadge v-if="project.cronMonitoringEnabled" :color="cronBadgeColor" variant="subtle">
-        Cron: {{ project.cronSummaryStatus }}
-      </UBadge>
-    </div>
-
-    <div class="mt-4 grid grid-cols-2 gap-2 rounded-lg bg-elevated/60 p-2.5 text-xs">
-      <div>
-        <span class="block text-muted">Commit VPS</span>
-        <span class="font-mono font-medium">{{ shortSha(project.lastCommitDeployed) }}</span>
-      </div>
-      <div>
-        <span class="block text-muted">Branche prod</span>
-        <span class="font-mono font-medium">{{ project.productionBranch }}</span>
-      </div>
     </div>
 
     <template #footer>
-      <div class="flex items-center justify-between gap-2 text-xs text-muted">
-        <div class="flex items-center gap-2">
-          <span
-            class="inline-flex items-center gap-1"
-            :class="project.hasDeployScript ? 'text-default' : 'opacity-45'"
-          >
-            <UIcon name="i-lucide-rocket" class="size-3.5" aria-hidden="true" />
-            deploy.sh
-          </span>
-          <span
-            class="inline-flex items-center gap-1"
-            :class="project.hasStatusScript ? 'text-default' : 'opacity-45'"
-          >
-            <UIcon name="i-lucide-clock" class="size-3.5" aria-hidden="true" />
-            status.sh
-          </span>
-        </div>
+      <div class="flex items-center justify-between gap-2">
+        <UButton
+          v-if="project.hasRunningDeployment"
+          :to="`/projects/${project.slug}`"
+          color="info"
+          variant="soft"
+          size="xs"
+          icon="i-lucide-loader-circle"
+        >
+          En cours…
+        </UButton>
+        <UButton
+          v-else-if="showDirectDeploy"
+          color="primary"
+          variant="solid"
+          size="xs"
+          icon="i-lucide-rocket"
+          :loading="deploying"
+          @click="emit('deploy', project)"
+        >
+          Déployer
+        </UButton>
+        <UButton
+          v-else
+          :to="`/projects/${project.slug}`"
+          color="neutral"
+          variant="soft"
+          size="xs"
+          trailing-icon="i-lucide-chevron-right"
+        >
+          Ouvrir
+        </UButton>
 
-        <div class="flex items-center gap-1.5">
+        <UDropdownMenu :items="menuItems" :content="{ align: 'end' }">
           <UButton
-            v-if="project.productionUrl"
-            :to="project.productionUrl"
-            target="_blank"
-            icon="i-lucide-external-link"
             color="neutral"
             variant="ghost"
             size="xs"
-            :aria-label="`Ouvrir ${project.name}`"
+            icon="i-lucide-ellipsis-vertical"
+            :aria-label="`Actions pour ${project.name}`"
           />
-          <UButton
-            :to="`/projects/${project.slug}`"
-            color="neutral"
-            variant="soft"
-            size="xs"
-            trailing-icon="i-lucide-arrow-right"
-          >
-            Ouvrir
-          </UButton>
-        </div>
+        </UDropdownMenu>
       </div>
     </template>
   </UCard>

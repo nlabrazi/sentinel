@@ -3,10 +3,12 @@ import type { DeploymentDto, ProjectDetailDto } from '#shared/types/api'
 
 const props = defineProps<{
   project: ProjectDetailDto
+  hideHeaderDeployButton?: boolean
 }>()
 
 const emit = defineEmits<{
   refreshed: []
+  stateChange: [running: boolean]
 }>()
 
 const toast = useToast()
@@ -196,6 +198,18 @@ function openDeployLog(deploy: DeploymentDto) {
   logModalOpen.value = true
 }
 
+watch(
+  () => triggering.value || liveStatus.value === 'running',
+  (isRunning) => {
+    emit('stateChange', isRunning)
+  },
+  { immediate: true },
+)
+
+defineExpose({
+  triggerDeploy: handleDeploy,
+})
+
 function statusBadgeColor(status: DeploymentDto['status']) {
   if (status === 'success') {
     return 'success' as const
@@ -220,6 +234,7 @@ function statusBadgeColor(status: DeploymentDto['status']) {
         </div>
 
         <UButton
+          v-if="!hideHeaderDeployButton"
           icon="i-lucide-play"
           :loading="triggering || liveStatus === 'running'"
           :disabled="!project.hasDeployScript"
