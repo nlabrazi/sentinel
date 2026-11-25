@@ -15,3 +15,6 @@ export const BRANCH_SYNC_STATUSES = [
   'diverged',
 ] as const
 export type BranchSyncStatus = (typeof BRANCH_SYNC_STATUSES)[number]
+
+export const CI_STATUSES = ['unknown', 'pending', 'success', 'failed'] as const
+export type CiStatus = (typeof CI_STATUSES)[number]

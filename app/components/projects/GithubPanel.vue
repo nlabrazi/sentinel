@@ -125,28 +125,66 @@ async function handleSyncGithub() {
         <div class="flex items-center justify-between rounded-lg border border-default p-3">
           <div>
             <p class="text-xs text-muted">VPS déployé vs HEAD {{ project.productionBranch }}</p>
-            <div class="mt-1 flex items-center gap-2 font-mono text-xs">
+            <div class="mt-1 flex flex-wrap items-center gap-2 font-mono text-xs">
               <span>{{ shortSha(project.lastCommitDeployed) }}</span>
               <span class="text-muted">→</span>
               <span>{{ shortSha(project.latestCommitAvailable) }}</span>
-              <UBadge v-if="project.commitsBehind > 0" color="warning" variant="subtle" size="xs">
+              <UBadge
+                v-if="project.commitsBehind > 0 && project.productionCiStatus === 'failed'"
+                color="error"
+                variant="subtle"
+                size="xs"
+              >
+                CI en échec (+{{ project.commitsBehind }})
+              </UBadge>
+              <UBadge
+                v-else-if="project.commitsBehind > 0 && project.productionCiStatus === 'pending'"
+                color="info"
+                variant="subtle"
+                size="xs"
+              >
+                CI en cours (+{{ project.commitsBehind }})
+              </UBadge>
+              <UBadge v-else-if="project.commitsBehind > 0" color="warning" variant="subtle" size="xs">
                 +{{ project.commitsBehind }} en attente
               </UBadge>
               <UBadge v-else color="success" variant="subtle" size="xs">À jour</UBadge>
+              <UBadge
+                v-if="project.productionCiStatus === 'success'"
+                color="success"
+                variant="outline"
+                size="xs"
+              >
+                CI OK
+              </UBadge>
             </div>
           </div>
-          <UButton
-            v-if="project.githubCompareDeployUrl"
-            :to="project.githubCompareDeployUrl"
-            target="_blank"
-            size="xs"
-            color="neutral"
-            variant="ghost"
-            icon="i-lucide-git-compare"
-            aria-label="Comparer le commit déployé et la branche de production"
-          >
-            Diff
-          </UButton>
+          <div class="flex items-center gap-1">
+            <UButton
+              v-if="project.productionCiUrl && project.productionCiStatus !== 'unknown'"
+              :to="project.productionCiUrl"
+              target="_blank"
+              size="xs"
+              color="neutral"
+              variant="ghost"
+              icon="i-lucide-external-link"
+              aria-label="Ouvrir le build CI de la branche de production"
+            >
+              CI
+            </UButton>
+            <UButton
+              v-if="project.githubCompareDeployUrl"
+              :to="project.githubCompareDeployUrl"
+              target="_blank"
+              size="xs"
+              color="neutral"
+              variant="ghost"
+              icon="i-lucide-git-compare"
+              aria-label="Comparer le commit déployé et la branche de production"
+            >
+              Diff
+            </UButton>
+          </div>
         </div>
       </div>
 

@@ -143,6 +143,8 @@ export function serializeProjectSummary(
     lastCommitDeployed: row.lastCommitDeployed,
     latestCommitAvailable: row.latestCommitAvailable,
     commitsBehind: row.commitsBehind,
+    productionCiStatus: row.productionCiStatus ?? 'unknown',
+    productionCiUrl: row.productionCiUrl ?? null,
     stagingCommitsAhead: row.stagingCommitsAhead,
     stagingCommitsBehind: row.stagingCommitsBehind,
     stagingSyncStatus: computeStagingSyncStatus(

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   getProjectAttentionState,
   hasCronAlert,
+  isDeployReady,
   sortProjectsByPriority,
 } from '../../app/utils/project-priority'
 import type { ProjectSummaryDto } from '../../shared/types/api'
@@ -27,6 +28,8 @@ function makeSummary(overrides: Partial<ProjectSummaryDto> = {}): ProjectSummary
     lastCommitDeployed: '1111111',
     latestCommitAvailable: '1111111',
     commitsBehind: 0,
+    productionCiStatus: 'unknown',
+    productionCiUrl: null,
     stagingCommitsAhead: 0,
     stagingCommitsBehind: 0,
     stagingSyncStatus: 'synced',
@@ -68,6 +71,36 @@ describe('project priority & attention helpers', () => {
       needsAttention: true,
       label: '2 commit(s) à déployer',
     })
+    expect(isDeployReady(makeSummary({ commitsBehind: 2, productionCiStatus: 'success' }))).toBe(
+      true,
+    )
+    expect(isDeployReady(makeSummary({ commitsBehind: 2, productionCiStatus: 'unknown' }))).toBe(
+      true,
+    )
+
+    expect(
+      getProjectAttentionState(makeSummary({ commitsBehind: 4, productionCiStatus: 'failed' })),
+    ).toMatchObject({
+      severity: 'critical',
+      needsAttention: true,
+      color: 'error',
+      label: 'CI en échec (4 commit(s))',
+    })
+    expect(isDeployReady(makeSummary({ commitsBehind: 4, productionCiStatus: 'failed' }))).toBe(
+      false,
+    )
+
+    expect(
+      getProjectAttentionState(makeSummary({ commitsBehind: 1, productionCiStatus: 'pending' })),
+    ).toMatchObject({
+      severity: 'running',
+      needsAttention: false,
+      color: 'info',
+      label: 'CI en cours (1 commit(s))',
+    })
+    expect(isDeployReady(makeSummary({ commitsBehind: 1, productionCiStatus: 'pending' }))).toBe(
+      false,
+    )
 
     expect(getProjectAttentionState(makeSummary({ maintenanceMode: true }))).toMatchObject({
       severity: 'warning',

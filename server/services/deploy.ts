@@ -10,9 +10,9 @@ import {
   shellEscape,
   wrapBashCommand,
 } from '#server/services/ssh'
-import { discoverVpsProjects } from '#server/services/vps-discovery'
+import { discoverVpsProjects, probeProjectDeployedCommit } from '#server/services/vps-discovery'
 import { getEnv, type SentinelEnv } from '#server/utils/env'
-import { extractGithubRepo, isSafeVpsPath } from '#shared/schemas/project'
+import { extractGithubRepo, isSafeVpsPath, matchesCommitSha } from '#shared/schemas/project'
 import type { DeploymentStatus } from '#shared/types/sentinel'
 
 export const MAX_DEPLOY_LOG_BYTES = 64 * 1024
@@ -223,6 +223,73 @@ export async function acquireDeploymentLock(
   })
 }
 
+interface DeployVerificationOutcome {
+  status: DeploymentStatus
+  notice: string | null
+  projectUpdate: Partial<typeof projects.$inferInsert> | null
+}
+
+function evaluatePostDeployRevision(params: {
+  project: ProjectRow
+  expectedSha: string | null
+  observedSha: string | null
+  now: Date
+}): DeployVerificationOutcome {
+  const { project, expectedSha, observedSha, now } = params
+
+  if (!observedSha) {
+    if (!expectedSha) {
+      return { status: 'success', notice: null, projectUpdate: null }
+    }
+    return {
+      status: 'success',
+      notice: null,
+      projectUpdate: {
+        lastCommitDeployed: expectedSha,
+        latestCommitAvailable: expectedSha,
+        commitsBehind: 0,
+        updatedAt: now,
+      },
+    }
+  }
+
+  if (!expectedSha || matchesCommitSha(observedSha, expectedSha)) {
+    return {
+      status: 'success',
+      notice: null,
+      projectUpdate: {
+        lastCommitDeployed: observedSha,
+        latestCommitAvailable: expectedSha ?? observedSha,
+        commitsBehind: 0,
+        vpsSyncedAt: now,
+        updatedAt: now,
+      },
+    }
+  }
+
+  if (project.lastCommitDeployed && matchesCommitSha(observedSha, project.lastCommitDeployed)) {
+    return {
+      status: 'failed',
+      notice: `[sentinel] Déploiement sans effet : deploy.sh s'est terminé (exit 0), mais la révision active sur le VPS reste ${observedSha.slice(0, 7)} au lieu de ${expectedSha.slice(0, 7)}. L'image GHCR ou le dépôt distant n'est probablement pas encore à jour (vérifiez la CI).`,
+      projectUpdate: {
+        lastCommitDeployed: observedSha,
+        vpsSyncedAt: now,
+        updatedAt: now,
+      },
+    }
+  }
+
+  return {
+    status: 'success',
+    notice: `[sentinel] Révision active sur le VPS : ${observedSha.slice(0, 7)} (HEAD attendu : ${expectedSha.slice(0, 7)}).`,
+    projectUpdate: {
+      lastCommitDeployed: observedSha,
+      vpsSyncedAt: now,
+      updatedAt: now,
+    },
+  }
+}
+
 export async function executeDeploymentRun(params: {
   db: SentinelDb
   project: ProjectRow
@@ -231,6 +298,7 @@ export async function executeDeploymentRun(params: {
   bus?: DeployLogBus
   appsRoot?: string
   deployAsUser?: string
+  verifyDeployedCommit?: boolean
 }): Promise<{ status: DeploymentStatus; durationSeconds: number; log: string }> {
   const ssh = params.ssh ?? defaultSshExecutor
   const bus = params.bus ?? deployLogBus
@@ -269,13 +337,42 @@ export async function executeDeploymentRun(params: {
       combinedLog = [result.stdout, result.stderr].filter(Boolean).join('\n')
     }
 
-    const cleanedLog = selfDeploy ? parseSelfDeployLog(combinedLog).log : combinedLog
+    let cleanedLog = selfDeploy ? parseSelfDeployLog(combinedLog).log : combinedLog
+    let status: DeploymentStatus = result.exitCode === 0 ? 'success' : 'failed'
+    const now = new Date()
+    let projectUpdate: Partial<typeof projects.$inferInsert> | null = null
+
+    if (status === 'success') {
+      let observedSha: string | null = null
+      if (!selfDeploy && params.verifyDeployedCommit !== false) {
+        observedSha = await probeProjectDeployedCommit(
+          params.project.slug,
+          params.project.vpsPath,
+          ssh,
+          params.appsRoot,
+        ).catch(() => null)
+      }
+
+      const verification = evaluatePostDeployRevision({
+        project: params.project,
+        expectedSha: params.deployment.commitSha,
+        observedSha,
+        now,
+      })
+
+      status = verification.status
+      projectUpdate = verification.projectUpdate
+      if (verification.notice) {
+        const noticeLine = `${cleanedLog && !cleanedLog.endsWith('\n') ? '\n' : ''}${verification.notice}\n`
+        cleanedLog = `${cleanedLog}${noticeLine}`
+        bus.append(params.deployment.id, noticeLine)
+      }
+    }
+
     const durationSeconds = Math.max(0, Math.round((Date.now() - startedAt) / 1000))
-    const status: DeploymentStatus = result.exitCode === 0 ? 'success' : 'failed'
     const finalLog = truncateLog(
       cleanedLog || (status === 'failed' ? `Exit code ${result.exitCode}` : ''),
     )
-    const now = new Date()
 
     await params.db
       .update(deployments)
@@ -287,16 +384,8 @@ export async function executeDeploymentRun(params: {
       })
       .where(eq(deployments.id, params.deployment.id))
 
-    if (status === 'success' && params.deployment.commitSha) {
-      await params.db
-        .update(projects)
-        .set({
-          lastCommitDeployed: params.deployment.commitSha,
-          latestCommitAvailable: params.deployment.commitSha,
-          commitsBehind: 0,
-          updatedAt: now,
-        })
-        .where(eq(projects.id, params.project.id))
+    if (projectUpdate) {
+      await params.db.update(projects).set(projectUpdate).where(eq(projects.id, params.project.id))
     }
 
     if (status === 'success' && params.project.productionUrl && getEnv().apiflashAccessKey) {
@@ -358,6 +447,7 @@ export interface ReconcileDeploymentsOptions {
   maxPollAttempts?: number
   pollIntervalMs?: number
   syncVpsOnSuccess?: boolean
+  verifyDeployedCommit?: boolean
 }
 
 function sleepMs(ms: number): Promise<void> {
@@ -376,6 +466,7 @@ async function finalizeReconciledDeployment(params: {
   status: DeploymentStatus
   log: string
   bus: DeployLogBus
+  projectUpdate?: Partial<typeof projects.$inferInsert> | null
 }): Promise<void> {
   const now = new Date()
   const durationSeconds = Math.max(
@@ -394,16 +485,20 @@ async function finalizeReconciledDeployment(params: {
     })
     .where(eq(deployments.id, params.deployment.id))
 
-  if (params.status === 'success' && params.deployment.commitSha) {
-    await params.db
-      .update(projects)
-      .set({
-        lastCommitDeployed: params.deployment.commitSha,
-        latestCommitAvailable: params.deployment.commitSha,
-        commitsBehind: 0,
-        updatedAt: now,
-      })
-      .where(eq(projects.id, params.project.id))
+  const updateToApply =
+    params.projectUpdate !== undefined
+      ? params.projectUpdate
+      : params.status === 'success' && params.deployment.commitSha
+        ? {
+            lastCommitDeployed: params.deployment.commitSha,
+            latestCommitAvailable: params.deployment.commitSha,
+            commitsBehind: 0,
+            updatedAt: now,
+          }
+        : null
+
+  if (updateToApply) {
+    await params.db.update(projects).set(updateToApply).where(eq(projects.id, params.project.id))
   }
 
   if (finalLog) {
@@ -493,6 +588,29 @@ async function reconcileSelfDeployment(
       .catch(() => {})
   }
 
+  let projectUpdate: Partial<typeof projects.$inferInsert> | null | undefined
+  const shouldVerify = options.verifyDeployedCommit ?? options.syncVpsOnSuccess !== false
+  if (resolvedStatus === 'success' && shouldVerify) {
+    const observedSha = await probeProjectDeployedCommit(
+      project.slug,
+      project.vpsPath,
+      ssh,
+      env.vps.appsRoot,
+      env,
+    ).catch(() => null)
+    const verification = evaluatePostDeployRevision({
+      project,
+      expectedSha: deployment.commitSha,
+      observedSha,
+      now: new Date(),
+    })
+    resolvedStatus = verification.status
+    projectUpdate = verification.projectUpdate
+    if (verification.notice) {
+      lastObservedLog = [lastObservedLog, verification.notice].filter(Boolean).join('\n')
+    }
+  }
+
   await finalizeReconciledDeployment({
     db,
     deployment,
@@ -500,6 +618,7 @@ async function reconcileSelfDeployment(
     status: resolvedStatus,
     log: lastObservedLog,
     bus,
+    projectUpdate,
   })
 
   if (resolvedStatus === 'success' && options.syncVpsOnSuccess !== false) {

@@ -35,6 +35,14 @@ const canDeploy = computed(
   () => Boolean(project.value?.hasDeployScript) && project.value?.kind !== 'service',
 )
 
+const deployBlockedByCi = computed(
+  () =>
+    Boolean(project.value) &&
+    (project.value?.commitsBehind ?? 0) > 0 &&
+    (project.value?.productionCiStatus === 'failed' ||
+      project.value?.productionCiStatus === 'pending'),
+)
+
 const displayDomain = computed(() => {
   if (!project.value?.productionUrl) {
     return null
@@ -48,13 +56,29 @@ const tabs = computed(() => {
     return []
   }
 
+  const deployTabBadge =
+    p.commitsBehind > 0
+      ? p.productionCiStatus === 'failed'
+        ? 'CI échec'
+        : p.productionCiStatus === 'pending'
+          ? 'CI…'
+          : `+${p.commitsBehind}`
+      : undefined
+  const deployTabBadgeColor = (
+    p.productionCiStatus === 'failed'
+      ? 'error'
+      : p.productionCiStatus === 'pending'
+        ? 'info'
+        : 'warning'
+  ) as 'error' | 'info' | 'warning'
+
   return [
     {
       id: 'deploys' as const,
       label: 'Déploiements',
       icon: 'i-lucide-rocket',
-      badge: p.commitsBehind > 0 ? `+${p.commitsBehind}` : undefined,
-      badgeColor: 'warning' as const,
+      badge: deployTabBadge,
+      badgeColor: deployTabBadgeColor,
     },
     {
       id: 'github' as const,
@@ -348,8 +372,8 @@ const latestDeployment = computed(() => project.value?.deployments[0] ?? null)
             <div class="flex shrink-0 flex-wrap items-center gap-2">
               <UButton
                 v-if="canDeploy"
-                color="primary"
-                variant="solid"
+                :color="deployBlockedByCi ? 'neutral' : 'primary'"
+                :variant="deployBlockedByCi ? 'soft' : 'solid'"
                 size="sm"
                 icon="i-lucide-rocket"
                 :loading="deployRunning || Boolean(project.runningDeployment)"
@@ -391,23 +415,46 @@ const latestDeployment = computed(() => project.value?.deployments[0] ?? null)
               <div class="mt-1 flex items-center justify-between gap-1">
                 <span
                   class="truncate text-sm font-semibold"
-                  :class="project.commitsBehind > 0 ? 'text-warning' : 'text-success'"
+                  :class="
+                    project.commitsBehind > 0
+                      ? project.productionCiStatus === 'failed'
+                        ? 'text-error'
+                        : project.productionCiStatus === 'pending'
+                          ? 'text-info'
+                          : 'text-warning'
+                      : 'text-success'
+                  "
                 >
                   {{
                     project.commitsBehind > 0
-                      ? `+${project.commitsBehind} en attente`
+                      ? project.productionCiStatus === 'failed'
+                        ? 'CI en échec'
+                        : project.productionCiStatus === 'pending'
+                          ? 'CI en cours'
+                          : `+${project.commitsBehind} en attente`
                       : 'À jour'
                   }}
                 </span>
-                <a
-                  v-if="project.commitsBehind > 0 && project.githubCompareDeployUrl"
-                  :href="project.githubCompareDeployUrl"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-xs text-primary hover:underline"
-                >
-                  Diff
-                </a>
+                <div class="flex items-center gap-2">
+                  <a
+                    v-if="project.productionCiUrl && project.productionCiStatus !== 'unknown'"
+                    :href="project.productionCiUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-xs text-primary hover:underline"
+                  >
+                    CI
+                  </a>
+                  <a
+                    v-if="project.commitsBehind > 0 && project.githubCompareDeployUrl"
+                    :href="project.githubCompareDeployUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-xs text-primary hover:underline"
+                  >
+                    Diff
+                  </a>
+                </div>
               </div>
               <p class="mt-0.5 font-mono text-xs text-muted">
                 {{ shortSha(project.lastCommitDeployed) }}
@@ -546,6 +593,50 @@ const latestDeployment = computed(() => project.value?.deployments[0] ?? null)
           :hidden="activeTab !== 'deploys'"
         >
           <div v-show="activeTab === 'deploys'" class="space-y-4">
+            <UAlert
+              v-if="project.commitsBehind > 0 && project.productionCiStatus === 'failed'"
+              color="error"
+              variant="subtle"
+              icon="i-lucide-x-circle"
+              :title="`CI en échec sur ${project.productionBranch} (${project.commitsBehind} commit(s) non déployés)`"
+              description="Le dernier build de production a échoué : aucune nouvelle image GHCR n'a probablement été publiée. Corrigez la CI avant de déployer."
+              :actions="
+                project.productionCiUrl
+                  ? [
+                      {
+                        label: 'Ouvrir la CI',
+                        color: 'error',
+                        variant: 'soft',
+                        to: project.productionCiUrl,
+                        target: '_blank',
+                      },
+                    ]
+                  : []
+              "
+            />
+
+            <UAlert
+              v-else-if="project.commitsBehind > 0 && project.productionCiStatus === 'pending'"
+              color="info"
+              variant="subtle"
+              icon="i-lucide-loader-circle"
+              :title="`CI en cours sur ${project.productionBranch} (${project.commitsBehind} commit(s))`"
+              description="Un build est en cours pour le dernier commit de production. Attendez qu'il passe au vert avant de déployer."
+              :actions="
+                project.productionCiUrl
+                  ? [
+                      {
+                        label: 'Suivre la CI',
+                        color: 'info',
+                        variant: 'soft',
+                        to: project.productionCiUrl,
+                        target: '_blank',
+                      },
+                    ]
+                  : []
+              "
+            />
+
             <UAlert
               v-if="hasCronAlert(project)"
               color="error"
