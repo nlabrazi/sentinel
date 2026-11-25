@@ -17,7 +17,15 @@ const emit = defineEmits<{
 const attention = computed(() => getProjectAttentionState(props.project))
 const canDeploy = computed(() => props.project.hasDeployScript && props.project.kind !== 'service')
 const showDirectDeploy = computed(
-  () => canDeploy.value && !props.project.hasRunningDeployment && props.project.commitsBehind > 0,
+  () => canDeploy.value && !props.project.hasRunningDeployment && isDeployReady(props.project),
+)
+const showCiLink = computed(
+  () =>
+    !props.project.hasRunningDeployment &&
+    props.project.commitsBehind > 0 &&
+    (props.project.productionCiStatus === 'failed' ||
+      props.project.productionCiStatus === 'pending') &&
+    Boolean(props.project.productionCiUrl),
 )
 
 const displayDomain = computed(() =>
@@ -160,6 +168,17 @@ const menuItems = computed<DropdownMenuItem[][]>(() => {
           @click="emit('deploy', project)"
         >
           Déployer
+        </UButton>
+        <UButton
+          v-else-if="showCiLink && project.productionCiUrl"
+          :to="project.productionCiUrl"
+          target="_blank"
+          :color="project.productionCiStatus === 'failed' ? 'error' : 'info'"
+          variant="soft"
+          size="xs"
+          icon="i-lucide-external-link"
+        >
+          Voir la CI
         </UButton>
         <UButton
           v-else

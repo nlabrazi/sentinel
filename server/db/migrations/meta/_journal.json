@@ -15,6 +15,13 @@
       "when": 1795315622456,
       "tag": "0001_project_screenshots",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795622060863,
+      "tag": "0002_production_ci_status",
+      "breakpoints": true
     }
   ]
 }

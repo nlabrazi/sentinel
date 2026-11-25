@@ -23,6 +23,8 @@ function makeProjectRow(overrides: Partial<ProjectRow> = {}): ProjectRow {
     lastCommitDeployed: 'abc1234',
     latestCommitAvailable: 'def5678',
     commitsBehind: 2,
+    productionCiStatus: 'failed',
+    productionCiUrl: 'https://jenkins.nabster.dev/job/sentinel/job/master/14/display/redirect',
     stagingCommitsAhead: 3,
     stagingCommitsBehind: 0,
     umamiVisitors24h: 0,
@@ -61,6 +63,10 @@ describe('project serializer', () => {
     expect(dto.openRenovatePrsCount).toBe(2)
     expect(dto.hasRunningDeployment).toBe(true)
     expect(dto.cronSummaryStatus).toBe('ok')
+    expect(dto.productionCiStatus).toBe('failed')
+    expect(dto.productionCiUrl).toBe(
+      'https://jenkins.nabster.dev/job/sentinel/job/master/14/display/redirect',
+    )
     expect(dto.screenshotUrl).toMatch(/^\/api\/projects\/sentinel\/screenshot\?v=\d+$/)
   })
 

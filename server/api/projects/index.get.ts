@@ -3,6 +3,7 @@ import { getDb } from '#server/db'
 import { cronJobs, deployments, githubPullRequests, projects } from '#server/db/schema'
 import { evaluateProjectCronSummary } from '#server/services/cron-metrics'
 import { serializeProjectSummary, serializePullRequest } from '#server/utils/project-serializer'
+import { isProjectDeployReady } from '#shared/schemas/project'
 import type { ProjectsDashboardResponse } from '#shared/types/api'
 
 export default defineEventHandler(async (): Promise<ProjectsDashboardResponse> => {
@@ -59,7 +60,9 @@ export default defineEventHandler(async (): Promise<ProjectsDashboardResponse> =
     openPullRequests,
     kpis: {
       totalProjects: serializedProjects.length,
-      deployPendingCount: serializedProjects.filter((p) => p.commitsBehind > 0).length,
+      deployPendingCount: serializedProjects.filter((p) =>
+        isProjectDeployReady(p.commitsBehind, p.productionCiStatus),
+      ).length,
       openRenovatePrsCount: openPullRequests.filter((pr) => pr.isRenovate).length,
       openPrsCount: openPullRequests.length,
       maintenanceCount: serializedProjects.filter((p) => p.maintenanceMode).length,

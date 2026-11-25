@@ -1,3 +1,4 @@
+import { isProjectDeployReady } from '#shared/schemas/project'
 import type { ProjectSummaryDto } from '#shared/types/api'
 
 export type AttentionSeverity = 'critical' | 'running' | 'warning' | 'info' | 'ok'
@@ -9,6 +10,12 @@ export interface ProjectAttentionState {
   label: string
   color: 'error' | 'info' | 'warning' | 'success' | 'neutral'
   icon: string
+}
+
+export function isDeployReady(
+  project: Pick<ProjectSummaryDto, 'commitsBehind' | 'productionCiStatus'>,
+): boolean {
+  return isProjectDeployReady(project.commitsBehind, project.productionCiStatus)
 }
 
 export function hasCronAlert(
@@ -31,6 +38,7 @@ export function getProjectAttentionState(
     | 'cronSummaryStatus'
     | 'hasRunningDeployment'
     | 'commitsBehind'
+    | 'productionCiStatus'
     | 'maintenanceMode'
     | 'stagingSyncStatus'
     | 'stagingCommitsAhead'
@@ -70,6 +78,28 @@ export function getProjectAttentionState(
   }
 
   if (project.commitsBehind > 0) {
+    if (project.productionCiStatus === 'failed') {
+      return {
+        severity: 'critical',
+        priority: 3,
+        needsAttention: true,
+        label: `CI en échec (${project.commitsBehind} commit(s))`,
+        color: 'error',
+        icon: 'i-lucide-x-circle',
+      }
+    }
+
+    if (project.productionCiStatus === 'pending') {
+      return {
+        severity: 'running',
+        priority: 3,
+        needsAttention: false,
+        label: `CI en cours (${project.commitsBehind} commit(s))`,
+        color: 'info',
+        icon: 'i-lucide-loader-circle',
+      }
+    }
+
     return {
       severity: 'warning',
       priority: 3,

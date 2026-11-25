@@ -74,7 +74,7 @@ const filteredProjects = computed(() => {
     if (statusFilter.value === 'attention' && !getProjectAttentionState(project).needsAttention) {
       return false
     }
-    if (statusFilter.value === 'deploy' && project.commitsBehind <= 0) {
+    if (statusFilter.value === 'deploy' && !isDeployReady(project)) {
       return false
     }
     if (statusFilter.value === 'cron' && !hasCronAlert(project)) {

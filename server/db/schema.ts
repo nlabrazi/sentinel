@@ -8,7 +8,12 @@ import {
   timestamp,
   uniqueIndex,
 } from 'drizzle-orm/pg-core'
-import type { CronStatus, DeploymentStatus, ProjectKind } from '../../shared/types/sentinel'
+import type {
+  CiStatus,
+  CronStatus,
+  DeploymentStatus,
+  ProjectKind,
+} from '../../shared/types/sentinel'
 
 export const projects = pgTable(
   'projects',
@@ -31,6 +36,8 @@ export const projects = pgTable(
     lastCommitDeployed: text('last_commit_deployed'),
     latestCommitAvailable: text('latest_commit_available'),
     commitsBehind: integer('commits_behind').notNull().default(0),
+    productionCiStatus: text('production_ci_status').$type<CiStatus>().notNull().default('unknown'),
+    productionCiUrl: text('production_ci_url'),
     stagingCommitsAhead: integer('staging_commits_ahead').notNull().default(0),
     stagingCommitsBehind: integer('staging_commits_behind').notNull().default(0),
     umamiVisitors24h: integer('umami_visitors_24h').notNull().default(0),

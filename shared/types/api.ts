@@ -1,5 +1,6 @@
 import type {
   BranchSyncStatus,
+  CiStatus,
   CronStatus,
   DeploymentStatus,
   ProjectKind,
@@ -80,6 +81,8 @@ export interface ProjectSummaryDto {
   lastCommitDeployed: string | null
   latestCommitAvailable: string | null
   commitsBehind: number
+  productionCiStatus: CiStatus
+  productionCiUrl: string | null
   stagingCommitsAhead: number
   stagingCommitsBehind: number
   stagingSyncStatus: BranchSyncStatus

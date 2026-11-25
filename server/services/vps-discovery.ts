@@ -7,7 +7,7 @@ import {
   shellEscape,
   wrapBashCommand,
 } from '#server/services/ssh'
-import { getEnv } from '#server/utils/env'
+import { getEnv, type SentinelEnv } from '#server/utils/env'
 import {
   DEFAULT_VPS_ROOT,
   isSafeVpsPath,
@@ -45,6 +45,8 @@ export interface VpsDiscoverySummary {
 }
 
 const FIELD_SEP = '\t'
+const SAFE_SLUG_PATTERN = /^[A-Za-z0-9._-]+$/
+const COMMIT_SHA_PATTERN = /^[0-9a-f]{7,40}$/i
 
 export function humanizeSlug(slug: string): string {
   return slug
@@ -52,6 +54,66 @@ export function humanizeSlug(slug: string): string {
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ')
+}
+
+export function buildProjectRevisionProbeCommand(
+  slug: string,
+  vpsPath: string,
+  appsRoot = DEFAULT_VPS_ROOT,
+): string {
+  if (!SAFE_SLUG_PATTERN.test(slug)) {
+    throw new Error(`Unsafe project slug rejected: ${slug}`)
+  }
+  if (!isSafeVpsPath(vpsPath, appsRoot)) {
+    throw new Error(`Unsafe VPS path rejected: ${vpsPath}`)
+  }
+
+  const script = [
+    `dir=${shellEscape(vpsPath)}`,
+    `slug=${shellEscape(slug)}`,
+    'if [ ! -d "$dir" ]; then exit 0; fi',
+    'gitdir="$dir"',
+    '[ -d "$dir/repo/.git" ] && gitdir="$dir/repo"',
+    'sha="$(git -c safe.directory="*" -C "$gitdir" rev-parse HEAD 2>/dev/null || true)"',
+    'if command -v docker >/dev/null 2>&1; then',
+    '  oci_rev=""',
+    '  for cid in $(docker ps -q --filter "label=com.docker.compose.project=$slug" 2>/dev/null || true); do',
+    '    [ -n "$cid" ] || continue',
+    '    img="$(docker inspect --format \'{{.Config.Image}}\' "$cid" 2>/dev/null || true)"',
+    '    case "$img" in ghcr.io/*) ;; *) continue ;; esac',
+    '    rev="$(docker inspect --format \'{{index .Config.Labels "org.opencontainers.image.revision"}}\' "$cid" 2>/dev/null || true)"',
+    '    if [ -z "$oci_rev" ] && [ -n "$rev" ] && [ "$rev" != "<no value>" ]; then oci_rev="$rev"; fi',
+    '  done',
+    '  [ -n "$oci_rev" ] && sha="$oci_rev"',
+    'fi',
+    'printf "%s\\n" "$sha"',
+  ].join('\n')
+
+  return wrapBashCommand(script)
+}
+
+export function parseProjectRevisionOutput(stdout: string): string | null {
+  const lines = stdout
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+  const candidate = lines.at(-1) ?? ''
+  return COMMIT_SHA_PATTERN.test(candidate) ? candidate : null
+}
+
+export async function probeProjectDeployedCommit(
+  slug: string,
+  vpsPath: string,
+  ssh: SshExecutor = defaultSshExecutor,
+  appsRoot = getEnv().vps.appsRoot,
+  env?: SentinelEnv,
+): Promise<string | null> {
+  const command = buildProjectRevisionProbeCommand(slug, vpsPath, appsRoot)
+  const result = await ssh.execute(command, { timeoutSeconds: 15, env })
+  if (result.exitCode !== 0) {
+    return null
+  }
+  return parseProjectRevisionOutput(result.stdout)
 }
 
 export function buildVpsDiscoveryCommand(appsRoot = DEFAULT_VPS_ROOT): string {

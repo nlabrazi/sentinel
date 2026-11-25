@@ -2,11 +2,13 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   compareGithubRefs,
   computeEffectiveBehindBy,
+  fetchCommitCiStatus,
   fetchLatestBranchCommit,
   fetchRecentPullRequests,
   fetchRepoMetadata,
   isRenovatePullRequest,
   normalizeHomepageUrl,
+  resolveCommitCiSummary,
 } from '#server/services/github'
 
 describe('github service', () => {
@@ -148,6 +150,93 @@ describe('github service', () => {
     expect(meta).toEqual({
       homepage: 'https://riftvision.nabster.dev',
       defaultBranch: 'master',
+    })
+  })
+
+  it('resolves production-branch Jenkins statuses ahead of sibling staging statuses on the same SHA', () => {
+    const failedMaster = resolveCommitCiSummary({
+      productionBranch: 'master',
+      statuses: [
+        {
+          context: 'continuous-integration/jenkins/branch',
+          state: 'success',
+          target_url: 'https://jenkins.nabster.dev/job/sawt-ai/job/staging/22/display/redirect',
+        },
+        {
+          context: 'continuous-integration/jenkins/branch',
+          state: 'error',
+          target_url: 'https://jenkins.nabster.dev/job/sawt-ai/job/master/10/display/redirect',
+        },
+      ],
+      checkRuns: [],
+    })
+    expect(failedMaster).toEqual({
+      status: 'failed',
+      url: 'https://jenkins.nabster.dev/job/sawt-ai/job/master/10/display/redirect',
+    })
+
+    const pendingMaster = resolveCommitCiSummary({
+      productionBranch: 'master',
+      statuses: [
+        {
+          context: 'continuous-integration/jenkins/branch',
+          state: 'pending',
+          target_url: 'https://jenkins.nabster.dev/job/sawt-ai/job/master/11/display/redirect',
+        },
+        {
+          context: 'continuous-integration/jenkins/branch',
+          state: 'success',
+          target_url: 'https://jenkins.nabster.dev/job/sawt-ai/job/staging/22/display/redirect',
+        },
+      ],
+      checkRuns: [],
+    })
+    expect(pendingMaster).toEqual({
+      status: 'pending',
+      url: 'https://jenkins.nabster.dev/job/sawt-ai/job/master/11/display/redirect',
+    })
+
+    const unknownEmpty = resolveCommitCiSummary({
+      productionBranch: 'master',
+      statuses: [],
+      checkRuns: [],
+    })
+    expect(unknownEmpty).toEqual({ status: 'unknown', url: null })
+  })
+
+  it('fetches and combines commit statuses and GitHub Actions check runs', async () => {
+    const mockFetch = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            check_runs: [
+              {
+                name: 'lint',
+                status: 'completed',
+                conclusion: 'success',
+                html_url: 'https://github.com/nlabrazi/demo/actions/runs/1',
+              },
+              {
+                name: 'e2e',
+                status: 'completed',
+                conclusion: 'failure',
+                html_url: 'https://github.com/nlabrazi/demo/actions/runs/2',
+              },
+            ],
+          }),
+          { status: 200 },
+        ),
+      )
+
+    const summary = await fetchCommitCiStatus('nlabrazi/demo', 'deadbeef1234', 'master', {
+      token: 'ghp_test',
+      fetchImpl: mockFetch,
+    })
+    expect(summary).toEqual({
+      status: 'failed',
+      url: 'https://github.com/nlabrazi/demo/actions/runs/2',
     })
   })
 })

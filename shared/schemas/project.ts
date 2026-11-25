@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { type BranchSyncStatus, PROJECT_KINDS } from '#shared/types/sentinel'
+import { type BranchSyncStatus, type CiStatus, PROJECT_KINDS } from '#shared/types/sentinel'
 
 export const DEFAULT_VPS_ROOT = '/srv/apps'
 const SAFE_PATH_SEGMENT = /^[A-Za-z0-9._-]+$/
@@ -119,6 +119,31 @@ export function buildGithubCompareDeployUrl(
     return null
   }
   return `https://github.com/${repo}/compare/${encodeURIComponent(lastCommitDeployed)}...${encodeURIComponent(productionBranch)}`
+}
+
+export function isProjectDeployReady(
+  commitsBehind: number,
+  productionCiStatus: CiStatus | null | undefined = 'unknown',
+): boolean {
+  return commitsBehind > 0 && productionCiStatus !== 'failed' && productionCiStatus !== 'pending'
+}
+
+export function matchesCommitSha(
+  left: string | null | undefined,
+  right: string | null | undefined,
+): boolean {
+  const a = (left ?? '').trim().toLowerCase()
+  const b = (right ?? '').trim().toLowerCase()
+  if (!a || !b) {
+    return false
+  }
+  if (a === b) {
+    return true
+  }
+  if (a.length >= 7 && b.length >= 7) {
+    return a.startsWith(b) || b.startsWith(a)
+  }
+  return false
 }
 
 const optionalNullableString = z

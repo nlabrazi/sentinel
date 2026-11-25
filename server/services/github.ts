@@ -3,8 +3,14 @@ import type { SentinelDb } from '#server/db'
 import { githubPullRequests, type ProjectRow, projects } from '#server/db/schema'
 import { getEnv } from '#server/utils/env'
 import { extractGithubRepo, isValidHttpUrl } from '#shared/schemas/project'
+import type { CiStatus } from '#shared/types/sentinel'
 
 const GITHUB_API_BASE = 'https://api.github.com'
+
+export interface GithubCiSummary {
+  status: CiStatus
+  url: string | null
+}
 
 export interface GithubCommitSummary {
   sha: string
@@ -305,6 +311,176 @@ export async function fetchRecentPullRequests(
   })
 }
 
+export interface RawCommitStatus {
+  context?: string | null
+  state?: string | null
+  target_url?: string | null
+}
+
+export interface RawCheckRun {
+  name?: string | null
+  status?: string | null
+  conclusion?: string | null
+  html_url?: string | null
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function normalizeOptionalHttpUrl(raw: string | null | undefined): string | null {
+  const trimmed = (raw ?? '').trim()
+  return trimmed && isValidHttpUrl(trimmed) ? trimmed : null
+}
+
+function matchesJenkinsBranchUrl(url: string | null | undefined, branch: string): boolean {
+  if (!url || !branch) {
+    return false
+  }
+  const rawBranch = escapeRegExp(branch)
+  const encodedBranch = escapeRegExp(encodeURIComponent(branch))
+  const pattern = new RegExp(`/job/(?:${rawBranch}|${encodedBranch})/`, 'i')
+  return pattern.test(url)
+}
+
+function mapGithubStatusState(state: string | null | undefined): CiStatus | null {
+  const normalized = (state ?? '').trim().toLowerCase()
+  if (normalized === 'failure' || normalized === 'error') {
+    return 'failed'
+  }
+  if (normalized === 'pending') {
+    return 'pending'
+  }
+  if (normalized === 'success') {
+    return 'success'
+  }
+  return null
+}
+
+function mapCheckRunState(run: RawCheckRun): CiStatus | null {
+  const status = (run.status ?? '').trim().toLowerCase()
+  if (status && status !== 'completed') {
+    return 'pending'
+  }
+  const conclusion = (run.conclusion ?? '').trim().toLowerCase()
+  if (!conclusion || conclusion === 'neutral' || conclusion === 'skipped') {
+    return null
+  }
+  if (conclusion === 'success') {
+    return 'success'
+  }
+  return 'failed'
+}
+
+export function resolveCommitCiSummary(params: {
+  productionBranch: string
+  statuses: RawCommitStatus[]
+  checkRuns: RawCheckRun[]
+}): GithubCiSummary {
+  const effectiveStatuses = new Map<string, { status: CiStatus; url: string | null }>()
+  const branchMatchedContexts = new Set<string>()
+
+  // GitHub returns /statuses newest-first. Prefer the newest status whose Jenkins URL targets
+  // the production branch so a sibling staging build on the same SHA cannot mask master CI.
+  for (const item of params.statuses) {
+    const context = (item.context ?? '').trim() || 'default'
+    const mapped = mapGithubStatusState(item.state)
+    if (!mapped) {
+      continue
+    }
+    if (matchesJenkinsBranchUrl(item.target_url, params.productionBranch)) {
+      if (!branchMatchedContexts.has(context)) {
+        branchMatchedContexts.add(context)
+        effectiveStatuses.set(context, {
+          status: mapped,
+          url: normalizeOptionalHttpUrl(item.target_url),
+        })
+      }
+    }
+  }
+
+  for (const item of params.statuses) {
+    const context = (item.context ?? '').trim() || 'default'
+    if (effectiveStatuses.has(context)) {
+      continue
+    }
+    const mapped = mapGithubStatusState(item.state)
+    if (!mapped) {
+      continue
+    }
+    effectiveStatuses.set(context, {
+      status: mapped,
+      url: normalizeOptionalHttpUrl(item.target_url),
+    })
+  }
+
+  const evaluations: Array<{ status: CiStatus; url: string | null }> = [
+    ...effectiveStatuses.values(),
+  ]
+
+  for (const run of params.checkRuns) {
+    const mapped = mapCheckRunState(run)
+    if (!mapped) {
+      continue
+    }
+    evaluations.push({
+      status: mapped,
+      url: normalizeOptionalHttpUrl(run.html_url),
+    })
+  }
+
+  const failed = evaluations.find((entry) => entry.status === 'failed')
+  if (failed) {
+    return failed
+  }
+
+  const pending = evaluations.find((entry) => entry.status === 'pending')
+  if (pending) {
+    return pending
+  }
+
+  const success = evaluations.find((entry) => entry.status === 'success')
+  if (success) {
+    return success
+  }
+
+  return { status: 'unknown', url: null }
+}
+
+export async function fetchCommitCiStatus(
+  repo: string,
+  sha: string,
+  productionBranch: string,
+  options: GithubSyncOptions = {},
+): Promise<GithubCiSummary | null> {
+  const token = options.token ?? getEnv().githubToken
+  const fetchImpl = options.fetchImpl ?? fetch
+  const encodedSha = encodeURIComponent(sha)
+
+  const [statusesData, checkRunsData] = await Promise.all([
+    githubGetJson<RawCommitStatus[]>(
+      `/repos/${repo}/commits/${encodedSha}/statuses?per_page=30`,
+      token,
+      fetchImpl,
+    ),
+    githubGetJson<{ check_runs?: RawCheckRun[] }>(
+      `/repos/${repo}/commits/${encodedSha}/check-runs?per_page=30`,
+      token,
+      fetchImpl,
+    ),
+  ])
+
+  if (!Array.isArray(statusesData) && !checkRunsData) {
+    return null
+  }
+
+  return resolveCommitCiSummary({
+    productionBranch,
+    statuses: Array.isArray(statusesData) ? statusesData : [],
+    checkRuns: Array.isArray(checkRunsData?.check_runs) ? checkRunsData.check_runs : [],
+  })
+}
+
 export async function syncProjectGithub(
   db: SentinelDb,
   project: ProjectRow,
@@ -331,6 +507,21 @@ export async function syncProjectGithub(
       if (deployComparison) {
         commitsBehind = deployComparison.aheadBy
       }
+    }
+  }
+
+  let productionCiStatus: CiStatus = project.productionCiStatus ?? 'unknown'
+  let productionCiUrl: string | null = project.productionCiUrl ?? null
+  if (latestCommit?.sha) {
+    const ciSummary = await fetchCommitCiStatus(
+      repo,
+      latestCommit.sha,
+      project.productionBranch,
+      options,
+    )
+    if (ciSummary) {
+      productionCiStatus = ciSummary.status
+      productionCiUrl = ciSummary.url
     }
   }
 
@@ -410,6 +601,8 @@ export async function syncProjectGithub(
       grafanaAppValue: resolvedGrafanaAppValue,
       latestCommitAvailable: latestCommit?.sha ?? project.latestCommitAvailable,
       commitsBehind,
+      productionCiStatus,
+      productionCiUrl,
       stagingCommitsAhead: stagingAhead,
       stagingCommitsBehind: stagingBehind,
       githubSyncedAt: now,

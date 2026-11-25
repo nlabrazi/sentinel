@@ -39,6 +39,8 @@ function makeFakeProject(overrides: Partial<ProjectRow> = {}): ProjectRow {
     lastCommitDeployed: '1111111',
     latestCommitAvailable: '2222222',
     commitsBehind: 1,
+    productionCiStatus: 'unknown',
+    productionCiUrl: null,
     stagingCommitsAhead: 0,
     stagingCommitsBehind: 0,
     umamiVisitors24h: 0,
@@ -157,6 +159,121 @@ describe('deploy service', () => {
     expect(updates).toHaveLength(2)
     expect(updates[0]).toMatchObject({ status: 'success' })
     expect(updates[1]).toMatchObject({ lastCommitDeployed: '2222222', commitsBehind: 0 })
+  })
+
+  it('fails deployment and preserves commitsBehind when deploy.sh exits 0 but VPS revision did not change', async () => {
+    const updates: Array<Record<string, unknown>> = []
+    const fakeDb = {
+      update: vi.fn(() => ({
+        set: vi.fn((values: Record<string, unknown>) => {
+          updates.push(values)
+          return {
+            where: vi.fn(async () => []),
+          }
+        }),
+      })),
+    } as unknown as SentinelDb
+
+    let callIndex = 0
+    const fakeSsh: SshExecutor = {
+      execute: vi.fn(async (_cmd, opts) => {
+        callIndex += 1
+        if (callIndex === 1) {
+          opts?.onStdout?.('Image ghcr.io/nlabrazi/sawt-ai-ui:latest Pulled\n')
+          return {
+            exitCode: 0,
+            stdout: 'Image ghcr.io/nlabrazi/sawt-ai-ui:latest Pulled\n',
+            stderr: '',
+          }
+        }
+        return {
+          exitCode: 0,
+          stdout: '1111111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n',
+          stderr: '',
+        }
+      }),
+    }
+
+    const bus = new DeployLogBus()
+    const events: DeployStreamEvent[] = []
+    const unsub = bus.subscribe(42, (ev) => events.push(ev))
+    const result = await executeDeploymentRun({
+      db: fakeDb,
+      project: makeFakeProject({
+        slug: 'sawt-ai',
+        vpsPath: '/srv/apps/sawt-ai',
+        lastCommitDeployed: '1111111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        latestCommitAvailable: '2222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+        commitsBehind: 4,
+      }),
+      deployment: makeFakeDeployment({
+        commitSha: '2222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+      }),
+      ssh: fakeSsh,
+      bus,
+      appsRoot: '/srv/apps',
+    })
+    unsub()
+
+    expect(result.status).toBe('failed')
+    expect(result.log).toContain('Déploiement sans effet')
+    expect(result.log).toContain('1111111')
+    expect(result.log).toContain('2222222')
+    expect(updates).toHaveLength(2)
+    expect(updates[0]).toMatchObject({ status: 'failed' })
+    expect(updates[1]).toMatchObject({
+      lastCommitDeployed: '1111111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    })
+    expect(updates[1]).not.toHaveProperty('commitsBehind')
+    expect(events.at(-1)).toMatchObject({ type: 'done', status: 'failed' })
+  })
+
+  it('keeps success without zeroing commitsBehind when VPS advanced to a different newer commit', async () => {
+    const updates: Array<Record<string, unknown>> = []
+    const fakeDb = {
+      update: vi.fn(() => ({
+        set: vi.fn((values: Record<string, unknown>) => {
+          updates.push(values)
+          return {
+            where: vi.fn(async () => []),
+          }
+        }),
+      })),
+    } as unknown as SentinelDb
+
+    let callIndex = 0
+    const fakeSsh: SshExecutor = {
+      execute: vi.fn(async () => {
+        callIndex += 1
+        if (callIndex === 1) {
+          return { exitCode: 0, stdout: 'deployed intermediate\n', stderr: '' }
+        }
+        return { exitCode: 0, stdout: '1555555ccccccccccccccccccccccccccccccccc\n', stderr: '' }
+      }),
+    }
+
+    const result = await executeDeploymentRun({
+      db: fakeDb,
+      project: makeFakeProject({
+        slug: 'sawt-ai',
+        vpsPath: '/srv/apps/sawt-ai',
+        lastCommitDeployed: '1111111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        commitsBehind: 2,
+      }),
+      deployment: makeFakeDeployment({
+        commitSha: '2222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+      }),
+      ssh: fakeSsh,
+      bus: new DeployLogBus(),
+      appsRoot: '/srv/apps',
+    })
+
+    expect(result.status).toBe('success')
+    expect(result.log).toContain('1555555')
+    expect(updates[1]).toMatchObject({
+      lastCommitDeployed: '1555555ccccccccccccccccccccccccccccccccc',
+    })
+    expect(updates[1]).not.toHaveProperty('commitsBehind')
   })
 
   it('detects self-deploy project, builds detached setsid command, and parses self-deploy markers', () => {

@@ -2,9 +2,11 @@ import { createHmac } from 'node:crypto'
 import { describe, expect, it, vi } from 'vitest'
 import { shellEscape, verifyKnownHostKey, wrapBashCommand } from '#server/services/ssh'
 import {
+  buildProjectRevisionProbeCommand,
   buildVpsDiscoveryCommand,
   humanizeSlug,
   parseDiscoveryOutput,
+  parseProjectRevisionOutput,
 } from '#server/services/vps-discovery'
 
 function buildFakeSshKeyBuffer(type = 'ssh-ed25519', payload = 'sentinel-test-key'): Buffer {
@@ -186,5 +188,25 @@ describe('vps discovery parser', () => {
       kind: 'app',
       hasDeployScript: true,
     })
+  })
+
+  it('builds safe single-project revision probe command and parses SHA output', () => {
+    const cmd = buildProjectRevisionProbeCommand('sawt-ai', '/srv/apps/sawt-ai', '/srv/apps')
+    expect(cmd).toContain('/srv/apps/sawt-ai')
+    expect(cmd).toContain('org.opencontainers.image.revision')
+    expect(cmd).toContain('ghcr.io/*')
+
+    expect(() =>
+      buildProjectRevisionProbeCommand('sawt-ai;id', '/srv/apps/sawt-ai', '/srv/apps'),
+    ).toThrow(/Unsafe project slug/)
+    expect(() => buildProjectRevisionProbeCommand('sawt-ai', '/etc/passwd', '/srv/apps')).toThrow(
+      /Unsafe VPS path/,
+    )
+
+    expect(parseProjectRevisionOutput('c4f6167e57fd7a2e55d10092dbdfc7783ecedafa\n')).toBe(
+      'c4f6167e57fd7a2e55d10092dbdfc7783ecedafa',
+    )
+    expect(parseProjectRevisionOutput('==> deployed\n')).toBeNull()
+    expect(parseProjectRevisionOutput('')).toBeNull()
   })
 })
