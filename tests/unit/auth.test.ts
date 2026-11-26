@@ -101,6 +101,7 @@ describe('auth service & env helpers', () => {
   it('identifies public vs protected routes and sanitizes returnTo URLs', () => {
     expect(isPublicPath('/login')).toBe(true)
     expect(isPublicPath('/users/sign_in')).toBe(true)
+    expect(isPublicPath('/api/health')).toBe(true)
     expect(isPublicPath('/metrics')).toBe(true)
     expect(isPublicPath('/favicon.ico')).toBe(true)
     expect(isPublicPath('/favicon-32x32.png')).toBe(true)

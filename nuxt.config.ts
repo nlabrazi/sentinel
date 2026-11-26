@@ -1,6 +1,25 @@
 export default defineNuxtConfig({
+  extends: ['@nlabrazi/nuxt-layer'],
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+
+  runtimeConfig: {
+    health: {
+      service: 'sentinel',
+    },
+    public: {
+      umami: {
+        websiteId: 'b207c955-ba25-4ba2-a228-fc70e8a67e34',
+        domains: 'sentinel.nabster.dev',
+      },
+      site: {
+        name: 'Sentinel',
+        url: 'https://sentinel.nabster.dev',
+        description:
+          'Panneau de contrôle DevOps auto-hébergé pour opérations VPS, déploiements SSH et supervision.',
+      },
+    },
+  },
 
   modules: ['@nuxt/ui'],
 
@@ -8,13 +27,8 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      htmlAttrs: {
-        lang: 'fr',
-      },
       title: 'Sentinel — VPS Operations Control Plane',
       meta: [
-        { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'color-scheme', content: 'light dark' },
         {
           name: 'description',

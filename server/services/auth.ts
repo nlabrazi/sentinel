@@ -47,6 +47,7 @@ const PUBLIC_PREFIXES = ['/_nuxt/', '/__nuxt_error', '/api/_nuxt_icon/', '/auth/
 const PUBLIC_EXACT_PATHS = new Set([
   '/login',
   '/users/sign_in',
+  '/api/health',
   '/metrics',
   '/favicon.ico',
   '/favicon-32x32.png',
