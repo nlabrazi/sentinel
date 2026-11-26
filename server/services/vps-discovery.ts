@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
 import type { SentinelDb } from '#server/db'
-import { projects } from '#server/db/schema'
+import { type ProjectRow, projects } from '#server/db/schema'
 import {
   defaultSshExecutor,
   type SshExecutor,
@@ -249,6 +249,19 @@ export function parseDiscoveryOutput(
   return { projects: discovered, warnings }
 }
 
+export function resolveUpdatedCronMonitoringEnabled(
+  existing: Pick<ProjectRow, 'hasStatusScript' | 'cronMonitoringEnabled'>,
+  discovered: Pick<DiscoveredVpsProject, 'hasStatusScript' | 'manifest'>,
+): boolean {
+  if (discovered.manifest?.cron_monitoring !== undefined) {
+    return discovered.manifest.cron_monitoring
+  }
+  if (!existing.hasStatusScript && discovered.hasStatusScript) {
+    return true
+  }
+  return existing.cronMonitoringEnabled
+}
+
 export async function discoverVpsProjects(
   db: SentinelDb,
   ssh: SshExecutor = defaultSshExecutor,
@@ -324,10 +337,7 @@ export async function discoverVpsProjects(
             : existing.umamiWebsiteId,
         hasDeployScript: item.hasDeployScript,
         hasStatusScript: item.hasStatusScript,
-        cronMonitoringEnabled:
-          item.manifest?.cron_monitoring !== undefined
-            ? item.manifest.cron_monitoring
-            : existing.cronMonitoringEnabled || item.hasStatusScript,
+        cronMonitoringEnabled: resolveUpdatedCronMonitoringEnabled(existing, item),
         maintenanceMode: item.maintenanceMode,
         lastCommitDeployed: item.lastCommitDeployed ?? existing.lastCommitDeployed,
         vpsSyncedAt: now,
