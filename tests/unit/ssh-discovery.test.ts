@@ -1,12 +1,21 @@
 import { createHmac } from 'node:crypto'
 import { describe, expect, it, vi } from 'vitest'
-import { shellEscape, verifyKnownHostKey, wrapBashCommand } from '#server/services/ssh'
+import type { SentinelDb } from '#server/db'
+import type { ProjectRow } from '#server/db/schema'
+import {
+  type SshExecutor,
+  shellEscape,
+  verifyKnownHostKey,
+  wrapBashCommand,
+} from '#server/services/ssh'
 import {
   buildProjectRevisionProbeCommand,
   buildVpsDiscoveryCommand,
+  discoverVpsProjects,
   humanizeSlug,
   parseDiscoveryOutput,
   parseProjectRevisionOutput,
+  resolveUpdatedCronMonitoringEnabled,
 } from '#server/services/vps-discovery'
 
 function buildFakeSshKeyBuffer(type = 'ssh-ed25519', payload = 'sentinel-test-key'): Buffer {
@@ -208,5 +217,111 @@ describe('vps discovery parser', () => {
     )
     expect(parseProjectRevisionOutput('==> deployed\n')).toBeNull()
     expect(parseProjectRevisionOutput('')).toBeNull()
+  })
+
+  it('preserves manual cronMonitoringEnabled opt-out on existing projects during VPS re-scans', async () => {
+    expect(
+      resolveUpdatedCronMonitoringEnabled(
+        { hasStatusScript: true, cronMonitoringEnabled: false },
+        { hasStatusScript: true, manifest: null },
+      ),
+    ).toBe(false)
+
+    expect(
+      resolveUpdatedCronMonitoringEnabled(
+        { hasStatusScript: false, cronMonitoringEnabled: false },
+        { hasStatusScript: true, manifest: null },
+      ),
+    ).toBe(true)
+
+    expect(
+      resolveUpdatedCronMonitoringEnabled(
+        { hasStatusScript: true, cronMonitoringEnabled: true },
+        { hasStatusScript: false, manifest: null },
+      ),
+    ).toBe(true)
+
+    expect(
+      resolveUpdatedCronMonitoringEnabled(
+        { hasStatusScript: true, cronMonitoringEnabled: true },
+        { hasStatusScript: true, manifest: { cron_monitoring: false } },
+      ),
+    ).toBe(false)
+
+    expect(
+      resolveUpdatedCronMonitoringEnabled(
+        { hasStatusScript: false, cronMonitoringEnabled: false },
+        { hasStatusScript: false, manifest: { cron_monitoring: true } },
+      ),
+    ).toBe(true)
+
+    const now = new Date()
+    const existingRow: ProjectRow = {
+      id: 10,
+      slug: 'sentinel',
+      name: 'Sentinel',
+      kind: 'app',
+      vpsPath: '/srv/apps/sentinel',
+      repoUrl: 'https://github.com/nlabrazi/sentinel.git',
+      productionBranch: 'master',
+      stagingBranch: 'staging',
+      productionUrl: 'https://sentinel.nabster.dev',
+      grafanaAppValue: null,
+      umamiWebsiteId: null,
+      hasDeployScript: true,
+      hasStatusScript: true,
+      cronMonitoringEnabled: false,
+      maintenanceMode: false,
+      lastCommitDeployed: '1111111',
+      latestCommitAvailable: null,
+      commitsBehind: 0,
+      productionCiStatus: 'unknown',
+      productionCiUrl: null,
+      stagingCommitsAhead: 0,
+      stagingCommitsBehind: 0,
+      umamiVisitors24h: 0,
+      umamiPageviews24h: 0,
+      umamiBounceRate: 0,
+      umamiSyncError: null,
+      umamiSyncedAt: null,
+      screenshotUpdatedAt: null,
+      vpsSyncedAt: now,
+      githubSyncedAt: null,
+      cronSyncedAt: null,
+      createdAt: now,
+      updatedAt: now,
+    }
+
+    const updates: Array<Record<string, unknown>> = []
+    const fakeDb = {
+      select: vi.fn(() => ({
+        from: vi.fn(async () => [existingRow]),
+      })),
+      update: vi.fn(() => ({
+        set: vi.fn((values: Record<string, unknown>) => {
+          updates.push(values)
+          return {
+            where: vi.fn(async () => []),
+          }
+        }),
+      })),
+    } as unknown as SentinelDb
+
+    const fakeSsh: SshExecutor = {
+      execute: vi.fn(async () => ({
+        exitCode: 0,
+        stdout:
+          'sentinel\t/srv/apps/sentinel\thttps://github.com/nlabrazi/sentinel.git\tmaster\t1111111\t1\t1\t0\t\n',
+        stderr: '',
+      })),
+    }
+
+    const summary = await discoverVpsProjects(fakeDb, fakeSsh, '/srv/apps')
+    expect(summary.updatedSlugs).toEqual(['sentinel'])
+    expect(updates).toHaveLength(1)
+    expect(updates[0]).toMatchObject({
+      hasStatusScript: true,
+      cronMonitoringEnabled: false,
+    })
   })
 })
